@@ -1,0 +1,11 @@
+---
+
+# Entries:
+# 1. Added to this file will be installed by CHPC's Ansible role.
+# 2. Are arrays for future-proofing.
+
+apiVersion: v1
+entries: []
+  # xxxx: []
+  # yyyy: []
+  # app-templates: []
