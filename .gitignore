@@ -1,0 +1,10 @@
+
+# Ruby
+# .bundle/
+# vendor/
+
+# Other
+#*~
+/code-server*/
+/local/
+/tmp/
