@@ -1,0 +1,23 @@
+<%
+app_name = "Coot"
+template_root = "/var/www/ood/apps/templates/"
+%>
+---
+title: <%= app_name %>
+attributes:
+attributes:
+  auto_modules_coot:
+    default: false
+    help: "This defines the version of <%= app_name %> you want to load."
+  cluster:
+    widget: "select"
+    options:
+      <% IO.foreach(template_root+"interactives_skl") do |line| %>
+      - [ "<%= line.to_s.strip %>" ]
+      <% end %>    
+    help: |
+      Select the Frisco node to create this session on.<br>
+
+form:
+  - auto_modules_coot
+  - cluster

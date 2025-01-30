@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Load the required environment
+module load <%= context.auto_modules_matlab %>  
+# additional environment
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+
+export PATH=/uufs/chpc.utah.edu/sys/installdir/miniconda3/matlab-web-app/bin:$PATH
+
+source ${CONFIG_FILE}
+
+echo ""
+echo "To use the web-desktop: http://${MWI_EXT_URL}${MWI_BASE_URL}/index.html"
+echo ""
+
+# Workaround for directory permission error
+#unset XDG_RUNTIME_DIR
+#export XDG_RUNTIME_DIR=""
+
+matlab-jupyter-app

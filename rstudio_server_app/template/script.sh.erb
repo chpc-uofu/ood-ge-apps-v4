@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+
+# set -x
+
+# Load the required environment
+module purge
+
+# Local RStudio Server with CHPC built R versions
+<%- if context.version == "4.4.2" or context.version == "4.4.0" or context.version == "4.3.2" or context.version == "4.2.2" or context.version == "4.1.1" or context.version == "4.1.3" -%>
+  module load R/<%= context.version %>
+  echo R version is <%= context.version %>
+ # RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2023.12.0-369/bin/"
+  RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2024.12.0-467/bin/"
+  # let the RStudio session use all the threads it can get (we set OMP_NUM_THREADS=1 in some R modules)
+  unset OMP_NUM_THREADS
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+# RStudio Server from the containers
+<%- else -%>
+  module use /uufs/chpc.utah.edu/sys/installdir/rstudio-singularity/modulefiles
+  module load singularity rstudio_singularity/<%= context.version %>
+  # Rocker containers 4.3 and up don't put rsession to /usr/local/bin, it's in 
+  # /usr/lib/rstudio-server/bin with all other RSS binaries
+  # adding RSPATH definition in the module to be passed to this script
+
+<%- end -%>
+
+if [ ! -d "/scratch/local/${USER}" ]; then
+    mkdir /scratch/local/${USER}
+fi
+
+WORKDIR=/scratch/local/${USER}/${SLURM_JOB_ID}
+
+# PAM auth helper used by RStudio
+export RSTUDIO_AUTH="${PWD}/bin/auth"
+
+# bring SLURM environment into the R session
+env |grep SLURM > ${PWD}/slurmenv.sh
+sed -i 's/SLURM/export SLURM/g' ${PWD}/slurmenv.sh
+
+# Generate an `rsession` wrapper script
+export RSESSION_WRAPPER_FILE="${PWD}/rsession.sh"
+(
+umask 077
+sed 's/^ \{2\}//' > "${RSESSION_WRAPPER_FILE}" << EOL
+  #!/usr/bin/env bash
+
+  # source Lmod if it's not already sourced - starts in clean environment
+  #source /etc/profile.d/chpc.sh
+  source /uufs/chpc.utah.edu/sys/etc/chpc.sh
+# bring SLURM environment into the R session
+  source ${PWD}/slurmenv.sh
+
+  export TZ="America/Denver"
+
+  # Log all output from this script
+  export RSESSION_LOG_FILE="${PWD}/rsession.log"
+  export RSTUDIO_DATA_HOME=$WORKDIR
+  exec &>>"\${RSESSION_LOG_FILE}"
+  #echo R_LIBS_SITE $R_LIBS_SITE
+  #env
+  # load all the modules that are set in the Environment section
+<%- if context.version == "4.4.2" or context.version == "4.4.0" or context.version == "4.3.2" or context.version == "4.2.2" or context.version == "4.1.1" or context.version == "4.1.3" -%>
+  module load R/<%= context.version %>
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+<%- end -%>
+
+  echo "Launching rsession..."
+  # Note that the rsession brings in limited environment, it imports PATH, LD_LIBRARY_PATH, MANPATH, ...
+  # but not other env. vars. that Lmod needs so "module list" is empty
+  exec ${RSPATH}rsession --r-libs-user "${R_LIBS_USER}" "\${@}"
+# error --config-file can'd be specified more than once on the command line
+#  exec ${RSPATH}rsession --config-file "${WORKDIR}/rsession.conf" --r-libs-user "${R_LIBS_USER}" "\${@}"
+EOL
+)
+chmod 700 "${RSESSION_WRAPPER_FILE}"
+
+# Job walltime in minutes for the authentication timeout setting
+WALLMIN=`squeue -h -j $SLURM_JOBID -o "%l" | awk '{split($1, tokens, "-"); if (length(tokens) == 1) { days=0; time=tokens[1]; } else { days=tokens[1]; time=tokens[2]; } split(time, times, ":"); print 60*(times[1]+24*days) + times[2] }'`
+
+cat >${WORKDIR}/rserver.conf <<END
+# Server Configuration File
+# complaint that auth-timeout-minutes is unrecognized despite https://docs.posit.co/ide/server-pro/authenticating_users/authorization_timeout.html
+# must be only the pro option, but based on https://docs.posit.co/ide/server-pro/rstudio-server-configuration.html it's not only in pro
+# these two settings are set as command line arguments
+# auth-timeout-minutes=0
+# auth-stay-signed-in-days=10
+session-save-action-default=no
+session-timeout-minutes=$WALLMIN
+session-timeout-suspend=0
+session-rprofile-on-resume-default=0
+session-quit-child-processes-on-exit=1
+<%- if context.version == "4.4.2" or context.version == "4.4.0" or context.version == "4.3.2" or context.version == "4.2.2" or context.version == "4.1.1" or context.version == "4.1.3" or context.version == "4.3.2-basic" or context.version == "4.3.2-bioconductor" or context.version == "4.3.2-geospatial" -%>
+copilot-enabled=1
+<%- end -%>
+END
+
+# [Rstudio 1.4] database is required
+# config option is required for local RS 
+cat > ${WORKDIR}/database.conf <<END
+provider=sqlite
+directory=${WORKDIR}/database
+END
+
+# [Rstudio 1.4] configure logging
+# no launch flag to set this, so, only in the containerized RS
+cat > ${WORKDIR}/logging.conf <<END
+[@rserver]
+log-level=info
+max-size-mb=10
+END
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Output debug info
+module list
+
+# echo old TMPDIR $TMPDIR
+export TMPDIR=`mktemp -d`
+# echo new TMPDIR $TMPDIR
+
+## fix rstudio active session error on start
+find ~/.rstudio/sessions/active/*/session-persistent-state -type f | xargs sed -i '' -e 's/abend="1"/abend="0"/'
+
+#
+# Start RStudio Server
+#
+env
+# Launch the RStudio Server
+echo "Starting up rserver..."
+set -x
+export RSTUDIO_DATA_HOME=$WORKDIR
+
+<%- if context.version == "4.4.2" or context.version == "4.4.0" or context.version == "4.3.2" or context.version == "4.2.2" or context.version == "4.1.1" or context.version == "4.1.3" -%>
+  # sqlite is needed for the RS database      
+  # it's part of the R8 OS installation, module below was built on CentOS 7
+  # ml sqlite
+
+  ${RSPATH}rserver \
+    --server-user ${USER} \
+    --www-port ${port} \
+    --auth-none 0 \
+    --auth-pam-helper-path "${RSTUDIO_AUTH}" \
+    --auth-encrypt-password 0 \
+    --rsession-path "${RSESSION_WRAPPER_FILE}" \
+    --server-data-dir "${TMPDIR}" \
+    --auth-timeout-minutes="${WALLMIN}" \
+    --server-app-armor-enabled=0 \
+    --secure-cookie-key-file "${TMPDIR}/rstudio-server/secure-cookie-key" \
+    --database-config-file ${WORKDIR}/database.conf \
+    --rsession-config-file ${WORKDIR}/rserver.conf
+
+<%- else -%>
+
+  mkdir $TMPDIR/rserver
+  mkdir $TMPDIR/rserver-run
+  echo TMPDIR is $TMPDIR
+
+  ## use our specific configs
+  export SING_BINDS="--bind ${TMPDIR}:/tmp --bind ${TMPDIR}/rserver:/var/lib/rstudio-server --bind ${TMPDIR}/rserver-run:/var/run"
+  export SING_BINDS2="--bind ${WORKDIR}/logging.conf:/etc/rstudio/logging.conf --bind ${WORKDIR}/database.conf:/etc/rstudio/database.conf"
+
+  singularity exec ${SING_BINDS} ${SING_BINDS2} ${RSTUDIO_SINGULARITY_IMAGE} rserver \
+    --server-user ${USER} \
+    --www-port="${port}" \
+    --auth-none=0 \
+    --auth-pam-helper-path="${RSTUDIO_AUTH}" \
+    --auth-encrypt-password=0 \
+    --rsession-path="${RSESSION_WRAPPER_FILE}" \
+    --auth-timeout-minutes="${WALLMIN}" \
+    --server-app-armor-enabled=0 \
+    --secure-cookie-key-file "${TMPDIR}/rstudio-server/secure-cookie-key" \
+    --server-daemonize=0 \
+    --rsession-which-r=/usr/local/bin/R \
+    --rsession-config-file ${WORKDIR}/rserver.conf
+
+# this option is only in RS >= 1.4 so bind mount instead
+#    --database-config-file ${WORKDIR}/database.conf \
+<%- end -%>
+
+# note, rserver in the container will start with the user space environment defined on host
+# BUT, the rsession starts on limited environment, only related to R = no SLURM*, http*, ...
+# so anything we want to pass to rsession needs to be set in $RSESSION_WRAPPER_FILE
