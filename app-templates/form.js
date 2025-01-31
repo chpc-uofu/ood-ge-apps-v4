@@ -23,8 +23,6 @@ const gpuMapping = gpuDataHash["gpu_name_mappings"].reduce((mapping, str) => {
     return mapping;
 }, {});
 
-const cachedAccPart = $('#batch_connect_session_context_custom_accpart').val();
-
 // SET PARTITION LIMITS ------------------------------------------------------------------------------------------------
 
 /**
@@ -136,16 +134,8 @@ function setDefaultPartition(clusterChange) {
     const accountPartitionSelect = document.getElementById('batch_connect_session_context_custom_accpart');
     const options = accountPartitionSelect.options;
     
-
-
     // Allow for caching
     if (clusterChange || !accountPartitionSelect.value) {
-        for (i = 0; i < options.length; i++) {
-            if (options[i].value === cachedAccPart && options[i].style.display !== 'none') {
-                accountPartitionSelect.selectedIndex = i;
-                return;
-            }
-        }
         for (i = 0; i < options.length; i++) {
             if (options[i].style.display !== 'none') {
                 accountPartitionSelect.selectedIndex = i;
@@ -338,10 +328,10 @@ function toggleNodes() {
 function toggleCustomEnvironment() {
     const pythonField = $('#batch_connect_session_context_python');
     const customEnvironment = $('#batch_connect_session_context_custom_environment');
-    const customEnvironmentParent = customEnvironment.closest('.form-group');  // Get the parent container
+    const customEnvironmentParent = customEnvironment.closest('.form-group');
 
     const showCustomEnv = pythonField.val() === 'custom';
-    customEnvironmentParent.toggle(showCustomEnv);  // Toggle the entire container
+    customEnvironmentParent.toggle(showCustomEnv);
 
     if (!showCustomEnv) {
         customEnvironment.val('');
