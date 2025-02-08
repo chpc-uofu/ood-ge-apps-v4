@@ -10,7 +10,6 @@ entries:
   ansysedt_app: []
   ansys_workbench_app: []
   app-templates: []
-  chpc-ash-status: []
   chpc-granite-status: []
   chpc-kingspeak-status: []
   chpc-lonepeak-status: []
