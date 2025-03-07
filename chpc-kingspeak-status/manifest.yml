@@ -4,3 +4,5 @@ description: |-
   Detailed Node Status of the Kingspeak Cluster
 category: Clusters
 icon: fa://tachometer
+url: https://portal.chpc.utah.edu/slurm/cluster/kingspeak/
+new_window: true
