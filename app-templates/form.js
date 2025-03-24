@@ -43,7 +43,7 @@ function partitionLimits(selected_queue) {
         "lp": { max_time: 336, max_cpu: 20, max_mem: 128 },
         "kp": { max_time: 336, max_cpu: 28, max_mem: 1000 },
         "np": { max_time: 336, max_cpu: 64, max_mem: 1000 },
-        "grn": { max_time: 336, max_cpu: 96, max_mem: 1152 } 
+        "grn": { max_time: 336, max_cpu: 96, max_mem: 1152 }
     };
 
     let config = Object.entries(queueConfigs).find(([key, _]) => selected_queue.includes(key));
@@ -119,6 +119,8 @@ function filterAccountPartitionOptions() {
         'kingspeak': 'kp',
         'lonepeak': 'lp',
         'notchpeak': 'np'
+        'granite': 'grn'
+        'redwood': 'rw'
     };
 
     for (let i = 0; i < options.length; i++) {
