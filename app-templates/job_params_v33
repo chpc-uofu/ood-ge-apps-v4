@@ -92,7 +92,7 @@
            'Nvidia L40, SP, 48GB, owner','l40',
         ]
       - [
-           'Nvidia V, SP, 12GB, owner','titanv',
+           'Nvidia Titan V, SP, 12GB, owner','titanv',
         ]
       - [
            'Nvidia RTX 2080 Ti, SP, 11GB, general, owner','2080ti',
@@ -117,6 +117,9 @@
         ]
       - [
            'Nvidia L40S, SP, 48GB, general','l40s',
+        ]
+      - [
+           'Nvidia L4, SP, 24GB, owner','l4',
         ]
     help: |
       - Default **none** if no GPU.
