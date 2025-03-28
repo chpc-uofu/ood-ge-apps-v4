@@ -20,6 +20,7 @@ entries:
   coot_app: []
   csd_app: []
   desktop_expert: []
+  gpt4all_app: []
   idl_app: []
   idv_app: []
   jupyter_app: []
