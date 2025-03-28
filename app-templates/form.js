@@ -118,8 +118,8 @@ function filterAccountPartitionOptions() {
         'ash': 'ash',
         'kingspeak': 'kp',
         'lonepeak': 'lp',
-        'notchpeak': 'np'
-        'granite': 'grn'
+        'notchpeak': 'np',
+        'granite': 'grn',
         'redwood': 'rw'
     };
 
