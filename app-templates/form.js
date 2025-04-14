@@ -42,7 +42,7 @@ function partitionLimits(selected_queue) {
         "smithp-ash": { max_time: 168, max_cpu: 24, max_mem: 490 },
         "lp": { max_time: 336, max_cpu: 20, max_mem: 128 },
         "kp": { max_time: 336, max_cpu: 28, max_mem: 1000 },
-        "np": { max_time: 336, max_cpu: 64, max_mem: 1000 },
+        "np": { max_time: 336, max_cpu: 96, max_mem: 1000 },
         "grn": { max_time: 336, max_cpu: 96, max_mem: 1152 }
     };
 
