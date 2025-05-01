@@ -13,7 +13,7 @@ description: |
 
   [GPU specification] is optional for the clusters and partitions that have them.
 
-  [NGC API key] https://docs.nvidia.com/ai-enterprise/deployment/spark-rapids-accelerator/latest/appendix-ngc.html
+  [NGC API key]: https://docs.nvidia.com/ai-enterprise/deployment/spark-rapids-accelerator/latest/appendix-ngc.html
   [example notebook]: https://github.com/chpc-uofu/ood-ge-apps-v4/blob/main/rfdiffusion_nim_app/example/rfdiffusion_test.ipynb
   [NIM]: https://developer.nvidia.com/nim
   [RFDiffusion]: https://docs.nvidia.com/nim/bionemo/rfdiffusion/latest/overview.html
