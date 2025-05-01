@@ -13,7 +13,7 @@ echo $PATH
 pwd
 
 
-./start_nim.sh >& nim.log &
+./start_nim.sh <%= context.ngc_api_key %> >& nim.log &
 
 #source_helpers
 #set -x

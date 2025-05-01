@@ -13,7 +13,7 @@ description: |
 
   [GPU specification] is optional for the clusters and partitions that have them.
 
-  [example notebook]: https://developer.nvidia.com/nim
+  [example notebook]: https://github.com/chpc-uofu/ood-ge-apps-v4/blob/main/proteinmpnn_nim_app/example/proteinmpnn_test.ipynb
   [NIM]: https://developer.nvidia.com/nim
   [ProteinMPNN]: https://docs.nvidia.com/nim/bionemo/proteinmpnn/latest/overview.html
   [Jupyter]: https://jupyter.org/
