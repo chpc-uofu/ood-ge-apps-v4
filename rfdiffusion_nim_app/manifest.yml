@@ -5,15 +5,17 @@ subcategory: Servers
 role: batch_connect
 description: |
   This app will launch a [RFDiffusion] Nvidia Inference Microservice ([NIM] in a [Jupyter] Notebook or Lab server using [Python] on a [HPC
-  cluster] or on a [Frisco node]. See [example notebook] for basic functionality.
+  cluster] or on a [Frisco node]. See [example notebook] for basic functionality. Choose at least a mid-size GPU (>=48 GB RAM), 16 CPUs and 128 GB RAM. 
+  Often, notchpeak-gpu-guest partition with a A40 GPU is available and works well.
 
-  NOTE: You need to use your own [NGC API key]. Choose at least a mid-size GPU (>=48 GB RAM), 16 CPUs and 128 GB RAM.
+  NOTE: You need to use your own [NGC API key]. To get that, you need to first get [Nvidia account] and then follow the aforementioned instructions.
  
   To start the job promptly, use notchpeak-shared-short account and partition on the [Notchpeak cluster].
 
   [GPU specification] is optional for the clusters and partitions that have them.
 
   [NGC API key]: https://docs.nvidia.com/ai-enterprise/deployment/spark-rapids-accelerator/latest/appendix-ngc.html
+  [Nvidia account]: https://www.nvidia.com/en-us/account/
   [example notebook]: https://github.com/chpc-uofu/ood-ge-apps-v4/blob/main/rfdiffusion_nim_app/example/rfdiffusion_test.ipynb
   [NIM]: https://developer.nvidia.com/nim
   [RFDiffusion]: https://docs.nvidia.com/nim/bionemo/rfdiffusion/latest/overview.html

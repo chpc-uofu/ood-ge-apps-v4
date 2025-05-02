@@ -110,6 +110,15 @@
            'Nvidia RTX 6000, SP, 48GB, owner','rtx6000',
         ]
       - [
+           'Nvidia RTX 5000, SP, 32GB, owner','rtx5000',
+        ]
+      - [
+           'Nvidia RTX 2000, SP, 16GB, owner','rtx2000',
+        ]
+      - [
+           'Nvidia RTX 4500, SP, 24GB, owner','rtx4500',
+        ]
+      - [
            'AMD MI100, SP, evaluation','mi100',
         ]
       - [
@@ -120,6 +129,9 @@
         ]
       - [
            'Nvidia L4, SP, 24GB, owner','l4',
+        ]
+      - [
+           'Nvidia A800, DP, 40GB, owner','a800',
         ]
     help: |
       - Default **none** if no GPU.
