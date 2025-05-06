@@ -14,13 +14,13 @@ pwd
 
 
 ./start_nim1.sh <%= context.ngc_api_key %> >& af2.log &
-sleep 60
+sleep 30
 ./start_nim2.sh <%= context.ngc_api_key %> >& rfd.log &
-sleep 60
+sleep 30
 ./start_nim3.sh <%= context.ngc_api_key %> >& pm.log &
-sleep 60
+sleep 30
 ./start_nim4.sh <%= context.ngc_api_key %> >& af2m.log &
-sleep 60
+sleep 30
 
 
 #source_helpers
