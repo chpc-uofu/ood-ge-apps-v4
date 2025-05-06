@@ -1,0 +1,27 @@
+---
+name: Protein Binder Design 
+category: Interactive Apps
+subcategory: Servers
+role: batch_connect
+description: |
+  This app provides [Jupyter] Notebook or Lab interface to [Generative Protein Binder Design] based on Nvidia Inference Microservices ([NIM]).
+  See [example notebook] for basic functionality.
+
+  NOTE: You need to use your own [NGC API key]. Choose three least mid-size GPUs (>=48 GB RAM), 32 CPUs and 256 GB RAM. notchpeak-gpu-guest with 3xA40 works well for the example.
+
+  LIMITS: The four NIMs use fixed ports so no other NIM should be running on the same node.
+ 
+  [GPU specification] is optional for the clusters and partitions that have them.
+
+  [Generative Protein Binder Design]: https://github.com/NVIDIA-BioNeMo-blueprints/generative-protein-binder-design
+  [NGC API key]: https://docs.nvidia.com/ai-enterprise/deployment/spark-rapids-accelerator/latest/appendix-ngc.html
+  [example notebook]: https://github.com/NVIDIA-BioNeMo-blueprints/generative-protein-binder-design/blob/main/src/protein-binder-design.ipynb
+  [NIM]: https://developer.nvidia.com/nim
+  [RFDiffusion]: https://docs.nvidia.com/nim/bionemo/rfdiffusion/latest/overview.html
+  [Jupyter]: https://jupyter.org/
+  [Python]: https://www.python.org/
+  [HPC cluster]: https://www.chpc.utah.edu/resources/HPC_Clusters.php
+  [GPU specification]: https://www.chpc.utah.edu/documentation/guides/gpus-accelerators.php#overview
+  [Frisco node]: https://www.chpc.utah.edu/documentation/guides/frisco-nodes.php
+  [Notchpeak cluster]: https://www.chpc.utah.edu/documentation/policies/2.1GeneralHPCClusterPolicies.php#Pol2.1.6
+
