@@ -35,7 +35,7 @@ attributes:
   custom_nim:
     widget: "path_selector"
     label: Path to custom NIM sif file
-    help: "Enter path to Apptainer container sif file, obtained by running <em>ml apptainer; apptainer build mynim.sif docker://path_to_nim_docker_container</em>, e.g. <em>apptainer build evo2-40b.sif docker://nvcr.io/nim/arc/evo2-40b:1</em>.<br> 
+    help: "Enter path to Apptainer container sif file, obtained by running <em>ml apptainer; apptainer build mynim.sif docker://path_to_nim_docker_container</em>, e.g. <em>apptainer build molmim-1.0.0.sif docker://nvcr.io/nim/nvidia/molmim:1.0.0</em>.<br> 
            <b>NOTE</b>: The NIM data, such as addtitional models, will be downloaded to <em>/scratch/general/vast/$USER/nim</em>.<br> 
            <b>NOTE</b>: Initial start may take a long time as model parameters may be downloading.<br>
            <b>NOTE</b>: Some NIM containers require additional steps during the setup, If the NIM does not start, look into the nim.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
