@@ -5,7 +5,7 @@ subcategory: Servers
 role: batch_connect
 description: |
   This app will launch a selected Nvidia Inference Microservice ([NIM] in a [Jupyter] Notebook or Lab server using [Python] on a [HPC
-  cluster] or on a [Frisco node]. See [example notebook] for basic functionality.
+  cluster] or on a [Frisco node]. See [example notebooks] for basic functionality.
 
   NOTE: You need to use your own [NGC API key]. Choose appropriate resources for the chosen NIM (TBD). Most need a GPU.
  
@@ -14,7 +14,7 @@ description: |
   [GPU specification] is optional for the clusters and partitions that have them.
 
   [NGC API key]: https://docs.nvidia.com/ai-enterprise/deployment/spark-rapids-accelerator/latest/appendix-ngc.html
-  [example notebook]: https://github.com/chpc-uofu/ood-ge-apps-v4/blob/main/rfdiffusion_nim_app/example/rfdiffusion_test.ipynb
+  [example notebooks]: https://github.com/chpc-uofu/ood-ge-apps-v4/tree/main/nim_app/example
   [NIM]: https://developer.nvidia.com/nim
   [RFDiffusion]: https://docs.nvidia.com/nim/bionemo/rfdiffusion/latest/overview.html
   [Jupyter]: https://jupyter.org/
