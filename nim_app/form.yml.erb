@@ -1,0 +1,102 @@
+<%
+app_name = "Nvidia Inference Microservice"
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+%>
+---
+title: <%= app_name %>
+attributes:
+  gpudata:
+    widget: hidden_field
+    cacheable: false
+    value: |
+      "<%= gpu_data.to_json %>"
+  nim:
+    widget: select
+    label: Nvidia Inference Microservice (NIM)
+    help: "Select the microservice you want to run."
+    options:
+      - [ "RFdiffusion", "rfdiffusion",
+           data-hide-custom-nim: true
+        ]
+      - [ "ProteinMPNN", "proteinmpnn",
+           data-hide-custom-nim: true
+        ]
+      - [ "Llama-3.2-1b-instruct", "llama-3.2-1b-instruct",
+           data-hide-custom-nim: true
+        ]
+      - [ "My own NIM", "ownnim" ,
+           data-hide-custom-nim: false
+        ]
+
+  custom_nim:
+    widget: "path_selector"
+    label: Path to custom NIM sif file
+    help: "Enter path to Apptainer container sif file, obtained by running <em>ml apptainer; apptainer build mynim.sif docker://path_to_nim_docker_container</em>, e.g. <em>apptainer build evo2-40b.sif docker://nvcr.io/nim/arc/evo2-40b:1</em>.<br> 
+           <b>NOTE</b>: The NIM data, such as addtitional models, will be downloaded to <em>/scratch/general/vast/$USER/nim</em>.<br> 
+           <b>NOTE</b>: Initial start may take a long time as model parameters may be downloading.<br>
+           <b>NOTE</b>: Some NIM containers require additional steps during the setup, If the NIM does not start, look into the nim.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
+    directory: "<%= CurrentUser.home %>"
+    readonly: false
+    show_hidden: false
+    cacheable: true
+    favorites:
+      - "<%= CurrentUser.home %>"
+
+  ngc_api_key:
+    widget: text_area
+    label: NGC API Key
+    help: "Enter your NGC API key. "
+
+  interface:
+    widget: select
+    label: <%= app_name %> interface
+    help: "This defines the interface of <%= app_name %> you want to start (Notebook or Lab)."
+    options:
+      - [ "Notebook", "notebook" ]
+      - [ "Lab", "lab" ]
+  python:
+    widget: select
+    label: <%= app_name %> Python version
+    help: "This defines the Python distribution of <%= app_name %> you want to start."
+    options:
+      - [  "CHPC Python 3.11.3", "python/3.11.3",
+        ]
+  cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>    
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+
+form:
+  - nim
+  - custom_nim
+  - ngc_api_key
+  - interface
+  - python
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %>   

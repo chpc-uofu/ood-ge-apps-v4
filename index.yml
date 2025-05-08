@@ -42,6 +42,7 @@ entries:
   vmd_app: []
   vscode_desktop_app: []
   protein_binder_nim_app: []
+  nim_app: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []

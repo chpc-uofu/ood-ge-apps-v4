@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+  module load <%= context.python %>
+# additional environment
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+
+# debugging info
+
+module list
+echo $PATH
+pwd
+
+echo NIM port is $nimport, jupyter port is $port
+<%- if context.nim == "rfdiffusion" -%>
+./start_rfdiffusion_nim.sh $nimport <%= context.ngc_api_key %> >& nim.log &
+<%- elsif context.nim == "proteinmpnn" -%>
+./start_proteinmpnn_nim.sh $nimport <%= context.ngc_api_key %> >& nim.log &
+<%- elsif context.nim == "llama-3.2-1b-instruct" -%>
+./start_llama-3.2-1b-instruct.sh $nimport <%= context.ngc_api_key %> >& nim.log &
+<%- elsif context.nim == "ownnim" -%>
+set -x
+./start_ownnim.sh $nimport <%= context.custom_nim %>  <%= context.ngc_api_key %> >& nim.log &
+<%- end -%>
+
+#source_helpers
+#set -x
+# Wait for the RFDiffusion NIM server to start
+#echo "Waiting for RFDiffusion NIM server to open port 8082..."
+#if wait_until_port_used "localhost:8082" 600; then
+#  echo "Discovered RFDiffusion NIM server listening on port 8082!"
+#else
+#  echo "Timed out waiting for RFDiffusion NIM  server to open port 8082!"
+#  clean_up 1
+#fi
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Workaround for directory permission error
+#unset XDG_RUNTIME_DIR
+#export XDG_RUNTIME_DIR=""
+
+#
+# Start Jupyter Notebook Server
+#
+
+# List available kernels for debugging purposes
+#set -x
+jupyter kernelspec list
+{ set +x; } 2>/dev/null
+echo "TTT - $(date)"
+
+if [ -v "$SLURM_JOBID" ]; then
+  echo srun
+  srun hostname -s
+fi 
+
+echo Interface is <%= context.interface %>
+#jupyter notebook --generate-config 
+# Launch the Jupyter Notebook Server
+# jupyter notebook --config="${CONFIG_FILE}" --debug
+jupyter <%= context.interface %> --config="${CONFIG_FILE}" 
