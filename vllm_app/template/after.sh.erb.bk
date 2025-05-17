@@ -1,0 +1,20 @@
+# Wait for the Jupyter Notebook server to start
+echo "Waiting for Jupyter Notebook server to open port ${port}..."
+if wait_until_port_used "${host}:${port}" 600; then
+  echo "Discovered Jupyter Notebook server listening on port ${port}!"
+else
+  echo "Timed out waiting for Jupyter Notebook server to open port ${port}!"
+  clean_up 1
+fi
+# Wait for the LLM server to start
+echo LLM port is $nimport
+echo "Waiting for LLM server to open port $nimport..."
+#echo "We'll just presume it works"
+if wait_until_port_used "${host}:${nimport}" 600; then
+  echo "Discovered LLM server listening on port $nimport!"
+else
+  echo "Timed out waiting for LLM  server to open port $nimport!"
+  clean_up 1
+fi
+
+sleep 2
