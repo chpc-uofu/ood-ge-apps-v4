@@ -22,19 +22,59 @@ attributes:
     options:
 #      - [ "ollama server", "ollama server"
 #      ]
-      - [ "ollama", "ollama"
-      ]
+#      - [ "ollama", "ollama"
+#      ]
       - [ "vLLM", "vLLM"
         ]
   
   llmmodel:
-    widget: text_area
-    label: Specific LLM to run (e.g. NousResearch/Meta-Llama-3-8B-Instruct does not require authentication). See https://docs.vllm.ai/en/stable/models/supported_models.html for a larger list
-    help: Type the LLM model you want to run
+    widget: select
+    label: Specific LLM to run from our local repository
+    help: Select the LLM model you want to run
+    options:
+      - ["meta-llama/Llama-4-Scout-17B-16E-Instruct"]
+      - ["meta-llama/Llama-4-Scout-17B-16E"]
+      - ["meta-llama/Llama-3.3-70B-Instruct"]
+      - ["meta-llama/Llama-3.1-8B"]
+      - ["meta-llama/Llama-3.1-8B-Instruct"]
+      - ["CohereLabs/aya-expanse-8b"]
+      - ["CohereLabs/aya-expanse-32b"]
+      - ["google/gemma-3-27b-it"]
+      - ["google/gemma-3-1b-it"]
+      - ["google/gemma-3-4b-it"]
+      - ["Qwen/Qwen3-0.6B"]
+      - ["Qwen/Qwen3-1.7B"]
+      - ["Qwen/Qwen3-4B"]
+      - ["Qwen/Qwen3-8B"]
+      - ["Qwen/Qwen3-14B"]
+      - ["Qwen/Qwen3-32B"]
+      - ["Qwen/Qwen2.5-VL-7B-Instruct"]
+      - ["Qwen/Qwen2.5-VL-32B-Instruct"]
+      - ["Qwen/Qwen2.5-VL-72B-Instruct"]
+      - ["allenai/OLMo-2-0425-1B-Instruct"]
+      - ["allenai/OLMo-2-1124-7B-Instruct"]
+      - ["allenai/OLMo-2-1124-13B-Instruct"]
+      - ["allenai/OLMo-2-0325-32B-Instruct"]
+      - ["deepseek-ai/DeepSeek-R1"]
+      - ["deepseek-ai/DeepSeek-V3"]
     required: true
 
+  scratch_dir:
+    widget: "path_selector"
+    label: Path to user scratch directory
+    help: "Enter path to user-specific scratch directory e.g. /scratch/general/vast/$USER/vllm_cache.
+    This directory will be your cache directory so models you previously used can be reused without redownloading them,
+           <b>NOTE</b>: Some NIM containers require additional steps during the setup, If the NIM does not start, look into the nim.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
+    directory:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
+    value:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
+    readonly: false
+    show_hidden: false
+    cacheable: false 
+    # favorites:
+    # - "<%= CurrentUser.home %>"
+
   huggingfacetoken:
-    widget: text_area
+    widget: text_field
     label: Huggingface token (required for some models)
     help: Check SessionID and then llm.log if your model fails to start
 
@@ -81,6 +121,7 @@ attributes:
 form:
   - llm
   - llmmodel
+  - scratch_dir
   - huggingfacetoken
   - interface
   - python
