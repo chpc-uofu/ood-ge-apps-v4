@@ -11,15 +11,17 @@ module load genai
 module list
 echo $PATH
 pwd
-export MODEL=<%= context.llmmodel.strip() %>
+export MODEL=/scratch/general/vast/app-repo/huggingface/<%= context.llmmodel %>
+export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
 echo model= $MODEL
+echo scratch_dir= $SCRATCH_DIR
 
 echo LLM port is $nimport, jupyter port is $port
 <%- if context.llm == "ollama" -%>
-./start_ollama_server.sh $nimport $MODEL >& llm.log &
+./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR >& llm.log &
 <%- elsif context.llm == "vLLM" -%>
-./start_vllm_server.sh $nimport $MODEL $HUGGINGFACE_TOKEN >& llm.log &
+./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
 <%- end -%>
 
 #source_helpers
