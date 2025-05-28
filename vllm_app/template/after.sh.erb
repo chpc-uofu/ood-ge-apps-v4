@@ -16,7 +16,7 @@ port_used_python() {
 
   port_used_nc(){
     nc -w 2 "$1" "$2" < /dev/null > /dev/null 2>&1
-    echo  nc -w 2 "$1" "$2" < /dev/null > /dev/null 2>&1
+    #echo  nc -w 2 "$1" "$2" < /dev/null > /dev/null 2>&1
   }
 
   port_used_lsof(){
@@ -40,10 +40,10 @@ port_used_python() {
 
     for strategy in ${port_strategies[@]};
     do
-      echo $strategy $host $port
+      # echo $strategy $host $port
       $strategy $host $port
       status=$?
-      echo "portusedpython3" $status
+      # echo "portusedpython3" $status
       if [[ "$status" == "0" ]] || [[ "$status" == "1" ]]; then
         return $status
       fi
@@ -69,7 +69,7 @@ port_used_python() {
         if port_used "${host}:${port}"; then
 continue
         fi
-        echo "${port}"
+        # echo "${port}"
         return 0 # success
       done
     done
@@ -87,7 +87,7 @@ continue
     for ((i=1; i<=time*2; i++)); do
       port_used "${port}"
       port_status=$?
-      echo $port $port_status
+      # echo $port $port_status
       if [ "$port_status" == "0" ]; then
          if [ -f ollama.log ]; then
            if grep "llama runner started in" ollama.log ; then
