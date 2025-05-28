@@ -59,6 +59,16 @@ attributes:
       - ["deepseek-ai/DeepSeek-V3"]
     required: true
 
+  task_widget:
+    widget: select
+    label: Select model task (leave on generate if you are unsure)
+    help: Models must be initialized with a task
+    options:
+      - ["generate"]
+      - ["embed"]        
+      - ["score"]
+      - ["reward"]
+
   scratch_dir:
     widget: "path_selector"
     label: Path to user scratch directory
@@ -121,6 +131,7 @@ attributes:
 form:
   - llm
   - llmmodel
+  - task_widget
   - scratch_dir
   - huggingfacetoken
   - interface
