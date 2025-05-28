@@ -74,7 +74,7 @@ attributes:
     label: Path to user scratch directory
     help: "Enter path to user-specific scratch directory e.g. /scratch/general/vast/$USER/vllm_cache.
     This directory will be your cache directory so models you previously used can be reused without redownloading them,
-           <b>NOTE</b>: Some NIM containers require additional steps during the setup, If the NIM does not start, look into the nim.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
+           <b>NOTE</b>: If the VLLM container does not start, look into the llm.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
     directory:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
     value:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
     readonly: false
