@@ -1,115 +1,3 @@
-unset -f wait_until_port_used
-unset -f port_used
-unset -f find_port
-unset -f port_used_bash
-unset -f port_used_nc
-unset -f port_used_python
-unset -f port_used_python3
-
-port_used_python() {
-    python -c "import socket; socket.socket().connect(('$1',$2))" >/dev/null 2>&1
-  }
-
-  port_used_python3() {
-    python3 -c "import socket; socket.socket().connect(('$1',$2))" >/dev/null 2>&1
-  }
-
-  port_used_nc(){
-    nc -w 2 "$1" "$2" < /dev/null > /dev/null 2>&1
-    #echo  nc -w 2 "$1" "$2" < /dev/null > /dev/null 2>&1
-  }
-
-  port_used_lsof(){
-    lsof -i :"$2" >/dev/null 2>&1
-  }
-
-  port_used_bash(){
-    local bash_supported=$(strings /bin/bash 2>/dev/null | grep tcp)
-    if [ "$bash_supported" == "/dev/tcp/*/*" ]; then
-      (: < /dev/tcp/$1/$2) >/dev/null 2>&1
-    else
-      return 127
-    fi
-  }
-
-  # Check if port $1 is in use
-  port_used () {
-    local port="${1#*:}"
-    local host=$((expr "${1}" : '\(.*\):' || echo "localhost") | awk 'END{print $NF}')
-    local port_strategies=(port_used_nc port_used_lsof port_used_bash port_used_python port_used_python3)
-
-    for strategy in ${port_strategies[@]};
-    do
-      # echo $strategy $host $port
-      $strategy $host $port
-      status=$?
-      # echo "portusedpython3" $status
-      if [[ "$status" == "0" ]] || [[ "$status" == "1" ]]; then
-        return $status
-      fi
-    done
-
-    return 127
-  }
-  export -f port_used
-
-  # Find available port in range [$2..$3] for host $1
-  # Default host: localhost
-  # Default port range: [2000..65535]
-  # returns error code (0: success, 1: failed)
-  # On success, the chosen port is echoed on stdout.
-  find_port () {
-    local host="${1:-localhost}"
-    local min_port=${2:-2000}
-    local max_port=${3:-65535}
-    local port_range=($(shuf -i ${min_port}-${max_port}))
-    local retries=1 # number of retries over the port range if first attempt fails
-    for ((attempt=0; attempt<=$retries; attempt++)); do
-      for port in "${port_range[@]}"; do
-        if port_used "${host}:${port}"; then
-continue
-        fi
-        # echo "${port}"
-        return 0 # success
-      done
-    done
-
-    echo "error: failed to find available port in range ${min_port}..${max_port}" >&2
-    return 1 # failure
-  }
-  export -f find_port
-
-  # Wait $2 seconds until port $1 is in use
-  # Default: wait 30 seconds
-  wait_until_port_used () {
-    local port="${1}"
-    local time="${2:-30}"
-    for ((i=1; i<=time*2; i++)); do
-      port_used "${port}"
-      port_status=$?
-      # echo $port $port_status
-      if [ "$port_status" == "0" ]; then
-         if [ -f ollama.log ]; then
-           if grep "llama runner started in" ollama.log ; then
-		return 0
-	   fi
-         fi
-	 if [ -f llm.log ]; then
-	    if grep "Application startup complete" llm.log; then
-               return 0
-            fi
-         fi
-      elif [ "$port_status" == "127" ]; then
-         echo "commands to find port were either not found or inaccessible."
-         echo "command options are lsof, nc, bash's /dev/tcp, or python (or python3) with socket lib."
-         return 127
-      fi
-      sleep 0.5
-    done
-    return 1
-  }
-  export -f wait_until_port_used
-
 # Wait for the Jupyter Notebook server to start
 echo "Waiting for Jupyter Notebook server to open port ${port}..."
 if wait_until_port_used "${host}:${port}" 600; then
@@ -118,14 +6,39 @@ else
   echo "Timed out waiting for Jupyter Notebook server to open port ${port}!"
   clean_up 1
 fi
-# Wait for the LLM server to start
-echo LLM port is $nimport
-echo "Waiting for LLM server to open port $nimport..."
-#echo "We'll just presume it works"
-if wait_until_port_used "${host}:${nimport}" 150; then
-  echo "Discovered LLM server listening on port $nimport!"
+
+unset -f wait_until_port_used
+
+wait_until_port_used () {
+    local port="${1}"
+    local time="${2:-30}"
+    for ((i=1; i<=time*2; i++)); do
+      port_used "${port}"
+      port_status=$?
+      # echo $port $port_status
+      if [ -f llm.log ]; then
+         if grep "Application startup complete" llm.log; then
+		 return 0
+         else echo "Log exists, Waiting on server start"
+	 fi
+      fi
+      if [ "$port_status" == "127" ]; then
+         echo "commands to find port were either not found or inaccessible."
+         echo "command options are lsof, nc, bash's /dev/tcp, or python (or python3) with socket lib."
+         return 127
+      fi
+      sleep 1
+    done
+    return 1
+  }
+
+# Wait for the NIM server to start
+echo NIM port is $nimport
+echo "Waiting for NIM server to open port $nimport..."
+if wait_until_port_used "${host}:${nimport}" 600; then
+  echo "Discovered NIM server listening on port $nimport!"
 else
-  echo "Timed out waiting for LLM  server to open port $nimport!"
+  echo "Timed out waiting for NIM  server to open port $nimport!"
   clean_up 1
 fi
 
