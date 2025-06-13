@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo Starting vLLM on port $1
-ml apptainer
+#ml apptainer/1.4.1
 set -x
 
 #need to create user-specified scratch dir if it does not already exist
