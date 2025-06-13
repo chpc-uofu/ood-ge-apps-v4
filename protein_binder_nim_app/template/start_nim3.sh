@@ -10,4 +10,4 @@ else
 fi
 export APPTAINER_DOCKER_PASSWORD=$NGC_API_KEY
 
-apptainer run --fakeroot --nv -e -B /scratch/general/vast/u0101881/nvs/.cache/nim/models:/home/nvs/.cache -B /scratch/general/vast/u0101881/nim/proteinmpnn/workspace:/opt/nim/workspace --env NIM_CACHE_PATH=/home/nvs/.cache/nim/models,NIM_HTTP_API_PORT=8083 /uufs/chpc.utah.edu/sys/installdir/r8/nim/proteinmpnn_1.0.sif
+apptainer run --fakeroot --nv -e -B /scratch/general/vast/app-repo/nim/nvs/.cache/nim/models:/home/nvs/.cache -B /scratch/general/vast/app-repo/nim/proteinmpnn/workspace:/opt/nim/workspace --env NIM_CACHE_PATH=/home/nvs/.cache/nim/models,NIM_HTTP_API_PORT=8083 /uufs/chpc.utah.edu/sys/installdir/r8/nim/proteinmpnn_1.0.sif
