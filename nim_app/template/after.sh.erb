@@ -9,7 +9,7 @@ fi
 # Wait for the NIM server to start
 echo NIM port is $nimport
 echo "Waiting for NIM server to open port $nimport..."
-if wait_until_port_used "${host}:${nimport}" 600; then
+if wait_until_port_used "${host}:${nimport}" 1200; then
   echo "Discovered NIM server listening on port $nimport!"
 else
   echo "Timed out waiting for NIM  server to open port $nimport!"
