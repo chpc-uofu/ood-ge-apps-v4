@@ -145,6 +145,9 @@
       - [
            'Nvidia H200 3g MIG, DP, 71GB, general','h200_3g.71gb',
         ]
+      - [
+           'Nvidia RTX 6000 PRO B, SP, 96GB, owner','rtxpr6000bl',
+        ]
     help: |
       - Default **none** if no GPU.
       - **any** available GPU for the given cluster and partition.
