@@ -1,0 +1,104 @@
+# Use these environment variables to enable or disable connectors
+# Default was 1
+export guacd_rdp_enabled=1
+# ws_console is for 
+export ws_console_enabled=0
+export tls_proxy_enabled=0
+
+# SMBCONF env var from OOD needs trimming at head and tail of string
+# More may be needed on this with multiple groups
+export SMBCONF=$(echo "$SMBCONF" | tr -d '["')
+export SMBCONF=$(echo "$SMBCONF" | tr -d '"]')
+
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+export ONDEMAND_SERVER="ondemand-staging.chpc.utah.edu"
+echo "BEFORE.SH Before script running..."
+
+# set hostnames. Samba server requires host_fqdn.
+export host=$(hostname -f)
+export host_fqdn=${host}.chpc.utah.edu
+echo "FQDN of host=${host_fqdn}"
+# Don't collect core dumps
+ulimit -c 0
+
+# Directory where guacd_connector.js, the guacd container, the guacamole client, and the gnutils_fips_override all reside
+# Used by guacd_rdp.sh and samba_start.sh
+export guac_dir="/uufs/chpc.utah.edu/sys/installdir/r8/apache_guacamole/"
+
+# For tlsproxy_start.sh
+# Because this is running inside of the isolated network namespace, these ports are already listening whether or not a program is calling accept()
+# Register the ports with the proxy then close the FD
+if [ "$tls_proxy_enabled" = "1" ]; then
+echo >&"$OODPROXY_REG_READY_FD"
+exec {OODPROXY_REG_READY_FD}>&-
+fi
+
+# The JOB_TMP_DIR is set by the Spank Plugin.  It must match.
+JOB_TMP_DIR="/scratch/general/vast/${USER}/win/${SLURM_JOB_ID}"
+export JOB_TMP_DIR
+mkdir -p $JOB_TMP_DIR
+
+script_path="$PWD"
+export script_path
+job_uuid=$(basename "$script_path")
+export job_uuid
+
+# Create a file that contains all of the necessary information to esatblish an rdp session
+# This information needs to be per job, not per refresh of the web browser, etc.
+rdp_credentials_file="${script_path}/rdp_credentials"
+
+# Set username for shared user account on Windows VM, must match VM image.
+win_user="user1"
+
+# Generate a random strong password for Windows
+win_password=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
+# Uncomment the line below if you do not want a random password for maintenance or testing
+#win_password="test4321"
+
+# For guacd_rdp.sh.erb
+# Generate a random authToken for guacd_rdp_connector.js authentication
+export guacd_rdp_authtoken=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
+# Generate a random guacamole key for guacd token creation
+export guac_key=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
+# Grab port from SPANK plugin for guacd_rdp_connector.js to listen on
+export guacd_rdp_port=$SPANK_ISO_NETNS_LISTENING_PORT_0
+#export SPANK_ISO_NETNS_LISTENING_FD_0="use-insecure-testing-port"
+
+# For ws_console.sh.erb
+export websockify_token=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
+export ws_console_fd=$SPANK_ISO_NETNS_LISTENING_FD_1
+export ws_console_port=$SPANK_ISO_NETNS_LISTENING_PORT_1
+
+
+# For tlsproxy_start.sh
+export job=$SLURM_JOBID
+export rdpport=$SPANK_ISO_NETNS_LISTENING_PORT_2
+# Because this is running inside of the isolated network namespace, these ports are already listening whether or not a program is calling accept()
+# Register the ports with the proxy then close the FD
+if [ "$tls_proxy_enabled" = "1" ]; then
+echo >&"$OODPROXY_REG_READY_FD"
+exec {OODPROXY_REG_READY_FD}>&-
+fi
+#Create the JSON credentials file, cypher wasn't there before but was in test
+#Seems like it should be there.
+cat <<EOF > "$rdp_credentials_file"
+{
+    "username": "$win_user",
+    "password": "$win_password",
+    "authtoken": "$guacd_rdp_authtoken",
+    "guac_key": "$guac_key",
+    "cypher": "AES-256-CBC"
+}
+EOF
+chmod 700 $rdp_credentials_file
+
+# Print success message
+echo "BEFORE.SH:  rdp_credentials created at $rdp_credentials_file"
+
+# This password is also inserted into SMBIOS for Windows to rename the password
+export win_password
+
+echo "BEFORE.SH:  Guacd RDP Port: $guacd_rdp_port"
+

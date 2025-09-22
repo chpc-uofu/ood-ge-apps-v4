@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# Wait for RDP, SMB, guacd ports, and port 54321 to be available
+echo "AFTER.SH: After script running:"
+start_time=$(date +%s)
+timeout=600  # Total timeout in seconds - verified on man page this is default
+# for timeout command.
+
+# This should exit at $timeout + a few seconds so it is alive longer than loop
+# The timeout command is a utility used to execute a command and 
+# automatically terminate it if it runs for longer than a specified time limit.
+#
+# -k sends a KILL signal if COMMAND is still running this long 
+# after the initial signal was sent.
+# The following example from AI is appropriate:
+#     timeout -k 5s 1m my_application
+# This runs my_application for 1 minute, and if it's still running, 
+# SIGKILL is sent after an additional 5 seconds.
+
+# So for the below, it runs nc -l for 300 seconds and kills it 5 seconds later
+# if it is still running. 
+# The application here is nc -l which listens for incoming connections.
+# The Windows VM connects to it and then says to close it.
+timeout -k 5 $timeout nc -l 127.0.0.1 54321 >/dev/null &
+vm_ready_pid=$!
+
+while true; do
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
+    # echo "@${elapsed}: in while loop before timeout check"
+    if [ $elapsed -ge $timeout ]; then
+        echo "AFTER.SH: Timed out waiting for Windows VM ports and readiness signal after ${timeout} seconds!"
+        clean_up 1
+    fi
+
+    rdp_up=false
+    smb_up=false
+    guacd_up=false
+    vm_ready=false
+
+    if wait_until_port_used "${host}:3389" 1 >/dev/null 2>&1; then
+	    rdp_up=true;
+    echo "RDP port up";
+    fi
+
+    if wait_until_port_used "${host_fqdn}:445" 1 >/dev/null 2>&1; then
+	    smb_up=true;
+	    echo "SMB port up";
+    fi
+
+    if wait_until_port_used "${host}:4822" 1 >/dev/null 2>&1; then
+	    guacd_up=true;
+	    echo "GUACD port up";
+    fi
+
+# Recall vm_ready_pid is NOT the pid of qemu, 
+# it is the pid of timeout statement
+    if [[ "$vm_ready" != "true" ]]; then
+# To translate the following statement: 
+# if process $vm_ready_pid exists, set vm_ready=true
+# if process $vm_ready_pid does NOT exist, rest of statement doesn't execute
+# and vm_ready stays false
+
+# To translate more, timeout terminates if it runs past time in seconds $timeout
+# So this is saying, if timeout has terminated, then vm=true
+
+    #only do the kill -0 if the vm has not already been seen as ready
+	    kill -0 "$vm_ready_pid" >/dev/null 2>&1 || vm_ready=true
+    fi
+
+    if $rdp_up && $smb_up && $guacd_up && $vm_ready; then
+        echo "AFTER.SH: All required services are up and VM signaled ready!"
+        break
+    fi
+
+    # Optional: Add status messages
+    if ! $rdp_up; then echo "AFTER.SH: Waiting for RDP port 3389..."; fi
+    if ! $smb_up; then echo "AFTER.SH: Waiting for SMB port 445..."; fi
+    if ! $guacd_up; then echo "AFTER.SH: Waiting for guacd port 4822..."; fi
+    if ! $vm_ready; then echo "AFTER.SH: Waiting for VM ready on pid ${vm_ready_pid} signal on port 54321..."; fi
+
+    sleep 2
+
+done
+
