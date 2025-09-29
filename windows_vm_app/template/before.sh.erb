@@ -9,6 +9,7 @@ export tls_proxy_enabled=0
 # More may be needed on this with multiple groups
 export SMBCONF=$(echo "$SMBCONF" | tr -d '["')
 export SMBCONF=$(echo "$SMBCONF" | tr -d '"]')
+export SMBCONF="${SMBCONF//,/}"
 
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
