@@ -33,6 +33,7 @@ entries:
   paraview_app: []
   qgis_app: []
   relion_app: []
+  rsoft_app: []
   rstudio_server_app: []
   sas_app: []
   shiny_app: []
