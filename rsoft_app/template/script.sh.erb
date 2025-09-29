@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Set working directory to home directory
+cd "${HOME}"
+
+#
+# Launch Xfce Window Manager and Panel
+#
+
+(
+  export SEND_256_COLORS_TO_REMOTE=1
+  export XDG_CONFIG_HOME="<%= session.staged_root.join("config") %>"
+  export XDG_DATA_HOME="<%= session.staged_root.join("share") %>"
+  export XDG_CACHE_HOME="$(mktemp -d)"
+  module restore
+  set -x
+  # xfwm4 --compositor=off --daemon --sm-client-disable
+  xfwm4 --compositor=off --sm-client-disable
+  xsetroot -solid "#D3D3D3"
+  xfsettingsd --sm-client-disable
+  xfce4-panel --sm-client-disable
+) &
+
+set -x
+#
+# Start RSoft
+#
+
+# Load the required environment
+module load <%= context.auto_modules_rsoft %>
+# additional environment
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+
+# Launch RSoft
+#unset SLURM_GTIDS
+# abaqus/2022 needs a specific MPI setting
+# for details: https://community.intel.com/t5/Intel-oneAPI-HPC-Toolkit/bug-mpiexec-segmentation-fault/m-p/1183364
+#export I_MPI_HYDRA_TOPOLIB=ipl
+# as of SLURM 23.11.1, need to set this to run multi-node
+#export I_MPI_HYDRA_BOOTSTRAP=slurm
+
+module list
+xbcad
