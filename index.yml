@@ -45,7 +45,7 @@ entries:
   protein_binder_nim_app: []
   nim_app: []
   vllm_app: []
-  windows_vm_app: []
+#  windows_vm_app: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []
