@@ -195,7 +195,7 @@ function toggleAdvancedOptions() {
         if (checkbox) toggleVisibility(checkbox, showAdvanced);
     });
 
-    //toggleVisibility(elements.memtask, showAdvanced && elements.checkboxes.memtask.is(':checked'));
+    toggleVisibility(elements.memtask, showAdvanced && elements.checkboxes.memtask.is(':checked'));
     toggleVisibility(elements.nodelist, showAdvanced && elements.checkboxes.nodelist.is(':checked'));
     toggleVisibility(elements.additionalEnvironment, showAdvanced && elements.checkboxes.addEnv.is(':checked'));
     toggleVisibility(elements.constraint, showAdvanced && elements.checkboxes.constraint.is(':checked'));
@@ -361,7 +361,7 @@ $(document).ready(function () {
     const selectors = {
         queue: $('#batch_connect_session_context_custom_accpart'),
         cluster: $('#batch_connect_session_context_cluster'),
-        // memtaskCheckbox: $('#batch_connect_session_context_memtask_checkbox'),
+        memtaskCheckbox: $('#batch_connect_session_context_memtask_checkbox'),
         gpuCheckbox: $('#batch_connect_session_context_gpu_checkbox'),
         advancedOptionsCheckbox: $('#batch_connect_session_context_advanced_options'),
         nodelistCheckbox: $('#batch_connect_session_context_nodelist_checkbox'),
@@ -383,7 +383,7 @@ $(document).ready(function () {
 
     // Function to reset advanced options to default values
     function resetAdvancedOptions() {
-        //selectors.memtaskCheckbox.prop('checked', false);
+        selectors.memtaskCheckbox.prop('checked', false);
         selectors.gpuCheckbox.prop('checked', false);
         selectors.nodelistCheckbox.prop('checked', false);
         selectors.addEnvCheckbox.prop('checked', false);
@@ -391,7 +391,7 @@ $(document).ready(function () {
         selectors.nodesCheckbox.prop('checked', false);
         selectors.advancedOptionsCheckbox.prop('checked', false);
 
-        //selectors.memtask.val('0');
+        selectors.memtask.val('0');
         selectors.gpuType.val('none');
         selectors.gpuCount.val('1');
         selectors.nodelist.val('');
