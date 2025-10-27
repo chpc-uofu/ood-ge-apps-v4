@@ -1,0 +1,34 @@
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+# Find available port to run server on
+port=$(find_port ${host})
+export port=$(find_port ${host})
+
+# Get the session id into a variable
+export sessionid=<%= session.id %>
+
+################################################################################
+################################################################################
+
+export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
+# mkdir -p $OLLAMA_MODELS
+
+<%- if context.ollama_model -%>
+export ollama_model=<%= context.ollama_model %>
+<%- end -%>
+
+# export ollama_url="https://ondemand-staging.chpc.utah.edu/node/${host}:${port}"
+export ollama_url="${host}:${port}"
+export ollama_models=$OLLAMA_MODELS
+
+# Set Ollama environment variables
+export OLLAMA_HOST=$ollama_url
+export OLLAMA_ORIGINS="*"
+export OLLAMA_NOHISTORY=1
+export OLLAMA_SCHED_SPREAD=1
+export OLLAMA_MAX_LOADED_MODELS=1
+# export OLLAMA_TMPDIR=/scratch/${SLURM_JOBID}
+export OLLAMA_TMPDIR=<%= context.scratch_dir %>
+export FORWARDED_ALLOW_IPS="127.0.0.1"
+
