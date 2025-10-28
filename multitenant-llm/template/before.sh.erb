@@ -18,8 +18,8 @@ export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
 export ollama_model=<%= context.ollama_model %>
 <%- end -%>
 
-# export ollama_url="https://ondemand-staging.chpc.utah.edu/node/${host}:${port}"
-export ollama_url="${host}:${port}"
+export ollama_url="https://ondemand-staging.chpc.utah.edu/node/${host}:${port}"
+# export ollama_url="${host}:${port}"
 export ollama_models=$OLLAMA_MODELS
 
 # Set Ollama environment variables

@@ -4,7 +4,7 @@
 # Set working directory to home directory
 cd "${HOME}"
 
-module load <%= context.python %>
+module load <%= context.version %>
 <%#- if context.python == "custom" -%>
   <%#= context.custom_environment.gsub /\r\n?/, "\n" %>
 <%#- else -%>
