@@ -23,16 +23,9 @@ script:
     - "--gres=gpu:<%= gpu_type %>:<%= gpu_count %>"
        <%- end -%>
     <%- end -%>
-    <%- if memtask != "" and memtask != "0" -%>
+    <%- if memory != "" and memtask != "0" -%>
     - "--mem"
-    - "<%= memtask %>G"
+    - "<%= memory %>G"
     <%- end -%>
-    <%- if nodelist != "" -%>
-    - "-w"
-    - "<%= nodelist %>"
-    <%- end -%>
-    <%- if constraint != "" -%>
-    - "-C"
-    - "<%= constraint %>"
     <%- end -%>
   <%- end -%>
