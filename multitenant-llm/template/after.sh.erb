@@ -51,8 +51,9 @@ sleep 2
 function mt_guids () {
   # returns a comma-separated string of uids from a given posix group
   if [[ -n $1 ]]; then local mygroup="$1"; else local mygroup="$(id -gn)"; fi
-  local myusers=($(getent group $mygroup | cut -d: -f4 | tr ',' ' '))
-  echo $(id -u ${myusers[@]} | sort -h) | tr ' ' ','
+  # local myusers=($(getent group $mygroup | cut -d: -f4 | tr ',' ' '))
+  # echo $(id -u ${myusers[@]} | sort -h) | tr ' ' ','
+  echo $(getent group $mygroup | cut -d: -f4)
 }
 
 function mt_ghex () {

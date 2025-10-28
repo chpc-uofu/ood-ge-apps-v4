@@ -23,9 +23,9 @@ script:
     - "--gres=gpu:<%= gpu_type %>:<%= gpu_count %>"
        <%- end -%>
     <%- end -%>
-    <%- if memory != "" and memtask != "0" -%>
+    <%- if memtask != "" and memtask != "0" -%>
     - "--mem"
-    - "<%= memory %>G"
+    - "<%= memtask %>G"
     <%- end -%>
-    <%- end -%>
+    - "--wckey=multitenant-ge-staging"
   <%- end -%>
