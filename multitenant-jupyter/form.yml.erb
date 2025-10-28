@@ -108,4 +108,7 @@ form:
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   - ollama_interface
   <%- end -%>
+<% IO.foreach(template_root+ "form_params_gpu") do |line| %>
+<%= line %>
+<% end %>   
 
