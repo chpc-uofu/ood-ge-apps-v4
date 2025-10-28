@@ -33,8 +33,7 @@ if [ -v "$SLURM_JOBID" ]; then
   srun hostname -s
 fi 
 
-echo Interface is <%= context.interface %>
 #jupyter notebook --generate-config 
 # Launch the Jupyter Notebook Server
 # jupyter notebook --config="${CONFIG_FILE}" --debug
-jupyter <%= context.interface %> --config="${CONFIG_FILE}" 
+jupyter notebook --config="${CONFIG_FILE}" 
