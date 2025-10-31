@@ -10,7 +10,6 @@ gpu_data = {
 gpu_type:
   - "none"        
 form:
-  - custom_accpart
   - version
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   - ollama_interface
@@ -42,7 +41,11 @@ attributes:
 <% IO.foreach(template_root+"accpart-help") do |line| %>
 <%= line %>
 <% end %>
-  
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>
+
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
     label: "Ollama API Connection"
