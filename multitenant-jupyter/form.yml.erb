@@ -7,18 +7,15 @@ gpu_data = {
 }
 %>
 ---
-gpu_type:
-  - "none"        
-form:
-  - version
-  <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
-  - ollama_interface
-  <%- end -%>
-<% IO.foreach(template_root+"form_params_gpu") do |line| %>
-<%= line %>
-<% end %>
+title: <%= app_name %>
 
 attributes:
+  gpudata:
+    widget: hidden_field
+    cacheable: false
+    value: |
+       "<%= gpu_data.to_json %>"
+  
   cluster:
     widget: select
     options:
@@ -71,4 +68,13 @@ attributes:
       - [ "CHPC Deep Learning 2022.1", "deeplearning/2022.1" ]
       - [ "CHPC Generative AI 2025.3", "genai/2025.3" ]
       - [ "CHPC Generative AI 2024.5", "genai/2024.5" ]
-  
+
+form:
+  - version
+  <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
+  - ollama_interface
+  <%- end -%>
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %>
+        

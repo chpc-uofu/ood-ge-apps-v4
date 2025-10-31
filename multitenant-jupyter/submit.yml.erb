@@ -27,5 +27,13 @@ script:
     - "--mem"
     - "<%= memtask %>G"
     <%- end -%>
+    <%- if nodelist != "" -%>
+    - "-w"
+    - "<%= nodelist %>"
+    <%- end -%>
+    <%- if constraint != "" -%>
+    - "-C"
+    - "<%= constraint %>"    
+    <%- end -%>
     - "--wckey=multitenant-ge-staging"
   <%- end -%>
