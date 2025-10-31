@@ -45,9 +45,9 @@ attributes:
 
   test_MT:
     widget: select
+    label: <%= MultiTenant.to_s %>
     options:
-     - [ <%= MultiTenant.jobs %> ]
-     - [ <%= MultiTenant.specs %> ]
+     - [ <%= MultiTenant.to_s %> ]
 
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
