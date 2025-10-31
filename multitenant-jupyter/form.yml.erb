@@ -10,11 +10,6 @@ gpu_data = {
 gpu_type:
   - "none"        
 form:
-  - bc_num_hours
-  - num_cores
-  - memory
-  - num_gpus
-  - bc_email_on_started
   - custom_accpart
   - version
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
@@ -25,11 +20,6 @@ form:
 <% end %>
 
 attributes:
-  bc_num_hours: 1
-  num_cores: 4
-  memory: 8
-  num_gpus: 0
-
   cluster:
     widget: select
     options:
@@ -53,7 +43,6 @@ attributes:
 <%= line %>
 <% end %>
   
-  bc_email_on_started: 0      
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
     label: "Ollama API Connection"
