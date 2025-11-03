@@ -46,7 +46,7 @@ attributes:
 <% if ENV['MULTITENANT_ENABLE'] %>
   test_MT:
     widget: text_area
-    label: <%= ENV['MULTITENANT_ENABLE'] %>
+    label: <%= MultiTenant.specs %>
 <% end %>
 
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
