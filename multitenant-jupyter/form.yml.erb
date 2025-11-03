@@ -43,11 +43,11 @@ attributes:
 <%= line %>
 <% end %>
 
+<% if ENV['MULTITENANT_ENABLE'] %>
   test_MT:
-    widget: select
-    label: <%= MultiTenant.jobs %>
-    options:
-     - [ <%= MultiTenant.to_s %> ]
+    widget: text_area
+    label: <%= ENV['MULTITENANT_ENABLE'] %>
+<% end %>
 
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
