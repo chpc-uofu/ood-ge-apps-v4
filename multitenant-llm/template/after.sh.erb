@@ -123,7 +123,7 @@ mt_accounting=$(cat << EOF
   'mtu':  '$(mt_guids "<%= context.client_group %>")',
   'mti':  '${sessionid}',
   'mta':  '<%= context.mt_appname %>',
-  'mtm':  '<%= context.mt_method %>'
+  'mtm':  '<%= context.mt_method %>',
   'mtd':  '<%= context.mt_delivery %>'
 }
 EOF
