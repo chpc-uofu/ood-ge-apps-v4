@@ -17,8 +17,8 @@ export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
 <%- if context.ollama_model -%>
 export ollama_model=<%= context.ollama_model %>
 <%- end -%>
-
-export ollama_url="https://ondemand-staging.chpc.utah.edu/node/${host}:${port}"
+# We use host/port below because this is how OOD requires it
+export ollama_url="https://ondemand.chpc.utah.edu/node/${host}/${port}"
 # export ollama_url="${host}:${port}"
 export ollama_models=$OLLAMA_MODELS
 
