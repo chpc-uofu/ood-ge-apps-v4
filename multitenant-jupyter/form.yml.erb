@@ -43,12 +43,6 @@ attributes:
 <%= line %>
 <% end %>
 
-<% if ENV['MULTITENANT_ENABLE'] %>
-  test_MT:
-    widget: text_area
-    label: <%= MultiTenant.specs %>
-<% end %>
-
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
     label: "Ollama API Connection"
@@ -76,7 +70,6 @@ attributes:
       - [ "CHPC Generative AI 2024.5", "genai/2024.5" ]
 
 form:
-  - test_MT           
   - version
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   - ollama_interface
