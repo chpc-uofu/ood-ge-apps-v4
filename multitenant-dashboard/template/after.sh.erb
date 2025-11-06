@@ -124,7 +124,7 @@ cypher_iv=$(mt_ghex $mt_iv 32)   # iv  should be 32 characters
 name_old="sys/dashboard"
 
 # posix group name of permitted users
-name_group="<%= context.auto_groups %>"
+name_group="<%= context.client_group %>"
 
 # now we can encryt the message and it is ready to pass to slurm
 name_message=$(mt_genc "$mt_message" "$cypher_key" "$cypher_iv")
