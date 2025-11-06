@@ -1,3 +1,11 @@
+<%
+app_name = "Multitenant Dashboard"
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+%>
 ---
 form:
   - version
