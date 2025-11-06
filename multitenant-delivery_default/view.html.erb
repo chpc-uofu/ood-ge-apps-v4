@@ -45,11 +45,17 @@
 
 The Ollama API URL shown above has been automatically set in the <code>$OLLAMA_HOST</code> environment variable.
 
-<strong>For Jupyter notebooks:</strong> Select the Ollama API from the list in the form. Once in the Notebook, list the models available like this:
-<pre><code class="python">import ollama
-for m in ollama.list().models:
-  print(m.model)</code></pre>
-
+<strong>For Jupyter notebooks:</strong> Select the Ollama API from the list in the form. Once in the Notebook, you can interact with it like below:
+<pre><code class="python">from openai import OpenAI
+import os
+openai_api_key = "EMPTY"
+openai_api_base = os.environ['OLLAMA_HOST'] + "/v1"
+client = OpenAI(
+    api_key=openai_api_key,
+    base_url=openai_api_base,
+)
+completion = client.completions.create(model="", prompt="Penguins are great because")
+print("Completion result:", completion)
 <div style="display: flex; gap: 20px;" class="d-flex">
 <form action="/pun/sys/dashboard/batch_connect/sys/multitenant-jupyter" method="get" target="_self">
   <button class="btn btn-primary" type="submit">

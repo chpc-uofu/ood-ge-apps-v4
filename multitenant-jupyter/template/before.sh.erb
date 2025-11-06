@@ -35,6 +35,6 @@ EOL
 )
 
 <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
-export OLLAMA_HOST=<%= context.ollama_interface %>
+  export OLLAMA_HOST=<%= context.ollama_interface %>
 <%- end -%>
 
