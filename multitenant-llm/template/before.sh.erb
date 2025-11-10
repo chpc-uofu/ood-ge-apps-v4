@@ -18,7 +18,7 @@ export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
 export ollama_model=<%= context.ollama_model %>
 <%- end -%>
 # We need IP addr for access
-export ollama_url="http:/$(hostname -I | cut -d ' ' -f 1):${port}"
+export ollama_url="http://$(hostname -I | cut -d ' ' -f 1):${port}"
 # export ollama_url="${host}:${port}"
 export ollama_models=$OLLAMA_MODELS
 
