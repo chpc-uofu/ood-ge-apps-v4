@@ -97,7 +97,8 @@ echo ${host} ${ollama_url} ${ollama_models} ${ollama_model}
 
 mt_connection=$(cat << EOF
 {
-  'ollama_url':       '${ollama_url}',
+  'host':            '${host}', 
+  'ollama_url':      '${ollama_url}',
   'ollama_model':    '${ollama_model}'
 }
 EOF
