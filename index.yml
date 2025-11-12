@@ -46,6 +46,7 @@ entries:
   nim_app: []
   vllm_app: []
   multitenant-dashboard: []
+  multitenant-delivery: []
   multitenant-llm: []
   multitenant-jupyter: []
   windows_vm_app: []
