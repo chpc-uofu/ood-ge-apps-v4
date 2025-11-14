@@ -3,7 +3,7 @@
 # Wait for RDP, SMB, guacd ports, and port 54321 to be available
 echo "AFTER.SH: After script running:"
 start_time=$(date +%s)
-timeout=600  # Total timeout in seconds - verified on man page this is default
+timeout=1200  # Total timeout in seconds - verified on man page this is default
 # for timeout command.
 
 # This should exit at $timeout + a few seconds so it is alive longer than loop
@@ -40,17 +40,17 @@ while true; do
 
     if wait_until_port_used "${host}:3389" 1 >/dev/null 2>&1; then
 	    rdp_up=true;
-    echo "RDP port up";
+    # echo "RDP port up";
     fi
 
     if wait_until_port_used "${host_fqdn}:445" 1 >/dev/null 2>&1; then
 	    smb_up=true;
-	    echo "SMB port up";
+    #	    echo "SMB port up";
     fi
 
     if wait_until_port_used "${host}:4822" 1 >/dev/null 2>&1; then
 	    guacd_up=true;
-	    echo "GUACD port up";
+    #	    echo "GUACD port up";
     fi
 
 # Recall vm_ready_pid is NOT the pid of qemu, 
