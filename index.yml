@@ -45,6 +45,7 @@ entries:
   protein_binder_nim_app: []
   nim_app: []
   vllm_app: []
+  metashape_app: []
   multitenant-dashboard: []
   multitenant-llm: []
   multitenant-jupyter: []
