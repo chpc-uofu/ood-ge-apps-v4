@@ -1,55 +1,142 @@
 ---
 
-# Entries:
-# 1. Added to this file will be installed by CHPC's Ansible role.
-# 2. Are arrays for future-proofing.
+#
+# NOTES:
+#   1. Use this file to specify the application catalog for the CHPC Ansible role.
+#
 
-apiVersion: v1
-entries:
-  abaqus_app: []
-  ansysedt_app: []
-  ansys_workbench_app: []
-  app-templates: []
-  chpc-granite-status: []
-  chpc-kingspeak-status: []
-  chpc-lonepeak-status: []
-  chpc-notchpeak-status: []
-  chpc-systemstatus: []
-  codeserver_app: []
-  comsol_app: []
-  coot_app: []
-  csd_app: []
-  desktop_expert: []
-  gpt4all_app: []
-  idl_app: []
-  idv_app: []
-  jupyter_app: []
-  libreoffice_app: []
-  lumerical_app: []
-  mathematica_app: []
-  matlab_app: []
-  matlab_html_app: []
-  meshroom_app: []
-  paraview_app: []
-  qgis_app: []
-  relion_app: []
-  rsoft_app: []
-  rstudio_server_app: []
-  sas_app: []
-  shiny_app: []
-  spark_jupyter_app: []
-  starccm_app: []
-  stata_app: []
-  vmd_app: []
-  vscode_desktop_app: []
-  protein_binder_nim_app: []
-  nim_app: []
-  vllm_app: []
-  metashape_app: []
-  multitenant-dashboard: []
-  multitenant-llm: []
-  multitenant-jupyter: []
-  windows_vm_app: []
-#  rfdiffusion_nim_app: []
-#  proteinmpnn_nim_app: []
-#  alphafold_nim_app: []
+apiVersion: chpc.utah.edu/v1alpha1
+kind: ApplicationCatalog
+metadata:
+  name: ood-ge-apps-v4
+spec:
+  apps:
+    - name: abaqus_app
+      relativePath: abaqus_app
+      type: interactive
+    - name: ansysedt_app
+      relativePath: ansysedt_app
+      type: interactive
+    - name: ansys_workbench_app
+      relativePath: ansys_workbench_app
+      type: interactive
+    - name: chpc-granite-status
+      relativePath: chpc-granite-status
+      type: passenger
+    - name: chpc-kingspeak-status
+      relativePath: chpc-kingspeak-status
+      type: passenger
+    - name: chpc-lonepeak-status
+      relativePath: chpc-lonepeak-status
+      type: passenger
+    - name: chpc-notchpeak-status
+      relativePath: chpc-notchpeak-status
+      type: passenger
+    - name: chpc-systemstatus
+      relativePath: chpc-systemstatus
+      type: passenger
+    - name: codeserver_app
+      relativePath: codeserver_app
+      type: interactive
+    - name: comsol_app
+      relativePath: comsol_app
+      type: interactive
+    - name: coot_app
+      relativePath: coot_app
+      type: interactive
+    - name: csd_app
+      relativePath: csd_app
+      type: interactive 
+    - name: desktop_expert
+      relativePath: desktop_expert
+      type: interactive
+    - name: gpt4all_app
+      relativePath: gpt4all_app
+      type: interactive
+    - name: idl_app
+      relativePath: idl_app
+      type: interactive 
+    - name: idv_app
+      relativePath: idv_app
+      type: interactive 
+    - name: jupyter_app
+      relativePath: jupyter_app
+      type: interactive
+    - name: libreoffice_app
+      relativePath: libreoffice_app
+      type: interactive
+    - name: lumerical_app
+      relativePath: lumerical_app
+      type: interactive
+    - name: mathematica_app
+      relativePath: mathematica_app
+      type: interactive
+    - name: matlab_app
+      relativePath: matlab_app
+      type: interactive
+    - name: matlab_html_app
+      relativePath: matlab_html_app
+      type: interactive
+    - name: meshroom_app
+      relativePath: meshroom_app
+      type: interactive
+    - name: paraview_app
+      relativePath: paraview_app
+      type: interactive
+    - name: qgis_app
+      relativePath: qgis_app
+      type: interactive
+    - name: relion_app
+      relativePath: relion_app
+      type: interactive
+    - name: rsoft_app
+      relativePath: rsoft_app
+      type: interactive
+    - name: rstudio_server_app
+      relativePath: rstudio_server_app
+      type: interactive
+    - name: sas_app
+      relativePath: sas_app
+      type: interactive 
+    - name: shiny_app
+      relativePath: shiny_app
+      type: interactive
+    - name: spark_jupyter_app
+      relativePath: spark_jupyter_app
+      type: interactive
+    - name: starccm_app
+      relativePath: starccm_app
+      type: interactive
+    - name: stata_app
+      relativePath: stata_app
+      type: interactive
+    - name: vmd_app
+      relativePath: vmd_app
+      type: interactive 
+    - name: vscode_desktop_app
+      relativePath: vscode_desktop_app
+      type: interactive
+    - name: protein_binder_nim_app
+      relativePath: protein_binder_nim_app
+      type: interactive
+    - name: nim_app
+      relativePath: nim_app
+      type: interactive 
+    - name: vllm_app
+      relativePath: vllm_app
+      type: interactive
+    - name: multitenant-dashboard
+      relativePath: multitenant-dashboard
+      type: interactive
+    - name: multitenant-llm
+      relativePath: multitenant-llm
+      type: interactive
+    - name: multitenant-jupyter
+      relativePath: multitenant-jupyter
+      type: interactive
+    - name: windows_vm_app
+      relativePath: windows_vm_app
+      type: interactive
+  templates:
+    - name: app-templates
+      relativePath: app-templates
