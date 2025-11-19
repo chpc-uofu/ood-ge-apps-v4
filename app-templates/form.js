@@ -377,7 +377,7 @@ $(document).ready(function () {
         nodesCheckbox: $('#batch_connect_session_context_nodes_checkbox'),
         gpuType: $('#batch_connect_session_context_gpu_type'),
         gpuCount: $('#batch_connect_session_context_gpu_count'),
-        gpuprofile: $('#batch_connect_session_context_gpu_profile'),
+        gpuProfile: $('#batch_connect_session_context_gpu_profile'),
         memtask: $('#batch_connect_session_context_memtask'),
         nodelist: $('#batch_connect_session_context_nodelist'),
         addEnv: $('#batch_connect_session_context_additional_environment'),
