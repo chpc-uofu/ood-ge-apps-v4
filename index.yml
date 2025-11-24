@@ -49,6 +49,7 @@ entries:
   nim_app: []
   vllm_app: []
   metashape_app: []
+  windows_vm_app: []
 #  multitenant-dashboard: []
 #  multitenant-llm: []
 #  multitenant-jupyter: []
