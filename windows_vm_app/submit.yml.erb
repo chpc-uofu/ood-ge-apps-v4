@@ -41,8 +41,8 @@ script:
     <%- end -%>
     <%- if memtask != "" and memtask != "0" -%>
     - "--mem"
-    - "22G"
-#    - "<%= memtask %>G"
+#    - "22G"
+    - "<%= memtask %>G"
     <%- end -%>
     <%- if nodelist != "" -%>
     - "-w"

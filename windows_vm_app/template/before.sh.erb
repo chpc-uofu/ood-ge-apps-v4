@@ -10,7 +10,8 @@ export tls_proxy_enabled=0
 export SMBCONF=$(echo "$SMBCONF" | tr -d '["')
 export SMBCONF=$(echo "$SMBCONF" | tr -d '"]')
 export SMBCONF="${SMBCONF//,/}"
-
+echo "SMBCONF: ${SMBCONF}"
+# mine was SMBCONF: /uufs/chpc.utah.edu/common/home/chpc-group2
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
 
@@ -72,6 +73,10 @@ export websockify_token=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
 export ws_console_fd=$SPANK_ISO_NETNS_LISTENING_FD_1
 export ws_console_port=$SPANK_ISO_NETNS_LISTENING_PORT_1
 
+# we want to use memory parameter in qemu startup line
+export requested_mem=$((SLURM_MEM_PER_NODE / 2))
+echo "requested_mem after -1 = ${requested_mem}"
+export requested_cpus=$SLURM_CPUS_ON_NODE
 
 # For tlsproxy_start.sh
 export job=$SLURM_JOBID
@@ -103,3 +108,5 @@ export win_password
 
 echo "BEFORE.SH:  Guacd RDP Port: $guacd_rdp_port"
 
+echo "probably need to parse this to check if virt is enabled on node "
+virt-host-validate
