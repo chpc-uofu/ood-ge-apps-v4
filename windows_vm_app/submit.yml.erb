@@ -1,16 +1,6 @@
 <%-
   emailcmd = '/uufs/chpc.utah.edu/sys/bin/CHPCEmailLookup.sh ' + ENV["USER"]
   emailaddr = %x[ #{emailcmd}]
-  if gpu_type != "none" 
-     if gpu_type == "any" 
-      gpustr="--gres=gpu:"+gpu_count
-     else
-      gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
-     end
-     if gpu_profile == "1" 
-       gpustr << ",nsight:1"
-     end
-  end
 -%>
 # Note conn_params section below is copied from BYU's submit script
 # Watch closely
@@ -43,7 +33,11 @@ script:
     - "8"
 #   - "<%= num_cores %>" 
     <%- if gpu_type != "none" -%>
-    - <%= gpustr %>
+       <%- if gpu_type == "any" -%>
+    - "--gres=gpu:<%= gpu_count %>"
+       <%- else -%>
+    - "--gres=gpu:<%= gpu_type %>:<%= gpu_count %>"
+       <%- end -%>
     <%- end -%>
     <%- if memtask != "" and memtask != "0" -%>
     - "--mem"
