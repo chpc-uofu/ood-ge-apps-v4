@@ -10,7 +10,7 @@ gpu_data = {
 ---
 title: <%= app_name %>
 attributes:
-  auto_modules_photoscan:
+  auto_modules_metashape:
     label: "Metashape"
     default: false
     help: "This defines the version of <%= app_name %> you want to load."
@@ -46,7 +46,7 @@ attributes:
 <% end %>   
 
 form:
-  - auto_modules_photoscan
+  - auto_modules_metashape
 <% IO.foreach(template_root+"form_params_gpu_multinode") do |line| %>
 <%= line %>
 <% end %>
