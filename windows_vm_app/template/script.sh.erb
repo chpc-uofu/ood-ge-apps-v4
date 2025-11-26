@@ -42,9 +42,9 @@ qemu-system-x86_64 -enable-kvm \
     -device ich9-ahci,id=sata_controller \
     -drive file=${OVERLAY_PATH},format=qcow2,if=none,id=drive0 \
     -device ide-hd,drive=drive0,bus=sata_controller.0 \
-    -m 20G \
+    -m ${requested_mem}M \
     -cpu max \
-    -smp 6 \
+    -smp ${requested_cpus} \
     -device virtio-net-pci,netdev=net0 \
     -netdev user,id=net0,net=169.254.100.0/24,dhcpstart=169.254.100.15,host=169.254.100.2,hostfwd=tcp::3389-:3389 \
     -boot c \

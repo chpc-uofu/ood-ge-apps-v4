@@ -1,9 +1,118 @@
 #!/usr/bin/env bash
 
+#BEGIN OF INLINE OOD PORT FUNCTIONS
+# port_used is normally sourced from OOD but does not seem to
+# work properly in the non-network available namespace
+unset -f wait_until_port_used
+unset -f port_used
+unset -f find_port
+unset -f port_used_python
+unset -f port_used_python3
+unset -f port_used_nc
+unset -f port_used_lsof
+unset -f port_used_bash
+
+  port_used_python() {
+    python -c "import socket; socket.socket().connect(('$1',$2))" >/dev/null 2>&1
+  }
+
+  port_used_python3() {
+    python3 -c "import socket; socket.socket().connect(('$1',$2))" >/dev/null 2>&1
+  }
+
+  # For unknown reasons, this function as written does not work
+  # in the namespace. Changed to use port only.
+  port_used_nc(){
+    #echo "port_used_nc command: nc -w 2 $1 $2 < /dev/null > /dev/null 2>&1"
+    nc -w 2 "$2" < /dev/null > /dev/null 2>&1
+  }
+
+  port_used_lsof(){
+    lsof -i :"$2" >/dev/null 2>&1
+  }
+
+  port_used_bash(){
+    local bash_supported=$(strings /bin/bash 2>/dev/null | grep tcp)
+    if [ "$bash_supported" == "/dev/tcp/*/*" ]; then
+      (: < /dev/tcp/$1/$2) >/dev/null 2>&1
+    else
+      return 127
+    fi
+  }
+
+  # Check if port $1 is in use
+port_used () {
+    local port="${1#*:}"
+    local host=$((expr "${1}" : '\(.*\):' || echo "localhost") | awk 'END{print $NF}')
+    #echo "Inside port used, port=${port}, host = ${host} "
+    local port_strategies=(port_used_nc port_used_lsof port_used_bash port_used_python port_used_python3)
+
+    for strategy in ${port_strategies[@]};
+    do
+      #echo "Starting strategy ${strategy}"
+      $strategy $host $port
+      status=$?
+      #echo "Ending strategy ${strategy}, status=${status}"
+      if [[ "$status" == "0" ]] || [[ "$status" == "1" ]]; then
+        return $status
+      fi
+    done
+
+    return 127
+  }
+
+  # Find available port in range [$2..$3] for host $1
+  # Default host: localhost
+  # Default port range: [2000..65535]
+  # returns error code (0: success, 1: failed)
+  # On success, the chosen port is echoed on stdout.
+find_port () {
+    local host="${1:-localhost}"
+    local min_port=${2:-2000}
+    local max_port=${3:-65535}
+    local port_range=($(shuf -i ${min_port}-${max_port}))
+    local retries=1 # number of retries over the port range if first attempt fails
+    for ((attempt=0; attempt<=$retries; attempt++)); do
+      for port in "${port_range[@]}"; do
+        if port_used "${host}:${port}"; then
+continue
+        fi
+        return 0 # success
+      done
+    done
+
+   echo "error: failed to find available port in range ${min_port}..${max_port}" >&2
+    return 1 # failure
+  }
+
+  # Wait $2 seconds until port $1 is in use
+  # Default: wait 30 seconds
+wait_until_port_used () {
+    local port="${1}"
+    local time="${2:-30}"
+    #echo "INSIDE wait_until_port_used, port= ${port}, time = ${time}"
+    for ((i=1; i<=time*2; i++)); do
+      #echo "INSIDE wait_until_port_used i loop before port_used call"
+      port_used "${port}"
+      port_status=$?
+      #echo "INSIDE wait_until_port_used i loop After port_used, result was ${port_status}"
+      if [ "$port_status" == "0" ]; then
+        return 0
+      elif [ "$port_status" == "127" ]; then
+         #echo "commands to find port were either not found or inaccessible."
+         #echo "command options are lsof, nc, bash's /dev/tcp, or python (or python3) with socket lib."
+         return 127
+      fi
+      sleep 0.5
+    done
+    return 1
+}
+#END OF INLINE OOD PORT FUNCTIONS
+
 # Wait for RDP, SMB, guacd ports, and port 54321 to be available
 echo "AFTER.SH: After script running:"
 start_time=$(date +%s)
-timeout=1200  # Total timeout in seconds - verified on man page this is default
+timeout=600  # Total timeout in seconds - verified on man page this is default
 # for timeout command.
 
 # This should exit at $timeout + a few seconds so it is alive longer than loop
@@ -38,24 +147,32 @@ while true; do
     guacd_up=false
     vm_ready=false
 
+    # echo "RDP Check: Right before wait_until_port_used 3389"
+    # NOTE: host is no longer used in port_used functions
     if wait_until_port_used "${host}:3389" 1 >/dev/null 2>&1; then
-	    rdp_up=true;
-    # echo "RDP port up";
+       rdp_up=true;
+       echo "RDP port up";
+    else
+       echo "RDP port not up";
     fi
 
+    #echo "SMB check: Right before wait_until_port_used 445"
     if wait_until_port_used "${host_fqdn}:445" 1 >/dev/null 2>&1; then
 	    smb_up=true;
-    #	    echo "SMB port up";
+	    echo "SMB port up";
     fi
 
+    #echo "GUACD check: Right before wait_until_port_used 4822"
     if wait_until_port_used "${host}:4822" 1 >/dev/null 2>&1; then
 	    guacd_up=true;
-    #	    echo "GUACD port up";
+	    echo "GUACD port up";
     fi
 
+    #echo "righht before vm_ready check, whichh is $vm_ready"
 # Recall vm_ready_pid is NOT the pid of qemu, 
 # it is the pid of timeout statement
     if [[ "$vm_ready" != "true" ]]; then
+     #echo "Beginning of vm_ready != 'true'"
 # To translate the following statement: 
 # if process $vm_ready_pid exists, set vm_ready=true
 # if process $vm_ready_pid does NOT exist, rest of statement doesn't execute
@@ -82,4 +199,4 @@ while true; do
     sleep 2
 
 done
-netstat -tulnp
+
