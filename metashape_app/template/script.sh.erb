@@ -30,7 +30,7 @@ set -x
 #
 
 # Load the required environment
-module load <%= context.auto_modules_photoscan %>
+module load <%= context.auto_modules_metashape %>
 # additional environment
 <%- if context.additional_environment != "" -%>
   <%= context.additional_environment.gsub /\r\n?/, "\n" %>
