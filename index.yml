@@ -53,6 +53,7 @@ entries:
   multitenant-dashboard: []
   multitenant-llm: []
   multitenant-jupyter: []
+  multitenant-instruction: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []
