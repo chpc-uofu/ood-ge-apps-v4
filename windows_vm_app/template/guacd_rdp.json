@@ -1,0 +1,28 @@
+{
+    "type": "rdp",
+    "useCredentials": true,
+    "defaultWidth": 1920,
+    "defaultHeight": 1080,
+    "guacd": {
+        "port": 4822,
+	"timezone": "America/Denver"
+    },
+
+    "logLevel": "INFO",
+    "settings": {
+        "hostname": "localhost",
+        "port": 3389,
+        "enable-drive": false,
+        "disable-audio": true,
+        "create-drive-path": false,
+        "enable-wallpaper": false,
+        "enable-theming": false,
+        "enable-font-smoothing": false,
+        "enable-desktop-composition": false,
+        "enable-menu-animations": false,
+        "security": "nla",
+        "ignore-cert": true,
+        "dpi": 96,
+        "timezone": "America/Denver"
+    }
+}

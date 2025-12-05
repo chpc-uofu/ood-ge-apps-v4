@@ -1,0 +1,57 @@
+module load qemu
+module load samba
+echo "SCRIPT.SH:  script running"
+QEMU_HOME=/uufs/chpc.utah.edu/sys/installdir/r8/qemu/9.1.3
+
+# Change working directory to user's home directory
+#cd "${HOME}"
+
+# Ensure that the user's configured login shell is used
+#export SHELL="$(getent passwd $USER | cut -d: -f7)"
+
+echo "SCRIPT.SH:  Starting VM..."
+READ_ONLY_VM_FILE="/uufs/chpc.utah.edu/sys/installdir/w11vm/link_to_wvm"
+OVERLAY_PATH="${JOB_TMP_DIR}/${USER}-test-suite.qcow2"
+qemu-img create -f qcow2 -b $READ_ONLY_VM_FILE -F qcow2 $OVERLAY_PATH
+
+# Only run tlsproxy if tls_proxy_enabled is 1
+if [ "$tls_proxy_enabled" = "1" ]; then
+    $script_path/tlsproxy_start.sh $SPANK_ISO_NETNS_LISTENING_FD_2 127.0.0.1:3389 &
+fi
+
+$script_path/samba_start.sh
+
+# Only run guacd_rdp if guacd_rdp_enabled is 1
+if [ "$guacd_rdp_enabled" = "1" ]; then
+    $script_path/guacd_rdp.sh
+fi
+
+$script_path/smbios.sh
+
+# Only run ws_console if ws_console_enabled is 1
+if [ "$ws_console_enabled" = "1" ]; then
+    $script_path/ws_console.sh &
+fi
+echo "SCRIPT.SH:  Launching VM"
+
+# Launch QEMU
+qemu-system-x86_64 -enable-kvm \
+    -name guest=${USER}_${job_uuid}_win11,debug-threads=on \
+    -machine q35  \
+    -drive if=pflash,format=raw,readonly=on,file=$QEMU_HOME/share/qemu/edk2-x86_64-code.fd \
+    -device ich9-ahci,id=sata_controller \
+    -drive file=${OVERLAY_PATH},format=qcow2,if=none,id=drive0 \
+    -device ide-hd,drive=drive0,bus=sata_controller.0 \
+    -m ${requested_mem}M \
+    -cpu max \
+    -smp ${requested_cpus} \
+    -device virtio-net-pci,netdev=net0 \
+    -netdev user,id=net0,net=169.254.100.0/24,dhcpstart=169.254.100.15,host=169.254.100.2,hostfwd=tcp::3389-:3389 \
+    -boot c \
+    -vga none \
+    -device virtio-gpu-pci \
+    -vnc unix:${JOB_TMP_DIR}/vnc.socket,lossy=on,non-adaptive=on \
+    -rtc base=localtime \
+    -smbios file=${script_path}/smbios_data.bin \
+    -usb -device usb-tablet 
+

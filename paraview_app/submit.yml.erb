@@ -1,6 +1,18 @@
 <%-
   emailcmd = '/uufs/chpc.utah.edu/sys/bin/CHPCEmailLookup.sh ' + ENV["USER"]
   emailaddr = %x[ #{emailcmd}]
+  if /frisco/.match(cluster) == nil and /crystalpeak/.match(cluster) == nil
+  if gpu_type != "none" 
+     if gpu_type == "any" 
+      gpustr="--gres=gpu:"+gpu_count
+     else
+      gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
+     end
+     if gpu_profile == "1" 
+       gpustr << ",nsight:1"
+     end
+  end
+  end
 -%>
 
 ---
@@ -18,11 +30,7 @@ script:
     - "-n"
     - "<%= num_cores %>"
     <%- if gpu_type != "none" -%>
-       <%- if gpu_type == "any" -%>
-    - "--gres=gpu:<%= gpu_count %>"
-       <%- else -%>
-    - "--gres=gpu:<%= gpu_type %>:<%= gpu_count %>"
-       <%- end -%>
+    - <%= gpustr %>
     <%- end -%>
     <%- if memtask != "" and memtask != "0" -%>
     - "--mem"

@@ -1,0 +1,194 @@
+<%
+app_name = "Multitenant Ollama"
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+%>
+---
+title: <%= app_name %>
+
+attributes:
+  gpudata:
+    widget: hidden_field
+    cacheable: false
+    value: |
+      "<%= gpu_data.to_json %>"
+      
+  cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+
+  ollama_model:
+    widget: select
+    label: Specific LLM to run from our local repository
+    help: Select the LLM model you want to run
+    options:
+      - ["meta-llama/Llama-4-Scout-17B-16E-Instruct"]
+      - ["meta-llama/Llama-4-Scout-17B-16E"]
+      - ["meta-llama/Llama-3.3-70B-Instruct"]
+      - ["meta-llama/Llama-3.1-8B"]
+      - ["meta-llama/Llama-3.1-8B-Instruct"]
+      - ["CohereLabs/aya-expanse-8b"]
+      - ["CohereLabs/aya-expanse-32b"]
+      - ["google/gemma-3-27b-it"]
+      - ["google/gemma-3-1b-it"]
+      - ["google/gemma-3-4b-it"]
+      - ["Qwen/Qwen3-0.6B"]
+      - ["Qwen/Qwen3-1.7B"]
+      - ["Qwen/Qwen3-4B"]
+      - ["Qwen/Qwen3-8B"]
+      - ["Qwen/Qwen3-14B"]
+      - ["Qwen/Qwen3-32B"]
+      - ["Qwen/Qwen2.5-VL-7B-Instruct"]
+      - ["Qwen/Qwen2.5-VL-32B-Instruct"]
+      - ["Qwen/Qwen2.5-VL-72B-Instruct"]
+      - ["allenai/OLMo-2-0425-1B-Instruct"]
+      - ["allenai/OLMo-2-1124-7B-Instruct"]
+      - ["allenai/OLMo-2-1124-13B-Instruct"]
+      - ["allenai/OLMo-2-0325-32B-Instruct"]
+      - ["deepseek-ai/DeepSeek-R1"]
+      - ["deepseek-ai/DeepSeek-V3"]
+    required: true  
+  
+  task_widget:
+    widget: select
+    label: Select model task (leave on generate if you are unsure)
+    help: Models must be initialized with a task
+    options:
+      - ["generate"]
+      - ["embed"]        
+      - ["score"]
+      - ["reward"]
+          
+  scratch_dir:
+    widget: "path_selector"
+    label: Path to user scratch directory
+    help: "Enter path to user-specific scratch directory e.g. /scratch/general/vast/$USER/vllm_cache.
+    This directory will be your cache directory so models you previously used can be reused without redownloading them,
+           <b>NOTE</b>: If the VLLM container does not start, look into the llm.log file in the job's staging directory and contact helpdesk@chpc.utah.edu for more help."
+    directory:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
+    value:  /scratch/general/vast/<%= CurrentUser.name %>/vllm_cache
+    readonly: false
+    show_hidden: false
+    cacheable: false 
+    
+  enable_multitenant:
+    label: "Multitenant App Options"
+    widget: 'select'
+    options:
+      - [
+          'No Multitenancy', 'none',
+          data-set-mt-method: 'form',
+          data-set-mt-delivery-select: 0,
+          data-set-client-group: <%= CurrentUser.group_names[3].to_s %>,
+          data-hide-mt-method: true,
+          data-hide-mt-delivery-select: true,
+          data-hide-client-group: true,
+        ]
+      - [
+          'My User Only', 'user',
+          data-set-mt-method: 'form',
+          data-set-mt-delivery-select: 0,
+          data-set-client-group: <%= CurrentUser.group_names[3].to_s %>,         
+          data-hide-mt-method: true,
+          data-hide-mt-delivery-select: true,
+          data-hide-client-group: true,
+        ]
+      - [
+          'Other Users', 'mt',
+          data-set-mt-delivery-select: 0,
+          data-hide-mt-method: false,
+          data-hide-mt-delivery-select: true,
+          data-hide-client-group: false,
+        ]
+    help: |
+      Do you want your job to be shared with select users?
+
+  client_group:
+    label: "Tenant Group"
+    widget: 'select'
+    options:
+      <%- %x{id -Gn $USER}.split(' ').each do |group| %>
+      - ["<%= group %>"]
+      <%- end %>
+    help: Select the group of users that should connect to your app.
+      
+  mt_method:
+    label: "Delivery Method"
+    help: |
+      What type of view do you want your users to see?
+    widget: select
+    options:
+      - [
+          "Form View Only", "form",
+          data-hide-mt-delivery-select: true,
+          data-set-mt-delivery-select: 0,
+        ]
+      - [
+          "Card + Form View", "card",
+          data-hide-mt-delivery-select: false,
+          data-set-mt-delivery-select: 0,
+        ]
+  mt_delivery_select:
+    widget: "select"
+    label: "Card Preset"
+    options:
+      - [
+          "Default Ollama API (Jupyter/Python)", 0,
+          data-set-mt-delivery: "sys/multitenant-delivery_default",
+          data-set-mt-appname: "Ollama_API"
+        ]
+      - [
+          "Code Generation (Code Server + Cline)", 1,
+          data-set-mt-delivery: "sys/multitenant-delivery_default",
+          data-set-mt-appname: "Ollama_Code"
+        ]
+      - [
+          "Debug", 2,
+          data-set-mt-delivery: "sys/multitenant-delivery_debug",
+          data-set-mt-appname: "debug"
+        ]
+    help: |
+      The style of card you want delivered to tenants.
+  mt_delivery:
+    widget: "hidden_field"
+  mt_appname:
+    widget: "hidden_field"
+    
+form:
+  - ollama_model
+  - task_widget
+  - scratch_dir
+  - enable_multitenant
+  - client_group
+  - mt_method
+  - mt_delivery_select
+  - mt_delivery
+  - mt_appname
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %> 

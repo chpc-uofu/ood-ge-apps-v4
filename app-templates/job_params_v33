@@ -92,7 +92,7 @@
            'Nvidia L40, SP, 48GB, owner','l40',
         ]
       - [
-           'Nvidia V, SP, 12GB, owner','titanv',
+           'Nvidia Titan V, SP, 12GB, owner','titanv',
         ]
       - [
            'Nvidia RTX 2080 Ti, SP, 11GB, general, owner','2080ti',
@@ -110,6 +110,15 @@
            'Nvidia RTX 6000, SP, 48GB, owner','rtx6000',
         ]
       - [
+           'Nvidia RTX 5000, SP, 32GB, owner','rtx5000',
+        ]
+      - [
+           'Nvidia RTX 2000, SP, 16GB, owner','rtx2000',
+        ]
+      - [
+           'Nvidia RTX 4500, SP, 24GB, owner','rtx4500',
+        ]
+      - [
            'AMD MI100, SP, evaluation','mi100',
         ]
       - [
@@ -117,6 +126,27 @@
         ]
       - [
            'Nvidia L40S, SP, 48GB, general','l40s',
+        ]
+      - [
+           'Nvidia L4, SP, 24GB, owner','l4',
+        ]
+      - [
+           'Nvidia A800, DP, 40GB, owner','a800',
+        ]
+      - [
+           'Nvidia H200, DP, 141GB, general','h200',
+        ]
+      - [
+           'Nvidia H200 1g MIG, DP, 18GB, general','h200_1g.18gb',
+        ]
+      - [
+           'Nvidia H200 2g MIG, DP, 35GB, general','h200_2g.35gb',
+        ]
+      - [
+           'Nvidia H200 3g MIG, DP, 71GB, general','h200_3g.71gb',
+        ]
+      - [
+           'Nvidia RTX 6000 PRO B, SP, 96GB, owner','rtxpr6000bl',
         ]
     help: |
       - Default **none** if no GPU.
@@ -131,6 +161,11 @@
     min: 1
     max: 8
     step: 1
+  gpu_profile:
+    widget: "check_box"
+    label: "Enable GPU profiling"
+    checked_value: 1
+    unchecked_value: 0
   nodelist_checkbox:
     widget: "check_box"
     label: "Nodelist"

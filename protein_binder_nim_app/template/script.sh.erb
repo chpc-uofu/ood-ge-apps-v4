@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+  module load <%= context.python %>
+# additional environment
+<%- if context.additional_environment != "" -%>
+  <%= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%- end -%>
+
+# debugging info
+
+module list
+echo $PATH
+pwd
+
+
+./start_nim1.sh <%= context.ngc_api_key %> >& af2.log &
+sleep 30
+./start_nim2.sh <%= context.ngc_api_key %> >& rfd.log &
+sleep 30
+./start_nim3.sh <%= context.ngc_api_key %> >& pm.log &
+sleep 30
+./start_nim4.sh <%= context.ngc_api_key %> >& af2m.log &
+sleep 30
+
+
+#source_helpers
+#set -x
+# Wait for the RFDiffusion NIM server to start
+#echo "Waiting for RFDiffusion NIM server to open port 8082..."
+#if wait_until_port_used "localhost:8082" 600; then
+#  echo "Discovered RFDiffusion NIM server listening on port 8082!"
+#else
+#  echo "Timed out waiting for RFDiffusion NIM  server to open port 8082!"
+#  clean_up 1
+#fi
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Workaround for directory permission error
+#unset XDG_RUNTIME_DIR
+#export XDG_RUNTIME_DIR=""
+
+#
+# Start Jupyter Notebook Server
+#
+
+# List available kernels for debugging purposes
+#set -x
+jupyter kernelspec list
+{ set +x; } 2>/dev/null
+echo "TTT - $(date)"
+
+if [ -v "$SLURM_JOBID" ]; then
+  echo srun
+  srun hostname -s
+fi 
+
+echo Interface is <%= context.interface %>
+#jupyter notebook --generate-config 
+# Launch the Jupyter Notebook Server
+# jupyter notebook --config="${CONFIG_FILE}" --debug
+jupyter <%= context.interface %> --config="${CONFIG_FILE}" 

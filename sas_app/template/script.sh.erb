@@ -40,6 +40,9 @@ module load <%= context.auto_modules_sas %>
   <%= context.additional_environment.gsub /\r\n?/, "\n" %>
 <%- end -%>
 
+# SAS remote web browser
+/uufs/chpc.utah.edu/sys/installdir/sas/9.4-19/rbrowser/linux/rbrowser &
+
 #sas -explorer
 sas 
 

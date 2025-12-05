@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+
+# Set working directory to home directory
+cd "${HOME}"
+
+module load <%= context.version %>
+<%#- if context.python == "custom" -%>
+  <%#= context.custom_environment.gsub /\r\n?/, "\n" %>
+<%#- else -%>
+<%#- end -%>
+# additional environment
+<%#- if context.additional_environment != "" -%>
+  <%#= context.additional_environment.gsub /\r\n?/, "\n" %>
+<%#- end -%>
+
+# Workaround for directory permission error
+#unset XDG_RUNTIME_DIR
+#export XDG_RUNTIME_DIR=""
+
+#
+# Start Jupyter Notebook Server
+#
+
+# List available kernels for debugging purposes
+#set -x
+jupyter kernelspec list
+{ set +x; } 2>/dev/null
+echo "TTT - $(date)"
+
+if [ -v "$SLURM_JOBID" ]; then
+  echo srun
+  srun hostname -s
+fi 
+
+#jupyter notebook --generate-config 
+# Launch the Jupyter Notebook Server
+# jupyter notebook --config="${CONFIG_FILE}" --debug
+jupyter notebook --config="${CONFIG_FILE}" 

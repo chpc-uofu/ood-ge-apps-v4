@@ -1,0 +1,16 @@
+---
+name: GPT4All LLM UI
+category: Interactive Apps
+subcategory: IDEs
+role: batch_connect
+description: |
+  This app will launch a [GPT4All] GUI on a [HPC cluster]. You will be able
+  to interact with the MATLAB GUI through a VNC session.
+
+  [GPU specification] is optional for the partitions that have them, but for good performance make sure to choose at least one GPU.
+  To assist with immediate start of the job, choose notchpeak-shared-short account and partition, and either the 1080Ti or T4 GPUs. 
+  1080Ti has 11.2 GB RAM, T4 has 15.3 GB RAM, and will fit models up that size.
+
+  [GPT4All]: https://www.nomic.ai/gpt4all
+  [HPC cluster]: https://www.chpc.utah.edu/resources/HPC_Clusters.php
+  [GPU specification]: https://www.chpc.utah.edu/documentation/guides/gpus-accelerators.php#overview
