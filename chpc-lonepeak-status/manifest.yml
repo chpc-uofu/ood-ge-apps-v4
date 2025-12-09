@@ -4,3 +4,5 @@ description: |-
   Detailed Node Status of the Lonepeak Cluster
 category: Clusters
 icon: fa://tachometer
+url: https://portal.chpc.utah.edu/slurm/cluster/lonepeak/
+new_window: true
