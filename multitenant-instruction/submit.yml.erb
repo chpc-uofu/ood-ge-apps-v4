@@ -1,16 +1,6 @@
 <%-
   emailcmd = '/uufs/chpc.utah.edu/sys/bin/CHPCEmailLookup.sh ' + ENV["USER"]
   emailaddr = %x[ #{emailcmd}]
-  if gpu_type != "none"
-     if gpu_type == "any"
-      gpustr="--gres=gpu:"+gpu_count
-     else
-      gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
-     end
-     if gpu_profile == "1"
-       gpustr << ",nsight:1"
-     end
-  end
 -%>
 
 ---
@@ -28,22 +18,7 @@ script:
     - "-N"
     - "1"
     - "-n"
-    - "<%= num_cores %>"
-    <%- if gpu_type != "none" -%>
-    - <%= gpustr %>
-    <%- end -%>
-    <%- if memtask != "" and memtask != "0" -%>
-    - "--mem"
-    - "<%= memtask %>G"
-    <%- end -%>
-    <%- if nodelist != "" -%>
-    - "-w"
-    - "<%= nodelist %>"
-    <%- end -%>
-    <%- if constraint != "" -%>
-    - "-C"
-    - "<%= constraint %>"
-    <%- end -%>
+    - "1"
     - "--wckey=multitenant-ge-staging"
   <%- end -%>
 
