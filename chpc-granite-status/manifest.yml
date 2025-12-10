@@ -4,3 +4,5 @@ description: |-
   Detailed Node Status of the Granite Cluster
 category: Clusters
 icon: fa://tachometer
+url: https://portal.chpc.utah.edu/slurm/cluster/granite/
+new_window: true
