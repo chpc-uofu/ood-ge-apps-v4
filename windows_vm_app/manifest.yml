@@ -5,5 +5,15 @@ category: Interactive Apps
 subcategory: Desktops
 role: batch_connect
 description: |
-  This app will launch an interactive Microsoft Windows desktop on a compute node. You will
-  have no internet access, but you will have access to your files.
+  This app will launch a Microsoft Windows virtual machine on a compute node. You will
+  have no internet access, but all directories you have permission to access will be mapped
+  in the Windows File Explorer. It may take 10-15 seconds for this mapping to activate.
+  It will also take approximately 2 minutes for the VM to start and you will see a Connect
+  button when it is ready.
+
+  We strongly recommend launching this job with the minimum resources below - 
+  CPUs - 4 cores
+  Memory - 32GB (use Advanced Options checkbox)
+
+  Currently this VM only has the Microsoft Office suite installed. Let us know at 
+  helpdesk@chpc.utah.edu if there are other applications you would like to see available.
