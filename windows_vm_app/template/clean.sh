@@ -7,6 +7,7 @@ for p in ${smbpid}; do
    kill -15 $p
    echo "killing ${p}"
    while [ -e /proc/$p ]; do sleep 1; done
+done
 echo "Samba server should now be shut down"
 #Clean up temporary directory on job exit.
 rm -r ${JOB_TMP_DIR}
