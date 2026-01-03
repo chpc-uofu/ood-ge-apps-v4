@@ -4,7 +4,7 @@ echo "Shutting down samba server"
 smbpid=$(ps aux | grep smbd | grep -v grep | awk '{print $2}')
 echo "smbpid is ${smbpid}"
 kill -15 $smbpid
-while [ -e /proc/$smbpid ];do sleep 1; done
+while [ -e /proc/$smbpid ]; do sleep 1; done
 echo "Samba server should now be shut down"
 #Clean up temporary directory on job exit.
 rm -r ${JOB_TMP_DIR}
