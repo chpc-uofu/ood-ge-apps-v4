@@ -16,18 +16,11 @@ attributes:
     value: |
       "<%= gpu_data.to_json %>"
       
-  cluster:
-    widget: select
-    options:
-      <%- CustomQueues.clusters.each do |g| %>
-      - "<%= g %>"
-      <%- end %>
-<% IO.foreach(template_root+"friscos_v2") do |line| %>
-<%= line %>
-<% end %>
-<% IO.foreach(template_root+"cluster-help") do |line| %>
-<%= line %>
-<% end %>    
+  cluster: 
+    widget: "text_field"
+    label: "Cluster"
+    value: "notchpeak"
+    
   custom_accpart:
     widget: select
     options:
@@ -72,6 +65,7 @@ attributes:
       - ["allenai/OLMo-2-0325-32B-Instruct"]
       - ["deepseek-ai/DeepSeek-R1"]
       - ["deepseek-ai/DeepSeek-V3"]
+      - ["openai/gpt-oss-20b"]
     required: true  
   
   task_widget:

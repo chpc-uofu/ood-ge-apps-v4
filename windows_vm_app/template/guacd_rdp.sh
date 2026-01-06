@@ -4,8 +4,8 @@ module load apptainer/1.4.1
 module load nodejs/22.4.0
 
 GUAC_DIR="/uufs/chpc.utah.edu/sys/installdir/r8/apache_guacamole"
-export API_SESSION_TIMEOUT=600
-export SESSION_TIMEOUT=600
+# export API_SESSION_TIMEOUT=1200
+# export SESSION_TIMEOUT=1200
 echo "GUACD_RDP.SH:  launching guacd:..."
 apptainer run ${GUAC_DIR}/guacd_latest.sif &
 # Load in a while loop so if the container is killed, another one will start up
