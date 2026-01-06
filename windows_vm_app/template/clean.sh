@@ -1,3 +1,6 @@
+# Clean up temporary directory on job exit.
+rm -r ${JOB_TMP_DIR}
+
 # shutdown samba server cleanly so temp files can be removed
 # Samba says "The safe way to terminate an smbd is to send it a SIGTERM (-15) signal and wait for it to die on its own"
 # echo "Shutting down samba server"
@@ -10,6 +13,4 @@
 #    echo "killed ${p}"
 # done
 # echo "Samba server should now be shut down"
-#Clean up temporary directory on job exit.
-# rm -r ${JOB_TMP_DIR}
 
