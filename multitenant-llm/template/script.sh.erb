@@ -15,4 +15,4 @@ mkdir -p <%= context.scratch_dir %>
 # launch Ollama - theoretically we don't need the & at the end since this is a separate job now.
 #./start_vllm_server.sh $port $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log 
 #--host=should be IP
-apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind <%= context.scratch_dir %>:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm-0.8.5p1.sif --host=0.0.0.0 --port=$port --model=${ollama_models}${ollama_model} --task=<%= context.task_widget %> >& llm.log
+apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind <%= context.scratch_dir %>:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link --host=0.0.0.0 --port=$port --model=${ollama_models}${ollama_model} --task=<%= context.task_widget %> >& llm.log

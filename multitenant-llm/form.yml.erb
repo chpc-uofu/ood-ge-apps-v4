@@ -1,5 +1,5 @@
 <%
-app_name = "Multitenant Ollama"
+app_name = "Multitenant VLLM Server"
 template_root = "/var/www/ood/apps/templates/"
 gpu_data = {
   gpu_partitions: CustomGPUPartitions.gpu_partitions,
@@ -152,14 +152,14 @@ attributes:
     label: "Card Preset"
     options:
       - [
-          "Default Ollama API (Jupyter/Python)", 0,
+          "Default VLLM API (Jupyter/Python)", 0,
           data-set-mt-delivery: "sys/multitenant-delivery_default",
-          data-set-mt-appname: "Ollama_API"
+          data-set-mt-appname: "VLLM_API"
         ]
       - [
           "Code Generation (Code Server + Cline)", 1,
           data-set-mt-delivery: "sys/multitenant-delivery_default",
-          data-set-mt-appname: "Ollama_Code"
+          data-set-mt-appname: "VLLM_Code"
         ]
       - [
           "Debug", 2,

@@ -23,7 +23,7 @@ export ollama_url="http://$(hostname -I | cut -d ' ' -f 1):${port}"
 export ollama_models=$OLLAMA_MODELS
 
 # Set Ollama environment variables
-export OLLAMA_HOST=$ollama_url
+export VLLM_HOST=$ollama_url
 export OLLAMA_ORIGINS="*"
 export OLLAMA_NOHISTORY=1
 export OLLAMA_SCHED_SPREAD=1
