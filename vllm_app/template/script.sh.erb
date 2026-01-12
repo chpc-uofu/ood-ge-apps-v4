@@ -18,11 +18,10 @@ export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
-export TASK_CHOICE=<%= context.task_widget %>
 
 echo LLM port is $nimport, jupyter port is $port
 <%- if context.llm == "ollama" -%>
-./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR $TASK_CHOICE >& llm.log &
+./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR  >& llm.log &
 <%- elsif context.llm == "vLLM" -%>
 ./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
 <%- end -%>

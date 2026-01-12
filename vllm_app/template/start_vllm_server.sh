@@ -5,7 +5,7 @@ echo Starting vLLM on port $1
 set -x
 
 #need to create user-specified scratch dir if it does not already exist
-echo $SCRATCH_DIR $TASK_CHOICE
+echo $SCRATCH_DIR 
 # mkdir -p $SCRATCH_DIR
 # export HUGGINGFACE_HUB_CACHE=~/hh_cache
 # mkdir -p $HUGGINGFACE_HUB_CACHE
