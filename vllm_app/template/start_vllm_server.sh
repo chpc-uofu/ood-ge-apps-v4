@@ -17,7 +17,14 @@ echo $SCRATCH_DIR $TASK_CHOICE
 # PROBLEM - so far there does not seem to be a one size fits all way to get VLLM to use a specified
 # cache dir. This snippet works for HF auth models but not others:
 # --env HF_HOME=/root/.cache/huggingface --bind ${SCRATCH_DIR}:/root/.cache/huggingface
+
+# 1-12-26 - VLLM now requires a chat template file for models that do chat. This is a separate file so we want
+# to use it if we have one.
+if [ -e $MODEL/chat_template.jinja ]; then
 apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind ${SCRATCH_DIR}:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link $MODEL  --host=localhost --port=$nimport --chat-template $MODEL/chat_template.jinja
+else
+apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind ${SCRATCH_DIR}:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link $MODEL  --host=localhost --port=$nimport 
+fi
 # --hf-token=$HUGGINGFACE_TOKEN
 # --download_dir=$SCRATCH_DIR 
 # --task $TASK_CHOICE
