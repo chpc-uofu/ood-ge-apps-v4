@@ -74,8 +74,8 @@ export ws_console_fd=$SPANK_ISO_NETNS_LISTENING_FD_1
 export ws_console_port=$SPANK_ISO_NETNS_LISTENING_PORT_1
 
 # we want to use memory parameter in qemu startup line
-export requested_mem=$((SLURM_MEM_PER_NODE - 16))
-echo "requested_mem after -1 = ${requested_mem}"
+export requested_mem=$((SLURM_MEM_PER_NODE - 16384))
+echo "requested_mem after 16G overhead subtracted = ${requested_mem}"
 export requested_cpus=$SLURM_NTASKS
 
 # For tlsproxy_start.sh
