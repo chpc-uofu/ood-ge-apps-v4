@@ -49,6 +49,18 @@ cd "${HOME}"
 
 # List available kernels for debugging purposes
 #set -x
+
+#check if jupyter exists in user env
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found in user env"
+else export PATH=$HOME/.local/bin:$PATH
+fi
+#Check again, if we don't find it after this we give up.
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found at second time of asking"
+else exit 1
+fi
+
 jupyter kernelspec list
 { set +x; } 2>/dev/null
 echo "TTT - $(date)"

@@ -14,18 +14,6 @@ attributes:
     cacheable: false
     value: |
       "<%= gpu_data.to_json %>"
-  llm:
-    widget: select
-    label: Large Language Model Servers (LLM)
-    help: "Select the microservice you want to run."
-    # I should be able to use the two fields here
-    options:
-#      - [ "ollama server", "ollama server"
-#      ]
-#      - [ "ollama", "ollama"
-#      ]
-      - [ "vLLM", "vLLM"
-        ]
   
   llmmodel:
     widget: select
@@ -159,7 +147,6 @@ attributes:
 <% end %>   
 
 form:
-  - llm
   - llmmodel
   - scratch_dir
   - huggingfacetoken
