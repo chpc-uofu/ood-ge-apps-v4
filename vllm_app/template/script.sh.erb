@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+<%- if context.python == "custom" -%>
+  <%= context.custom_environment.gsub /\r\n?/, "\n" %>
+<%- else -%>
   module load <%= context.python %>
+<%- end -%>
 # additional environment
 <%- if context.additional_environment != "" -%>
   <%= context.additional_environment.gsub /\r\n?/, "\n" %>
 <%- end -%>
 
 # debugging info
-module load genai
 module load apptainer/1.4.1
 apptainer --version
 module list
@@ -20,11 +23,7 @@ echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
 
 echo LLM port is $nimport, jupyter port is $port
-<%- if context.llm == "ollama" -%>
-./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR  >& llm.log &
-<%- elsif context.llm == "vLLM" -%>
 ./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
-<%- end -%>
 
 #source_helpers
 #set -x
