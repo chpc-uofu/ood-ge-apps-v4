@@ -67,11 +67,6 @@ print("Completion result:", completion)
 
 <%- elsif mt_appname == "VLLM_Code" -%>
 
-Make sure you have the Cline extension installed within Code Server. Use the following parameters to configure Cline:
-
-<strong>Use your own API key</strong><br>
-<strong>API Provider:</strong> <code>VLLM</code><br>
-<strong>Use custom base URL:</strong> &#10003;<br>
 <strong>Base URL:</strong> <code><%= ollama_url.to_s.gsub(":",'&#x3A;') %></code><br>
 <strong>Model:</strong> <code><%= ollama_model %></code><br>
 
