@@ -85,24 +85,6 @@ attributes:
     widget: 'select'
     options:
       - [
-          'No Multitenancy', 'none',
-          data-set-mt-method: 'form',
-          data-set-mt-delivery-select: 0,
-          data-set-client-group: <%= CurrentUser.group_names[3].to_s %>,
-          data-hide-mt-method: true,
-          data-hide-mt-delivery-select: true,
-          data-hide-client-group: true,
-        ]
-      - [
-          'My User Only', 'user',
-          data-set-mt-method: 'form',
-          data-set-mt-delivery-select: 0,
-          data-set-client-group: <%= CurrentUser.group_names[3].to_s %>,         
-          data-hide-mt-method: true,
-          data-hide-mt-delivery-select: true,
-          data-hide-client-group: true,
-        ]
-      - [
           'Other Users', 'mt',
           data-set-mt-delivery-select: 0,
           data-hide-mt-method: false,
@@ -127,11 +109,6 @@ attributes:
       What type of view do you want your users to see?
     widget: select
     options:
-      - [
-          "Form View Only", "form",
-          data-hide-mt-delivery-select: true,
-          data-set-mt-delivery-select: 0,
-        ]
       - [
           "Card + Form View", "card",
           data-hide-mt-delivery-select: false,
