@@ -16,7 +16,7 @@ mkdir -p <%= context.scratch_dir %>
 #./start_vllm_server.sh $port $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log 
 #--host=should be IP
 if [ -e ${ollama_models}${ollama_model}/chat_template.jinja ]; then
-	apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind <%= context.scratch_dir %>:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link ${ollama_models}${ollama_model} --host=0.0.0.0 --port=$port --chat-template $MODEL/chat_template.jinja >& llm.log
+	apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind <%= context.scratch_dir %>:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link ${ollama_models}${ollama_model} --host=0.0.0.0 --port=$port --chat-template ${ollama_models}${ollama_model}/chat_template.jinja >& llm.log
 else
 	apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind <%= context.scratch_dir %>:/root/.cache  /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link ${ollama_models}${ollama_model} --host=0.0.0.0 --port=$port >& llm.log
 fi
