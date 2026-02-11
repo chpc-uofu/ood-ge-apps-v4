@@ -67,6 +67,16 @@ attributes:
     label: Huggingface token (required for some models)
     help: Check SessionID and then llm.log if your model fails to start
 
+  quantization:
+    widget: select
+    label: Quantization
+    help: Decrease GPU space required for a model with quantization. Can result in worse performance.
+    options:
+      - ["None","None"]
+      - ["awq","awq"]            
+      - ["fp8","fp8"]
+      - ["int4", "int4"]
+    
   interface:
     widget: select
     label: <%= app_name %> interface
@@ -148,6 +158,7 @@ attributes:
 
 form:
   - llmmodel
+  - quantization
   - scratch_dir
   - huggingfacetoken
   - interface

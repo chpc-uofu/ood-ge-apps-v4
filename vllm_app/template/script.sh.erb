@@ -21,9 +21,13 @@ export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
+if [[ <%= context.quantization %> != "None" ]]; then
+  QUANT_STRING=" --quantization <%= context.quantization %>"
+else
+  QUANT_STRING=""
 
-echo LLM port is $nimport, jupyter port is $port
-./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
+echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING
+./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN $QUANT_STRING >& llm.log &
 
 #source_helpers
 #set -x
