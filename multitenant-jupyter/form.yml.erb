@@ -54,7 +54,8 @@ attributes:
       <%- end -%>
     cacheable: false
   <%- end -%>
-  version:
+
+  python:
     widget: select
     label: <%= app_name %> Python version
     help: "This defines the Python distribution of <%= app_name %> you want to start."
@@ -90,7 +91,7 @@ attributes:
         module load python/3.10.3
 
 form:
-  - version
+  - python
   - custom_environment        
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   - ollama_interface
