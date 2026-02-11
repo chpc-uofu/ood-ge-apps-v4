@@ -25,6 +25,7 @@ if [[ <%= context.quantization %> != "None" ]]; then
   QUANT_STRING=" --quantization <%= context.quantization %>"
 else
   QUANT_STRING=""
+fi
 
 echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING
 ./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN $QUANT_STRING >& llm.log &
