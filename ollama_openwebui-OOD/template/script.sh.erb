@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+# set -e
+
+echo "=== Open WebUI + Ollama Starting ==="
+
+# Load modules
+module purge
+module load ollama/0.15.5
+module load openwebui/0.7.2
+
+port_webui=${WEBUI_PORT}
+port_ollama=${OLLAMA_PORT}
+host_fqdn=${host}
+host_short=$(hostname -s)
+# Read connection info from before.sh
+echo "Host FQDN: ${host_fqdn}"
+echo "Host SHORT: ${host_short}"
+echo "WebUI Port: ${port_webui}"
+echo "Ollama Port: ${port_ollama}"
+
+# User configuration from form
+USER_OPENWEBUI_DATA_DIR="<%= context.openwebui_data_dir.to_s.strip %>"
+
+# System-wide Ollama models directory
+# SYSTEM_MODEL_DIR="/scratch/general/vast/app-repo/huggingface"
+SYSTEM_MODEL_DIR="/scratch/general/vast/app-repo/ollama"
+
+# Create user directories
+mkdir -p "${USER_OPENWEBUI_DATA_DIR}"
+
+# not allowing this yet
+# ============ MODEL SELECTION LOGIC ============
+# if [ "${USE_SYSTEM_MODEL}" = "yes" ]; then
+  export OLLAMA_MODELS="${SYSTEM_MODEL_DIR}"
+  echo "Using system-wide models from: ${OLLAMA_MODELS}"
+# else
+#   mkdir -p "${USER_MODEL_DIR}"
+#   export OLLAMA_MODELS="${USER_MODEL_DIR}"
+#   echo "Using user's models from: ${OLLAMA_MODELS}"
+# fi
+
+echo ""
+echo "=========================================="
+echo "Configuration:"
+echo "  Models Dir: ${OLLAMA_MODELS}"
+echo "  WebUI Data: ${USER_OPENWEBUI_DATA_DIR}"
+echo "=========================================="
+echo ""
+
+# Set Ollama to listen on localhost only
+export OLLAMA_HOST="127.0.0.1:${port_ollama}"
+
+# Start Ollama server
+echo "Starting Ollama on ${OLLAMA_HOST}..."
+ollama serve > "${PWD}/ollama.log" 2>&1 &
+OLLAMA_PID=$!
+
+# Cleanup function
+cleanup() {
+  echo "Cleaning up..."
+  kill "${OLLAMA_PID}" 2>/dev/null || true
+  kill "${WEBUI_PID}" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Wait for Ollama to be ready
+echo "Waiting for Ollama to start..."
+for i in $(seq 1 60); do
+  if curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+    echo "Ollama is ready!"
+    break
+  fi
+  if ! kill -0 "${OLLAMA_PID}" 2>/dev/null; then
+    echo "ERROR: Ollama process died. Check ollama.log for details."
+    cat "${PWD}/ollama.log"
+    exit 1
+  fi
+  [ $((i % 10)) -eq 0 ] && echo "Still waiting... (${i}/60 seconds)"
+  sleep 1
+done
+
+if ! curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+  echo "ERROR: Ollama failed to start within 60 seconds."
+  cat "${PWD}/ollama.log"
+  exit 1
+fi
+
+# Pull model if requested
+#if [ -n "${PULL_NEW_MODEL}" ]; then
+#  echo "Pulling model: ${PULL_NEW_MODEL}..."
+#  ollama pull "${PULL_NEW_MODEL}" || {
+#    echo "WARNING: Failed to pull model ${PULL_NEW_MODEL}"
+#  }
+#fi
+
+# List available models
+echo ""
+echo "Available models:"
+ollama list 2>/dev/null || echo "  (none found)"
+echo ""
+
+# Configure Open WebUI environment
+export OLLAMA_BASE_URL="http://127.0.0.1:${port_ollama}"
+export OPENWEBUI_DATA_DIR="${USER_OPENWEBUI_DATA_DIR}"
+export OPENWEBUI_PORT="${port_webui}"
+export WEBUI_AUTH=true
+export ENABLE_SIGNUP=true
+export WEBUI_SECRET_KEY=$(openssl rand -hex 32 2>/dev/null || echo "fallback-secret-key-$(date +%s)")
+export ENABLE_PERSISTENT_CONFIG=false
+
+# Banner/name change only
+export WEBUI_NAME="🦙 𝗢𝗟𝗟𝗔𝗠𝗔 𝗕𝗔𝗖𝗞𝗘𝗡𝗗"
+export APPTAINERENV_WEBUI_NAME="$WEBUI_NAME"
+export SINGULARITYENV_WEBUI_NAME="$WEBUI_NAME"
+export WEBUI_BANNERS='[
+  {
+    "id": "ollama",
+    "type": "info",
+    "title": "",
+    "content": "🦙 𝗢𝗟𝗟𝗔𝗠𝗔 𝗕𝗔𝗖𝗞𝗘𝗡𝗗",
+    "dismissible": false,
+    "timestamp": 1
+  }
+]'
+export APPTAINERENV_WEBUI_BANNERS="$WEBUI_BANNERS"
+export SINGULARITYENV_WEBUI_BANNERS="$WEBUI_BANNERS"
+
+# Write connection info for the view page
+cat > "${PWD}/connection.yml" << EOF
+---
+cluster: "<%= context.cluster %>"
+host: "${host_fqdn}"
+port: "${port_webui}"
+ollama_port: "${port_ollama}"
+backend: "ollama"
+EOF
+
+echo ""
+echo "=============================================="
+echo "  Open WebUI + Ollama is starting!"
+echo "  "
+echo "  Use SSH tunnel to connect:"
+echo "  ssh -N -L ${port_webui}:127.0.0.1:${port_webui} $(whoami)@${host_short}"
+echo "  "
+echo "  Then open: http://127.0.0.1:${port_webui}/"
+echo "  "
+echo "  Models directory: ${OLLAMA_MODELS}"
+echo "=============================================="
+echo ""
+
+# Start Open WebUI
+cd "${USER_OPENWEBUI_DATA_DIR}"
+exec openwebui
+

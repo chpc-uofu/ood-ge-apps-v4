@@ -1,0 +1,6 @@
+---
+name: "Ollama (Open WebUI)"
+category: "Interactive Apps"
+subcategory: "AI"
+role: "batch_connect"
+description: "Launch Open WebUI connected to an Ollama server for local LLM inference."

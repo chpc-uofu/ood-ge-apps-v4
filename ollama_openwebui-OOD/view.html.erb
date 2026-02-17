@@ -1,0 +1,857 @@
+<%#
+  Ollama + Open WebUI view with SSH tunnel instructions
+%>
+<%
+require "yaml"
+
+def s(x); (x || "").to_s; end
+def present?(x); !s(x).strip.empty?; end
+
+# Find newest output dir for this dev app
+def find_staged_root(app_dirname)
+  base = File.join(
+    ENV["HOME"].to_s,
+    "ondemand", "data", "sys", "dashboard",
+    "batch_connect", "dev", app_dirname, "output"
+  )
+  candidates = Dir.glob(File.join(base, "*")).select { |d| File.directory?(d) }
+  candidates.empty? ? "" : candidates.max_by { |d| File.mtime(d) }.to_s
+end
+
+app_name = "ollama_openwebui-OOD"
+sroot = find_staged_root(app_name)
+
+host = ""
+port = ""
+
+if !sroot.empty?
+  cpath = File.join(sroot, "connection.yml")
+  if File.exist?(cpath)
+    conn = YAML.safe_load(File.read(cpath)) || {}
+    host = s(conn["host"])
+    port = s(conn["port"])
+    cluster = s(conn["cluster"])
+  end
+end
+
+ready = present?(host) && present?(port)
+
+# Extract short hostname (remove domain)
+host_short = host.split('.').first.to_s
+
+# Get username
+username = ENV["USER"] || "username"
+
+# SSH tunnel command
+tunnel_cmd = "ssh -N -L #{port}:127.0.0.1:#{port} -J #{username}@#{cluster}.chpc.utah.edu #{username}@#{host_short}"
+local_url = "http://127.0.0.1:#{port}/"
+%>
+
+<% unless ready %>
+  <meta http-equiv="refresh" content="3">
+<% end %>
+
+<style>
+  .owui-container {
+    max-width: 700px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  
+  .owui-header {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    color: white;
+  }
+  
+  .owui-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 600;
+  }
+  
+  .owui-header .subtitle {
+    opacity: 0.85;
+    font-size: 15px;
+    margin: 0;
+  }
+  
+  .owui-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: rgba(34, 197, 94, 0.15);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4ade80;
+  }
+  
+  .owui-status .dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .owui-model-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #93c5fd;
+  }
+  
+  .owui-help-link {
+    margin-top: 16px;
+  }
+  
+  .owui-btn-help {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .owui-btn-help:hover {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    text-decoration: none;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  
+  .owui-step {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  
+  .owui-step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .owui-step-number {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .owui-step.step-success .owui-step-number {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  }
+  
+  .owui-step-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .owui-step-body {
+    padding: 20px;
+  }
+  
+  .owui-step-body p {
+    margin: 0 0 14px 0;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .owui-code {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
+    font-size: 15px;
+    overflow-x: auto;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  
+  .owui-code code {
+    white-space: nowrap;
+    font-size: 15px;
+  }
+  
+  .owui-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+  }
+  
+  .owui-btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  
+  .owui-btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .owui-btn-primary:hover {
+    background: #2563eb;
+  }
+  
+  .owui-btn-success {
+    background: #22c55e;
+    color: white;
+  }
+  
+  .owui-btn-success:hover {
+    background: #16a34a;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .owui-btn-outline {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .owui-btn-outline:hover {
+    background: #f8fafc;
+    color: #475569;
+  }
+  
+  .owui-btn-outline.copied {
+    background: #dcfce7;
+    color: #16a34a;
+    border-color: #bbf7d0;
+  }
+  
+  .owui-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .owui-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #92400e;
+  }
+  
+  .owui-tip i {
+    color: #f59e0b;
+    margin-top: 1px;
+  }
+  
+  .owui-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #93c5fd;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #1e40af;
+  }
+  
+  .owui-warning i {
+    color: #3b82f6;
+    font-size: 18px;
+    margin-top: 2px;
+  }
+  
+  .owui-warning strong {
+    color: #1e3a8a;
+    font-size: 14px;
+  }
+  
+  .owui-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e40af;
+  }
+  
+  .owui-info i {
+    color: #3b82f6;
+    margin-top: 1px;
+  }
+  
+  .owui-loading {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+  }
+  
+  .owui-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .owui-loading h3 {
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-size: 18px;
+  }
+  
+  .owui-loading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  .owui-connection-details {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+  }
+  
+  .owui-detail {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .owui-detail-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+  
+  .owui-detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    font-family: "SF Mono", monospace;
+  }
+  
+  .owui-credits {
+    text-align: center;
+    padding: 24px 20px;
+    margin-top: 24px;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .owui-credits p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+  }
+  
+  .owui-credits a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .owui-credits a:hover {
+    text-decoration: underline;
+    color: #2563eb;
+  }
+  
+  .owui-credits strong {
+    color: #475569;
+  }
+  
+  .owui-credits-sub {
+    margin-top: 6px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+  }
+</style>
+
+<div class="owui-container mt-4">
+  <% if ready %>
+    <!-- Header -->
+    <div class="owui-header">
+      <h2>🦙 Ollama + Open WebUI</h2>
+      <p class="subtitle">Your AI chat session is ready</p>
+      <div class="owui-status">
+        <span class="dot"></span>
+        Running on <%= host_short %>
+      </div>
+      <div class="owui-help-link">
+        <button onclick="openHelpWindow()" class="owui-btn-help">
+          <i class="fa fa-question-circle"></i> Help & Documentation
+        </button>
+      </div>
+    </div>
+    
+    <!-- Step 1: SSH Tunnel -->
+    <div class="owui-step">
+      <div class="owui-step-header">
+        <div class="owui-step-number">Step 1</div>
+        <h4>Create SSH Tunnel</h4>
+      </div>
+      <div class="owui-step-body">
+        <p>Open a terminal on your <strong>local computer</strong> and run this command:</p>
+        <div class="owui-code">
+          <code id="tunnel-cmd"><%= tunnel_cmd %></code>
+        </div>
+        <div class="owui-actions">
+          <button class="owui-btn owui-btn-outline" onclick="copyText('tunnel-cmd', this)">
+            <i class="fa fa-copy"></i> Copy Command
+          </button>
+        </div>
+        <div class="owui-tip">
+          <i class="fa fa-lightbulb-o"></i>
+          <span>You may need to enter your password twice (once for the jump host, once for the compute node).</span>
+        </div>
+        <div class="owui-warning">
+          <i class="fa fa-hand-paper-o"></i>
+          <div>
+            <strong>Keep this terminal window open!</strong><br>
+            After entering your password, the terminal will appear to hang with no output — this is normal and means the tunnel is working. Do not close it! The tunnel stays active only while this terminal is open.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Open Browser -->
+    <div class="owui-step step-success">
+      <div class="owui-step-header">
+        <div class="owui-step-number">Step 2</div>
+        <h4>Access Open WebUI</h4>
+      </div>
+      <div class="owui-step-body">
+        <p>Once the tunnel is running, click the button below to launch Open WebUI:</p>
+        <div class="owui-actions" style="margin-bottom: 16px;">
+          <a href="<%= local_url %>" target="_blank" class="owui-btn owui-btn-success owui-btn-lg">
+            <i class="fa fa-external-link"></i> Launch Open WebUI
+          </a>
+        </div>
+        <p style="margin-bottom: 8px; color: #64748b; font-size: 13px;">Or copy this URL to open manually:</p>
+        <div class="owui-code">
+          <code id="local-url"><%= local_url %></code>
+        </div>
+        <div class="owui-actions">
+          <button class="owui-btn owui-btn-outline" onclick="copyText('local-url', this)">
+            <i class="fa fa-copy"></i> Copy URL
+          </button>
+        </div>
+        <div class="owui-info" style="margin-top: 14px;">
+          <i class="fa fa-info-circle"></i>
+          <span>First time? You'll create a local account when you first access Open WebUI. This is separate from your cluster login.</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Connection Details -->
+    <div class="owui-connection-details">
+      <div class="owui-detail">
+        <div class="owui-detail-label">Node</div>
+        <div class="owui-detail-value"><%= host_short %></div>
+      </div>
+      <div class="owui-detail">
+        <div class="owui-detail-label">Port</div>
+        <div class="owui-detail-value"><%= port %></div>
+      </div>
+      <div class="owui-detail">
+        <div class="owui-detail-label">User</div>
+        <div class="owui-detail-value"><%= username %></div>
+      </div>
+    </div>
+    
+    <!-- Credits -->
+    <div class="owui-credits">
+      <p>
+        Created by 
+        <a href="https://rci.stonybrook.edu/HPC/team/arshad-mehmood" target="_blank">A. Mehmood</a>, 
+        <a href="https://rci.stonybrook.edu/HPC/team/david-carlson" target="_blank">D. Carlson</a>, 
+        <a href="https://rci.stonybrook.edu/HPC/team/feng-zhang" target="_blank">F. Zhang</a>, 
+        and <a href="https://www.anthropic.com/claude" target="_blank">Claude AI</a>
+      </p>
+      <p class="owui-credits-sub">
+        Stony Brook University Research Computing · 2025
+      </p>
+    </div>
+    
+  <% else %>
+    <!-- Loading State -->
+    <div class="owui-header">
+      <h2>🦙 Ollama + Open WebUI</h2>
+      <p class="subtitle">Local AI Chat Interface</p>
+    </div>
+    
+    <div class="owui-loading">
+      <div class="owui-spinner"></div>
+      <h3>Starting your session...</h3>
+      <p>This page will update automatically when ready.</p>
+    </div>
+  <% end %>
+</div>
+
+<script>
+function copyText(elementId, button) {
+  const text = document.getElementById(elementId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const icon = button.querySelector('i');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fa fa-check"></i> Copied!';
+    button.classList.add('copied');
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+      button.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function openHelpWindow() {
+  var helpHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ollama + Open WebUI - Help</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; line-height: 1.6; color: #334155; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; margin-bottom: 30px; color: white; }
+    .header h1 { margin: 0 0 10px 0; font-size: 32px; }
+    .header p { opacity: 0.85; margin: 0; }
+    .section { background: white; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .section-header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; cursor: pointer; }
+    .section-header:hover { background: #f1f5f9; }
+    .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .section-icon.green { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .section-icon.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .section-icon.orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .section-icon.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    .section-title { flex: 1; }
+    .section-title h2 { margin: 0; font-size: 18px; color: #1e293b; }
+    .section-title p { margin: 4px 0 0 0; font-size: 14px; color: #64748b; }
+    .section-body { padding: 24px; display: none; }
+    .section.open .section-body { display: block; }
+    .section-body h3 { color: #1e293b; font-size: 16px; margin: 24px 0 12px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+    .section-body h3:first-child { margin-top: 0; }
+    .section-body h4 { color: #334155; font-size: 15px; margin: 20px 0 10px 0; }
+    .section-body p { color: #475569; margin: 0 0 14px 0; }
+    .section-body ul, .section-body ol { color: #475569; padding-left: 24px; margin: 0 0 14px 0; }
+    .section-body li { margin-bottom: 8px; }
+    .code { background: #1e293b; color: #e2e8f0; padding: 14px 18px; border-radius: 8px; font-family: "SF Mono", monospace; font-size: 13px; overflow-x: auto; margin: 12px 0 16px 0; white-space: pre-wrap; word-break: break-all; }
+    .inline-code { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-family: "SF Mono", monospace; font-size: 13px; color: #7c3aed; }
+    .box { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: 8px; margin: 16px 0; font-size: 14px; }
+    .box i { font-size: 18px; margin-top: 2px; }
+    .box.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .box.info i { color: #3b82f6; }
+    .box.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .box.warning i { color: #f59e0b; }
+    .box.tip { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .box.tip i { color: #22c55e; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    th { background: #f1f5f9; padding: 12px; text-align: left; font-weight: 600; color: #1e293b; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 12px; border-bottom: 1px solid #e5e7eb; color: #475569; }
+    .footer { text-align: center; padding: 30px 20px; color: #64748b; font-size: 13px; }
+    .footer a { color: #3b82f6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🦙 Ollama + Open WebUI</h1>
+      <p>Complete Guide & Documentation</p>
+    </div>
+    
+    <div class="section open">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-icon"><i class="fa fa-play"></i></div>
+        <div class="section-title"><h2>Getting Started</h2><p>Quick overview of launching your first session</p></div>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="section-body">
+        <h3>What is this app?</h3>
+        <p>This app launches <strong>Open WebUI</strong> (a beautiful chat interface) connected to <strong>Ollama</strong> (a local LLM runtime) on HPC nodes. Chat with models like Llama, Mistral, Phi, and more!</p>
+        <h3>Quick Start</h3>
+        <ol>
+          <li><strong>Select a model</strong> — Choose a system-wide model or enter your own</li>
+          <li><strong>Configure resources</strong> — Select queue, hours, memory, and GPUs</li>
+          <li><strong>Launch the job</strong> — Click "Launch" and wait for it to start</li>
+          <li><strong>Create SSH tunnel</strong> — Run the command shown on the session page</li>
+          <li><strong>Open the UI</strong> — Click "Launch Open WebUI" and start chatting!</li>
+        </ol>
+        <div class="box info"><i class="fa fa-info-circle"></i><div><strong>First time?</strong> You'll create a local account when you first access Open WebUI. This is separate from your cluster login.</div></div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-icon green"><i class="fa fa-terminal"></i></div>
+        <div class="section-title"><h2>SSH Port Forwarding</h2><p>How to connect to your session</p></div>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="section-body">
+        <h3>Why SSH Tunnel?</h3>
+        <p>Open WebUI runs on a compute node that isn't directly accessible from your browser. SSH port forwarding creates a secure tunnel.</p>
+        <h3>Step-by-Step</h3>
+        <h4>1. Open a terminal on your local computer</h4>
+        <ul>
+          <li><strong>macOS:</strong> Terminal (Applications → Utilities → Terminal)</li>
+          <li><strong>Linux:</strong> Your terminal emulator</li>
+          <li><strong>Windows:</strong> PowerShell, Command Prompt, or PuTTY</li>
+        </ul>
+        <h4>2. Run the SSH command</h4>
+        <p>Copy the command from the session page:</p>
+        <div class="code">ssh -N -L PORT:127.0.0.1:PORT -J user@130.245.181.10 user@b40xXXX</div>
+        <h4>3. Enter your password</h4>
+        <div class="box warning"><i class="fa fa-exclamation-triangle"></i><div><strong>You may need to enter your password twice</strong> — once for login02, once for the compute node.</div></div>
+        <h4>4. Keep terminal open!</h4>
+        <p>After entering your password, the terminal will appear to hang — <strong>this is normal!</strong> Don't close it.</p>
+        <h4>5. Open your browser</h4>
+        <p>Navigate to <span class="inline-code">http://127.0.0.1:PORT/</span></p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-icon purple"><i class="fa fa-cube"></i></div>
+        <div class="section-title"><h2>Working with Models</h2><p>System models vs your own models</p></div>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="section-body">
+        <h3>Model Selection</h3>
+        <p>In the form, you choose between:</p>
+        <div class="box tip"><i class="fa fa-check-circle"></i><div><strong>Yes - Use system models:</strong> All pre-downloaded system models will be available in Open WebUI's model dropdown.</div></div>
+        <div class="box info"><i class="fa fa-info-circle"></i><div><strong>No - Use my own models:</strong> Point to your own Ollama models directory. Your downloaded models will appear in Open WebUI.</div></div>
+        
+        <h3>Available System Models</h3>
+        <table>
+          <tr><th>Model</th><th>Size</th><th>Best For</th></tr>
+          <tr><td>llama3.2:1b</td><td>~1.3 GB</td><td>Fast responses, simple tasks</td></tr>
+          <tr><td>llama3.2:3b</td><td>~2.0 GB</td><td>Balanced speed/quality</td></tr>
+          <tr><td>phi3:mini</td><td>~2.3 GB</td><td>Efficient, good reasoning</td></tr>
+          <tr><td>qwen2.5:0.5b</td><td>~400 MB</td><td>Ultra-fast, lightweight</td></tr>
+          <tr><td>mistral:7b</td><td>~4.1 GB</td><td>High quality, powerful</td></tr>
+        </table>
+        
+        <h3>Using Your Own Models</h3>
+        <p>To download models to your own directory:</p>
+        <div class="code">module load ollama/0.13.5
+
+# Set your models directory
+export OLLAMA_MODELS=/lustre/nvwulf/scratch/$USER/ollama_models
+mkdir -p $OLLAMA_MODELS
+
+# Start Ollama temporarily
+OLLAMA_HOST="127.0.0.1:11434" ollama serve &
+sleep 5
+
+# Pull the model you want
+ollama pull codellama:7b
+ollama pull mixtral:8x7b
+
+# Stop Ollama
+pkill ollama</div>
+        <p>Then in the form, select "No - Use my own models" and enter your models directory path.</p>
+        
+        <h3>Model Name Format</h3>
+        <p>Ollama model names follow this format:</p>
+        <ul>
+          <li><span class="inline-code">modelname:tag</span> — e.g., <span class="inline-code">llama3.2:1b</span></li>
+          <li><span class="inline-code">modelname</span> — uses default tag (usually "latest")</li>
+        </ul>
+        
+        <h3>Popular Models to Try</h3>
+        <ul>
+          <li><span class="inline-code">codellama:7b</span> — Code generation and explanation</li>
+          <li><span class="inline-code">mixtral:8x7b</span> — Powerful mixture-of-experts model</li>
+          <li><span class="inline-code">deepseek-coder:6.7b</span> — Excellent for coding tasks</li>
+          <li><span class="inline-code">neural-chat:7b</span> — Conversational AI</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-icon orange"><i class="fa fa-cog"></i></div>
+        <div class="section-title"><h2>Admin Guide (Only for HPC Admin)</h2><p>Adding system-wide models for all users</p></div>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="section-body">
+        <h3>System Model Directory</h3>
+        <p>System-wide Ollama models are stored in:</p>
+        <div class="code">/lustre/nvwulf/software/ollama/models</div>
+        
+        <h3>Adding a New System Model</h3>
+        <h4>Step 1: Download to scratch</h4>
+        <div class="code">module load ollama
+
+# Set temporary download location
+export OLLAMA_MODELS=/lustre/nvwulf/scratch/$USER/ollama_models
+mkdir -p $OLLAMA_MODELS
+
+# Start Ollama
+OLLAMA_HOST="127.0.0.1:11434" ollama serve &
+sleep 5
+
+# Pull the model
+ollama pull llama3.2:1b
+
+# Stop Ollama
+pkill ollama</div>
+        
+        <h4>Step 2: Copy to system directory</h4>
+        <div class="code"># Copy entire models directory
+sudo rsync -av /lustre/nvwulf/scratch/$USER/ollama_models/ /lustre/nvwulf/software/ollama/models
+
+# Set permissions
+sudo chmod -R a+rX /lustre/nvwulf/software/ollama/models</div>
+        
+        <h4>Step 3: Verify structure</h4>
+        <div class="code">ls -la /lustre/nvwulf/software/ollama/models/
+# Should show:
+# blobs/      - actual model weights
+# manifests/  - model metadata</div>
+        
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-icon red"><i class="fa fa-wrench"></i></div>
+        <div class="section-title"><h2>Troubleshooting</h2><p>Common issues and how to fix them</p></div>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="section-body">
+        <h3>Ollama fails to start</h3>
+        <ul>
+          <li>Check <span class="inline-code">ollama.log</span> in job output directory</li>
+          <li>Ensure you have enough memory allocated</li>
+          <li>Try a smaller model</li>
+        </ul>
+        
+        <h3>Model not found</h3>
+        <ul>
+          <li>If using system model: verify it's in the dropdown</li>
+          <li>If using your own: check <span class="inline-code">OLLAMA_MODELS</span> path is correct</li>
+          <li>Try pulling the model first using the "Pull new model" option</li>
+        </ul>
+        
+        <h3>SSH tunnel won't connect</h3>
+        <ul>
+          <li>Check job is still running in OOD dashboard</li>
+          <li>Verify correct port from session page</li>
+          <li>Try SSH to login02 first</li>
+        </ul>
+        
+        <h3>No models in Open WebUI</h3>
+        <ul>
+          <li>Wait a minute and refresh — Ollama may still be starting</li>
+          <li>Check <span class="inline-code">ollama.log</span> for errors</li>
+          <li>In Open WebUI, go to Settings → Connections and verify Ollama URL</li>
+        </ul>
+        
+        <h3>Slow responses</h3>
+        <ul>
+          <li>Use GPU queue instead of CPU</li>
+          <li>Try a smaller model (1b or 3b instead of 7b)</li>
+          <li>Check GPU is being utilized with <span class="inline-code">nvidia-smi</span></li>
+        </ul>
+        
+        <h3>Out of memory</h3>
+        <ul>
+          <li>Use a smaller model</li>
+          <li>Increase memory allocation in the form</li>
+          <li>For large models, ensure you have GPU with enough VRAM</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer">
+      Created by <a href="https://rci.stonybrook.edu/HPC/team/arshad-mehmood" target="_blank">A. Mehmood</a>, 
+      <a href="https://rci.stonybrook.edu/HPC/team/david-carlson" target="_blank">D. Carlson</a>, 
+      <a href="https://rci.stonybrook.edu/HPC/team/feng-zhang" target="_blank">F. Zhang</a>, 
+      and <a href="https://www.anthropic.com/claude" target="_blank">Claude AI</a>
+      · Stony Brook University Research Computing · 2025
+    </div>
+  </div>
+</body>
+</html>`;
+  
+  var helpWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+  helpWindow.document.write(helpHTML);
+  helpWindow.document.close();
+}
+</script>
+
