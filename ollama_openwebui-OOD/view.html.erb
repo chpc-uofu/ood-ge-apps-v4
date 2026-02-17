@@ -12,7 +12,7 @@ def find_staged_root(app_dirname)
   base = File.join(
     ENV["HOME"].to_s,
     "ondemand", "data", "sys", "dashboard",
-    "batch_connect", "dev", app_dirname, "output"
+    "batch_connect", "sys", app_dirname, "output"
   )
   candidates = Dir.glob(File.join(base, "*")).select { |d| File.directory?(d) }
   candidates.empty? ? "" : candidates.max_by { |d| File.mtime(d) }.to_s
