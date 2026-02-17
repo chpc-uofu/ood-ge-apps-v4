@@ -54,6 +54,7 @@ entries:
   multitenant-instruction: []
   multitenant-jupyter: []
   multitenant-llm: []
+  ollama_openwebui-OOD: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []
