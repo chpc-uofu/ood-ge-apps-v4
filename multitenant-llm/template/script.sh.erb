@@ -28,7 +28,6 @@ cat > vllm_config.yaml <<EOL
 model: ${ollama_models}${ollama_model}
 host: 0.0.0.0
 port: $port
-chat-template: ${ollama_models}${ollama_model}/chat_template.jinja
 api-key: $VLLM_API_KEY
 EOL
 fi
