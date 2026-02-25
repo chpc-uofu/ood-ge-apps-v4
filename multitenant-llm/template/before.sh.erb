@@ -14,6 +14,8 @@ export sessionid=<%= session.id %>
 export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
 # mkdir -p $OLLAMA_MODELS
 
+export VLLM_API_KEY=<%= context.api_key %>
+
 <%- if context.ollama_model -%>
 export ollama_model=<%= context.ollama_model %>
 <%- end -%>
