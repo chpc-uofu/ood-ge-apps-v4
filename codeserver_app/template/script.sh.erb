@@ -49,6 +49,7 @@ echo ""
 
 $CODE_SERVER \
     --auth="password" \
+    --password=$password \
     --bind-addr="0.0.0.0:${port}" \
     --disable-telemetry \
     --extensions-dir="$CODE_SERVER_DATAROOT/extensions" \
