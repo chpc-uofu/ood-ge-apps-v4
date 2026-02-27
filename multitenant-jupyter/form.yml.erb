@@ -46,23 +46,19 @@ attributes:
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
     label: "VLLM API Connection"
-    required: true
     widget: select
     options:
       <%- MultiTenant.specs.each do |key, value| %>
       - [ '<%= "#{value["accounting"]["mta"]} (Job ID: #{key})" %>', '<%= value["connection"]['ollama_url'] %>' ]
       <%- end -%>
-    cacheable: false
 
   api_key:
     label: "VLLM API Key"
-    required: true
     widget: select
     options:
       <%- MultiTenant.specs.each do |key, value| %>
       - [ '<%= "#{value["accounting"]["mta"]} (Job ID: #{key})" %>', '<%= value["connection"]['api_key'] %>' ]
       <%- end -%>
-    cacheable: false
   <%- end -%>
             
   python:
