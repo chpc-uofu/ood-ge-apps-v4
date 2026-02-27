@@ -12,7 +12,7 @@ echo $SCRATCH_DIR
 # Note we have to set HF_HOME to the directory inside the container which then is bound outside
 
 # Below line works with model=NousResearch/Meta-Llama-3-8B-Instruct
-# and SCRATCH_DIR=/scratch/general/vast/u6040150/vllm_cache
+# and SCRATCH_DIR=/scratch/general/vast/$USER/vllm_cache
 
 # PROBLEM - so far there does not seem to be a one size fits all way to get VLLM to use a specified
 # cache dir. This snippet works for HF auth models but not others:
