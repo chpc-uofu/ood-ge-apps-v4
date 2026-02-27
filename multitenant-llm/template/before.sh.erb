@@ -13,8 +13,11 @@ export sessionid=<%= session.id %>
 
 export OLLAMA_MODELS=/scratch/general/vast/app-repo/huggingface/
 # mkdir -p $OLLAMA_MODELS
-
-export VLLM_API_KEY=<%= context.api_key %>
+# Generate SHA1 encrypted password (requires OpenSSL installed)
+SALT="$(create_passwd 16)"
+password="$(create_passwd 16)"
+export VLLM_API_KEY="$(echo -n "${password}${SALT}" | openssl dgst -sha1 | awk '{print $NF}')"
+# export VLLM_API_KEY=<%= context.api_key %>
 
 <%- if context.ollama_model -%>
 export ollama_model=<%= context.ollama_model %>

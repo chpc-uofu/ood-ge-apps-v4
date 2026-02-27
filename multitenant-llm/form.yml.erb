@@ -68,12 +68,6 @@ attributes:
       - ["openai/gpt-oss-20b"]
     required: true  
 
-  api_key:
-    widget: "text_field"
-    label: "API Key"
-    value: ""
-    required: true
-
   scratch_dir:
     widget: "path_selector"
     label: Path to user scratch directory
@@ -149,7 +143,6 @@ attributes:
 form:
   - ollama_model
   - scratch_dir
-  - api_key
   - enable_multitenant
   - client_group
   - mt_method
