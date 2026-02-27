@@ -31,5 +31,5 @@ port: $port
 api-key: $VLLM_API_KEY
 EOL
 fi
-apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind /scratch/general/vast/u6040150/vllm_cache:/root/.cache,/scratch/general/vast/app-repo/huggingface /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link --config vllm_config.yaml >& llm.log
+apptainer run --nv -e --fakeroot --env HF_HOME=/root/.cache/ --bind ${OLLAMA_TMPDIR}:/root/.cache,/scratch/general/vast/app-repo/huggingface /uufs/chpc.utah.edu/sys/installdir/r8/vllm/vllm_current_cuda_sif_link --config vllm_config.yaml >& llm.log
 
