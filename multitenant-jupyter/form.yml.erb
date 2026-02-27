@@ -46,7 +46,7 @@ attributes:
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   ollama_interface:
     label: "VLLM API Connection"
-    required: false
+    required: true
     widget: select
     options:
       <%- MultiTenant.specs.each do |key, value| %>
@@ -55,6 +55,17 @@ attributes:
     cacheable: false
   <%- end -%>
 
+  api_key:
+    label: "VLLM API Key"
+    required: true
+    widget: select
+    options:
+      <%- MultiTenant.specs.each do |key, value| %>
+      - [ '<%= "#{value["accounting"]["mta"]} (Job ID: #{key})" %>', '<%= value["connection"]['api_key'] %>' ]
+      <%- end -%>
+    cacheable: false
+  <%- end -%>
+            
   python:
     widget: select
     label: <%= app_name %> Python version
@@ -95,6 +106,7 @@ form:
   - custom_environment        
   <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
   - ollama_interface
+  - api_key
   <%- end -%>
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
