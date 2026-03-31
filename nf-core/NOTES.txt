@@ -1,0 +1,7 @@
+Instead of supplying every single parameter in the form.yml.erb, I think we should just have a JSON file upload option, which is universal to all pipelines.
+There is also a nextflow command to provide the parameters and create the json file from it.
+**That is probably why they have a separate app for each pipeline.
+
+COMMAND=
+nf-core pipelines create-params-file <pipeline_name> --output my_params.json
+

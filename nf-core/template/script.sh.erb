@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+# Exit immediately if a command fails
+set -euo pipefail
+
+# Clean the environment
+module purge
+
+# Load the required module
+module load nextflow apptainer
+module list
+
+# Set the working directory
+workdir="<%= context.workdir %>"
+nfparams="<%= context.nf_params %>"
+account="<%= custom_accpart.split(":")[0]%>"
+queue="<%= custom_accpart.split(":")[1] %>"
+qos="<%= custom_accpart.split(":")[2] %>"
+
+# Ensure the working directory exists
+if [[ ! -d "$workdir" ]]; then
+    echo "Creating working directory: $workdir"
+    mkdir -p "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+fi
+
+# Copy necessary files and change to the working directory
+cp "$nfparams" "$workdir/$USER/SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+cd "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+
+# Determine if the job should resume
+resume_flag=""
+if [[ "<%= context.resume %>" -eq 1 ]]; then
+    echo "Resuming previous run."
+    resume_flag="-resume"
+else
+    echo "Starting a fresh run."
+fi
+
+# Check if Nextflow Tower should be used
+with_tower_flag=""
+if [[ -n "${TOWER_ACCESS_TOKEN:="<%= context.tower_access_token %>"}" && -n "${TOWER_ACCESS_TOKEN// }" ]]; then
+    echo "Using Nextflow Tower."
+    export TOWER_ACCESS_TOKEN="$TOWER_ACCESS_TOKEN"
+    with_tower_flag="-with-tower"
+else
+    echo "Not using Nextflow Tower."
+fi
+
+# Set the Singularity cache directory
+export NXF_APPTAINER_CACHEDIR="/scratch/general/nfs1/app-repo/singularity-cache-nf"
+
+# Clean up nf-params.json by removing empty values and replacing placeholders
+sed -i -E '/:[[:space:]]*,/d; /"[[:space:]]*"/d' "$nfparams"
+
+export pipeline_nf="<%= context.pipeline %>"
+#comment out or replace the 3 export commands below
+#export pipeline_version=/cluster/tufts/biocontainers/nf-core/pipelines/nf-core-ampliseq/2.13.0/2_13_0
+#export projectDir=$pipeline_version
+#export baseDir=$pipeline_version
+
+#I commented out the above export lines and the below sed line because I am not targetting a specific version of a pre-downloaded pipeline and I do not know what that sed command is exactly doing.
+#sed -i -E "s@\$(projectDir)@$projectDir@g; s@\$(baseDir)@$baseDir@g; s/\"None\"/null/g" "$nfparams"
+
+# Define resources based on execution environment
+num_memory="<%= context.num_memory %>"
+num_core="<%= context.num_core %>"
+
+# Build Nextflow command
+nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
+
+if [[ "<%= context.executor %>" == "slurm" ]]; then
+    echo "Using Slurm to execute the pipeline."  # TODO - make a UU Nextflow config profile??
+    nextflow_command+=("-profile apptainer,slurm")
+else
+    echo "Running in local mode (single-node execution)."
+
+    # Generate custom.config for local execution
+    cat <<EOF > custom.config
+cleanup = true
+
+process {
+         executor = 'slurm'
+         queue = $queue
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+        resourceLimits = [
+            cpus: $num_core,
+            memory: "$num_memory"
+        ]
+}
+EOF
+
+    echo "custom.config file created with cpus=$num_core and memory=$num_memory."
+    nextflow_command+=("-profile singularity" "-c custom.config")
+fi
+
+# Append optional flags
+[[ -n "$resume_flag" ]] && nextflow_command+=("$resume_flag")
+[[ -n "$with_tower_flag" ]] && nextflow_command+=("$with_tower_flag")
+
+# Output and execute the command
+echo "Executing command: ${nextflow_command[*]}"
+eval "${nextflow_command[*]}"

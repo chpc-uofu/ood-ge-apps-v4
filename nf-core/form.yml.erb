@@ -1,0 +1,94 @@
+<%
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+%>
+---
+title: NF-Core Pipeline
+attributes:
+  pipeline:
+    widget: select
+    label: Choose the nf-core pipeline you wish to run:
+    help: "Please select which nf-core pipeline you would like to run. Descriptions and documentation of each nf-core pipeline can be found at https://nf-co.re/pipelines/."
+    options:
+      - [ "ribomsqc", "ribomsqc" ]
+      - [ "loneraredisease", "loneraredisease" ]
+      - [ "mag", "mag" ]
+      - [ "scnanoseq", "scnanoseq" ]
+      - [ "pixelator", "pixelator" ]
+  nf_params:
+    widget: "path_selector"
+    label: NF-Core Pipeline 
+    show_files: true
+    popup_title: "Select your Nextflow params YAML file"
+    help: "Please upload a YAML file that details your parameters for the NF-CORE pipeline you selected. All NF-CORE pipelines have detailed parameter requirements detailed at https://nf-co.re/pipelines. You can also build a YAML file with the command 'nf-core schema build'. If you have questions about this, please contact the CHPC HelpDesk."
+  gpudata:
+    widget: hidden_field
+    cacheable: false
+    value: |
+      "<%= gpu_data.to_json %>"
+  cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>    
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+    
+  bc_num_hours:
+    value: 1
+    min: 1
+    max: 8
+    step: 1
+  bc_email_on_started:
+    help: "If you do not receive the email, check your [Profile](https://www.chpc.utah.edu/role/user/edit_profile.php) for correct address."
+  workdir:
+    label: "Working Directory"
+    widget: "path_selector"
+    directory: "/scratch/general/vast"
+    required: false
+    label: Working directory 
+    help: "Please select a directory under your uNID. If no directory under your uNID exists, please create one."
+  resume:
+    label: Resume
+    widget: check_box
+    checked_value: 1
+    unchecked_value: 0
+    help: "Check if you would like to resume your previous run (if it exists)."
+  tower_access_token:
+    widget: "text_field"
+    required: false
+    label: "TOWER_ACCESS_TOKEN (Optional)"
+    help: "Your Seqera TOWER_ACCESS_TOKEN used to monitor runs on [Nextflow Tower](https://seqera.io)."
+
+form:
+  - pipeline
+  - nf_params
+  - workdir
+  - resume
+  - tower_access_token
+  - bc_num_hours
+  - bc_email_on_started
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %>   
