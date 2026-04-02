@@ -20,10 +20,9 @@ attributes:
 
   nf_params:
     widget: "path_selector"
-    label: "NF-Core Pipeline" 
+    label: "Parameter YAML File"
     show_files: true
-    popup_title: "Select your Nextflow params YAML file"
-    help: "Please upload a YAML file that details your parameters for the NF-CORE pipeline you selected. All NF-CORE pipelines have detailed parameter requirements detailed at https://nf-co.re/pipelines. You can also build a YAML file with the command 'nf-core schema build'. If you have questions about this, please contact the CHPC HelpDesk."
+    help: "Each nf-core pipeline has a set of input parameters that are unique to that pipeline. You can find the parameters required by searching for the pipeline you selected at this link: https://nf-co.re/pipelines. Upload a YAML file that details your necessary parameters. You can also build a YAML file with the command 'nf-core schema build'."
 
     cluster:
     widget: select
