@@ -48,11 +48,11 @@ attributes:
       - "<%= g %>"
       <%- end %>
 <% IO.foreach(template_root+"accpart-help") do |line| %>
-<%= line %>
+  <%= line %>
 <% end %>    
 
 <% IO.foreach(template_root+"job_params_v33") do |line| %>
-<%= line %>
+  <%= line %>
 <% end %>   
     
   bc_num_hours:
@@ -74,7 +74,9 @@ attributes:
     widget: check_box
     checked_value: 1
     unchecked_value: 0
-    help: "Check if you would like to resume your previous run (if it exists)."
+    help: |
+           Resume previous run if found
+
   tower_access_token:
     widget: "text_field"
     required: false
@@ -90,5 +92,5 @@ form:
   - bc_num_hours
   - bc_email_on_started
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
-<%= line %>
+  <%= line %>
 <% end %>   
