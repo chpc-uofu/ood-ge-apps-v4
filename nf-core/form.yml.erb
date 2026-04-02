@@ -10,7 +10,7 @@ attributes:
   pipeline:
     widget: "select"
     label: "Choose the nf-core pipeline you wish to run:"
-    help: "Please select which nf-core pipeline you would like to run. Descriptions and documentation of each nf-core pipeline can be found at https://nf-co.re/pipelines/."
+    help: "Select the nf-core pipeline to use"
     options:
       - [ "ribomsqc", "ribomsqc" ]
       - [ "loneraredisease", "loneraredisease" ]
@@ -22,7 +22,7 @@ attributes:
     widget: "path_selector"
     label: "Parameter YAML File"
     show_files: true
-    help: "Each nf-core pipeline has a set of input parameters that are unique to that pipeline. You can find the parameters required by searching for the pipeline you selected at this link: https://nf-co.re/pipelines. Upload a YAML file that details your necessary parameters. You can also build a YAML file with the command 'nf-core schema build'."
+    help: "Parameters are unique to each pipeline, detailed at https://nf-co.re/pipelines. Upload a YAML file with your necessary parameters."
 
     cluster:
     widget: select
