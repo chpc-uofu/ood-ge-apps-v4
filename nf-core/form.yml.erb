@@ -25,6 +25,32 @@ attributes:
     popup_title: "Select your Nextflow params YAML file"
     help: "Please upload a YAML file that details your parameters for the NF-CORE pipeline you selected. All NF-CORE pipelines have detailed parameter requirements detailed at https://nf-co.re/pipelines. You can also build a YAML file with the command 'nf-core schema build'. If you have questions about this, please contact the CHPC HelpDesk."
 
+    cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>    
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+
   gpudata:
     widget: "hidden_field"
     cacheable: false
