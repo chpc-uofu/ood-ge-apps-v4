@@ -85,9 +85,9 @@ attributes:
 form:
   - pipeline
   - nf_params
-  - workdir
-  - resume
-  - tower_access_token
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
 <% end %>
+  - resume
+  - workdir
+  - tower_access_token
