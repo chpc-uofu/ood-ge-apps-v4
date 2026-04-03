@@ -76,19 +76,18 @@ cat <<EOF > custom.config
 cleanup = true
 
 process {
-         executor = 'slurm'
-         queue = $queue
-        clusterOptions = '--account=$account --qos=$qos $gpustr'
-        resourceLimits = [
-            cpus: $num_core,
-            memory: "$num_memory"
-        ]
+    executor = 'slurm'
+    queue = $queue
+    clusterOptions = '--account=$account --qos=$qos $gpustr'
+    resourceLimits = [
+        cpus: $num_core,
+        memory: "$num_memory"
+    ]
 }
 EOF
 
-    echo "custom.config file created with cpus=$num_core and memory=$num_memory."
-    nextflow_command+=("-profile singularity" "-c custom.config")
-fi
+echo "custom.config file created with cpus=$num_core and memory=$num_memory."
+nextflow_command+=( "-c custom.config")
 
 # Append optional flags
 [[ -n "$resume_flag" ]] && nextflow_command+=("$resume_flag")
