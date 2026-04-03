@@ -13,9 +13,9 @@ module list
 # Set the working directory
 workdir="<%= context.workdir %>"
 nfparams="<%= context.nf_params %>"
-account="<%= custom_accpart.split(":")[0]%>"
-queue="<%= custom_accpart.split(":")[1] %>"
-qos="<%= custom_accpart.split(":")[2] %>"
+account="<%= context.custom_accpart.split(":")[0]%>"
+queue="<%= context.custom_accpart.split(":")[1] %>"
+qos="<%= context.custom_accpart.split(":")[2] %>"
 
 # Ensure the working directory exists
 if [[ ! -d "$workdir" ]]; then
