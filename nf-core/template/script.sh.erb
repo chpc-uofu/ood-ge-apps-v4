@@ -75,9 +75,6 @@ num_core="<%= context.num_core %>"
 # Build Nextflow command
 nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
 
-echo "Using Slurm to execute the pipeline."  # TODO - make a UU Nextflow config profile??
-nextflow_command+=("-profile apptainer,slurm")
-
 # Generate custom.config for local execution
 cat <<EOF > custom.config
 cleanup = true
