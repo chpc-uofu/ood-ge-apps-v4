@@ -21,11 +21,18 @@ qos="<%= custom_accpart.split(":")[2] %>"
 if [[ ! -d "$workdir" ]]; then
     echo "Creating working directory: $workdir"
     mkdir -p "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+else
+    mkdir -p "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
 fi
 
 # Copy necessary files and change to the working directory
-cp "$nfparams" "$workdir/$USER/SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-cd "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+if [[ ! -d "$workdir" ]]; then
+    cp "$nfparams" "$workdir/$USER/SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+else
+    cp "$nfparams" "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory workdir"; exit 1; }
+fi
 
 # Determine if the job should resume
 resume_flag=""
