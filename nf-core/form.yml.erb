@@ -24,7 +24,7 @@ attributes:
     show_files: true
     help: "Parameters are unique to each pipeline, detailed at https://nf-co.re/pipelines. Upload a YAML file with your necessary parameters."
 
-    cluster:
+  cluster:
     widget: select
     options:
       <%- CustomQueues.clusters.each do |g| %>
