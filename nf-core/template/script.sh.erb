@@ -69,8 +69,8 @@ export pipeline_nf="<%= context.pipeline %>"
 #sed -i -E "s@\$(projectDir)@$projectDir@g; s@\$(baseDir)@$baseDir@g; s/\"None\"/null/g" "$nfparams"
 
 # Define resources based on execution environment
-num_memory="<%= context.num_memory %>"
-num_core="<%= context.num_core %>"
+num_memory="<%= context.memtask %>"
+num_core="<%= context.num_cores %>"
 
 # Build Nextflow command
 nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
