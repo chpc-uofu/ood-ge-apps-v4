@@ -16,9 +16,6 @@
 
 batch_connect:
   template: "basic"
-  conn_params:
-    - working_path 
-
 script:
   accounting_id: "<%= custom_accpart.split(":")[0]%>"
   queue_name: "<%= custom_accpart.split(":")[1] %>"
