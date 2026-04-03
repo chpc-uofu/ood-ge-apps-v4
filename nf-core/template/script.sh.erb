@@ -68,14 +68,11 @@ num_core="<%= context.num_core %>"
 # Build Nextflow command
 nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
 
-if [[ "<%= context.executor %>" == "slurm" ]]; then
-    echo "Using Slurm to execute the pipeline."  # TODO - make a UU Nextflow config profile??
-    nextflow_command+=("-profile apptainer,slurm")
-else
-    echo "Running in local mode (single-node execution)."
+echo "Using Slurm to execute the pipeline."  # TODO - make a UU Nextflow config profile??
+nextflow_command+=("-profile apptainer,slurm")
 
-    # Generate custom.config for local execution
-    cat <<EOF > custom.config
+# Generate custom.config for local execution
+cat <<EOF > custom.config
 cleanup = true
 
 process {
