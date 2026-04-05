@@ -1,0 +1,9 @@
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+# Find available port to run server on
+port=$(find_port ${host} 2000 30000)
+echo "nginx port=$port"
+export port2=$(find_port ${host} 30001 65535)
+echo "cryosparc port2=$port2"
+
