@@ -1,0 +1,94 @@
+; Supervisord configuration file for cryoSPARC
+;
+
+[unix_http_server]
+file=%(ENV_CRYOSPARC_SUPERVISOR_SOCK_FILE)s   ; (the path to the socket file)
+
+[supervisord]
+logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/supervisord.log
+logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10           ; (num of main logfile rotation backups;default 10)
+loglevel=info                ; (log level;default info; others: debug,warn,trace)
+pidfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/supervisord.pid
+nodaemon=false               ; (start in foreground if true;default false)
+minfds=1024                  ; (min. avail startup file descriptors;default 1024)
+minprocs=200                 ; (min. avail process descriptors;default 200)
+childlogdir=%(ENV_CRYOSPARC_ROOT_DIR)s/run/            ; ('AUTO' child log dir, default $TEMP)
+umask = 002
+
+; the below section must remain in the config file for RPC
+; (supervisorctl/web interface) to work, additional interfaces may be
+; added by defining them in separate rpcinterface: sections
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=unix://%(ENV_CRYOSPARC_SUPERVISOR_SOCK_FILE)s
+
+[program:database]
+command=mongod -vvvvv %(ENV_CRYOSPARC_DB_ENABLE_AUTH_FLAG)s --dbpath "%(ENV_CRYOSPARC_DB_PATH)s" --port %(ENV_CRYOSPARC_MONGO_PORT)s --oplogSize 64 --replSet meteor %(ENV_CRYOSPARC_MONGO_EXTRA_FLAGS)s --wiredTigerCacheSizeGB %(ENV_CRYOSPARC_MONGO_CACHE_GB)s --bind_ip_all
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s
+autostart=false
+autorestart=false
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/database.log
+
+[program:command_core]
+command=gunicorn -n command_core -b "0.0.0.0:%(ENV_CRYOSPARC_COMMAND_CORE_PORT)s" "cryosparc_command.command_core:start()" -c "%(ENV_CRYOSPARC_ROOT_DIR)s/gunicorn.conf.py"
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s
+autostart=false
+autorestart=true
+startsecs=5
+startretries=2
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/command_core.log
+stopasgroup=true
+stopsignal=QUIT
+
+[program:command_vis]
+command=flask --app "cryosparc_command.command_vis" run -h "0.0.0.0" -p %(ENV_CRYOSPARC_COMMAND_VIS_PORT)s --with-threads
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s
+autostart=false
+autorestart=true
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/command_vis.log
+stopasgroup=true
+stopsignal=QUIT
+environment=CRYOSPARC_IO_URING="false"
+
+[program:command_rtp]
+command=gunicorn "cryosparc_command.command_rtp:start()" -n command_rtp -b "0.0.0.0:%(ENV_CRYOSPARC_COMMAND_RTP_PORT)s" -c "%(ENV_CRYOSPARC_ROOT_DIR)s/gunicorn.conf.py"
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s
+autostart=false
+autorestart=true
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/command_rtp.log
+stopasgroup=true
+stopsignal=QUIT
+
+[program:app]
+command=node dist/server/index.js
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s/cryosparc_app/custom-server
+autostart=false
+autorestart=false
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/app.log
+environment=MONGO_URL="%(ENV_CRYOSPARC_APP_MONGO_URI)s",MONGO_OPLOG_URL="%(ENV_CRYOSPARC_APP_MONGO_OPLOG_URI)s",NODE_ENV="production",PORT="%(ENV_CRYOSPARC_HTTP_APP_PORT)s"
+
+[program:app_api]
+command=%(ENV_CRYOSPARC_ROOT_DIR)s/cryosparc_app/nodejs/bin/node ./bundle/main.js
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s/cryosparc_app
+autostart=false
+autorestart=true
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/app_api.log
+environment=MONGO_URL="%(ENV_CRYOSPARC_APP_MONGO_URI)s",MONGO_OPLOG_URL="%(ENV_CRYOSPARC_APP_MONGO_OPLOG_URI)s",PORT="%(ENV_CRYOSPARC_HTTP_LIVEAPP_LEGACY_PORT)s",HTTP_FORWARDED_COUNT="1",ROOT_URL="http://%(ENV_CRYOSPARC_MASTER_HOSTNAME)s:%(ENV_CRYOSPARC_HTTP_LIVEAPP_LEGACY_PORT)s",NODE_OPTIONS="--max-old-space-size=8192",METEOR_SETTINGS='{"public":{"cryosparc_live":"prod"}}'
+
+[program:app_api_dev]
+command=meteor --port %(ENV_CRYOSPARC_HTTP_LIVEAPP_LEGACY_PORT)s
+directory=%(ENV_CRYOSPARC_ROOT_DIR)s/cryosparc_app/api
+autostart=false
+autorestart=false
+redirect_stderr=true
+stdout_logfile=%(ENV_CRYOSPARC_ROOT_DIR)s/run/app_api.log
+environment=MONGO_URL="%(ENV_CRYOSPARC_APP_MONGO_URI)s",MONGO_OPLOG_URL="%(ENV_CRYOSPARC_APP_MONGO_OPLOG_URI)s",NODE_OPTIONS="--max-old-space-size=8192",METEOR_OFFLINE_CATALOG="1"

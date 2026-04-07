@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+
+# port=$(find_port ${host} 2000 30000)
+# echo "nginx port=$port"
+
+# Find available port to run cryosparc server on
+export port=$(find_port ${host} 30001 65535)
+echo "cryosparc port=$port"
+CRYOSPARC_PORT=$port
+export CRYOSPARC_PORT
+
+
+# -----------------------------
+# CONFIG (adjust these)
+# -----------------------------
+FRPS_ADDR="155.101.26.122"
+FRPS_PORT="7000"
+#FRPS_TOKEN="your-shared-secret"
+
+BASE_DOMAIN="cryosparc.ondemand-staging.chpc.utah.edu"   # or cryosparc.example.edu
+VHOST_PORT="7001"
+
+CRYOSPARC_PORT="${port}"
+CLUSTER_NAME="${SLURM_CLUSTER_NAME:-cluster}"
+
+# -----------------------------
+# JOB CONTEXT
+# -----------------------------
+JOB_ID="${SLURM_JOB_ID:-jobid}"
+USER_NAME="${USER:-user}"
+
+# sanitize (DNS-safe)
+sanitize() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-'
+}
+
+USER_NAME=$(sanitize "$USER_NAME")
+CLUSTER_NAME=$(sanitize "$CLUSTER_NAME")
+
+# -----------------------------
+# RANDOM SUFFIX
+# -----------------------------
+RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
+
+SUBDOMAIN="${USER_NAME}-${CLUSTER_NAME}-${JOB_ID}-${RAND_SUFFIX}"
+EXTERNAL_URL="http://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}"
+
+export SUBDOMAIN
+export EXTERNAL_URL
+
+echo "Subdomain: $SUBDOMAIN"
+echo "URL: $EXTERNAL_URL"
+
+# -----------------------------
+# CREATE TOKEN FILE (secure)
+# -----------------------------
+#TOKEN_FILE="${PWD}/frp_token"
+
+#umask 077
+#printf '%s\n' "${FRPS_TOKEN}" > "${TOKEN_FILE}"
+
+# -----------------------------
+# GENERATE FRPC CONFIG
+# -----------------------------
+cat > "${PWD}/frpc.toml" <<EOF
+serverAddr = "${FRPS_ADDR}"
+serverPort = ${FRPS_PORT}
+
+# auth.tokenSource.type = "file"
+# auth.tokenSource.file.path = "${TOKEN_FILE}"
+loginFailExit = false
+
+transport.dialServerTimeout = 30
+transport.heartbeatInterval = 30
+transport.heartbeatTimeout = 120
+
+[[proxies]]
+name = "cryosparc-${USER_NAME}-${JOB_ID}"
+type = "http"
+localIP = "127.0.0.1"
+localPort = ${CRYOSPARC_PORT}
+subdomain = "${SUBDOMAIN}"
+EOF
+
+#chmod 600 "${PWD}/frpc.toml"

@@ -1,0 +1,9 @@
+# Wait for the Cryosparc Server to start
+echo "Waiting for Cryosparc Server to open port at ${port}..."
+if wait_until_port_used "${host}:${port}" 300; then
+  echo "Discovered Cryosparc Server listening on port ${port}!"
+else
+  echo "Timed out waiting for Cryosparc Server to open port ${port}!"
+  clean_up 1
+fi
+sleep 2

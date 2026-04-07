@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -x
+
+cleanup() {
+  [[ -n "${FRPC_PID:-}" ]] && kill "${FRPC_PID}" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Start CryoSPARC (daemon)
+module purge
+module load apptainer
+
+export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-v4.7.1"
+export APPTAINERENV_CRYOSPARC_BASE_PORT=${port}
+export APPTAINERENV_CRYOSPARC_LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
+
+simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814-nginx.sif"
+
+user_cryosparc_directory=$APPTAINERENV_USER_CRYOSPARC_DIRECTORY
+
+if [ ! -d "$user_cryosparc_directory" ]; then
+    echo "first launch"
+    export APPTAINERENV_FIRST_LAUNCH=true
+    mkdir -p "$user_cryosparc_directory"
+    mkdir "$user_cryosparc_directory/cryosparc_license"
+    mkdir "$user_cryosparc_directory/cryosparc_cache"
+    mkdir "$user_cryosparc_directory/cryosparc_database"
+
+    tar xzf /uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz -C $user_cryosparc_directory
+else
+    echo "NOT first launch"
+    export APPTAINERENV_FIRST_LAUNCH=false
+fi
+
+
+cryo_apptainer_instance=ood_cryosparc_${USER}_${SLURM_JOB_ID}_${port}
+echo $cryo_apptainer_instance
+
+apptainer instance start --writable-tmpfs --nv \
+-B $user_cryosparc_directory/cryosparc_master/run:/cryosparc_master/run \
+-B $TMPDIR:/tmp -B /uufs -B /scratch \
+-B $user_cryosparc_directory/cryosparc_database:/cryosparc_database \
+-B $user_cryosparc_directory/cryosparc_cache:/cryosparc_cache \
+-B $user_cryosparc_directory/cryosparc_license:/cryosparc_license \
+-B ${PWD}/supervisord.conf_daemon:/cryosparc_master/supervisord.conf \
+$simage_path \
+$cryo_apptainer_instance
+
+##the last step of this script is a blocking process (nginx)
+apptainer exec instance://$cryo_apptainer_instance ${PWD}/cryosparc_container_startup.sh
+
+
+# End Start CryoSPARC (daemon)
+# Give it time to start (optional improvement later: health check)
+sleep 10
+
+# Start FRP client
+echo "${PWD}/frpc"
+${PWD}/frpc -c "${PWD}/frpc.toml" &
+FRPC_PID=$!
+
+# Keep session alive
+wait "${FRPC_PID}"
+
+#####################
