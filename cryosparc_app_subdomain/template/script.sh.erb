@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 set -x
-#version="4.7.1"
-version="v5.0.4"
 
 cleanup() {
   [[ -n "${FRPC_PID:-}" ]] && kill "${FRPC_PID}" 2>/dev/null || true
@@ -12,17 +10,25 @@ trap cleanup EXIT
 module purge
 module load apptainer
 
-export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-${version}"
+export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-${SELECTED_CRYO_VERSION}"
 export APPTAINERENV_CRYOSPARC_BASE_PORT=${port}
-export APPTAINERENV_CRYOSPARC_LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
+export APPTAINERENV_CRYOSPARC_LICENSE_ID=<%= context.cryosparc_license_id %>
+export APPTAINERENV_CRYOSPARC_ADMIN_EMAIL=<%= context.cryosparc_admin_email %>
 
-#simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814-nginx.sif"
-#simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814.sif"
-#tar_file="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz"
-
-simage_path="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5.0.4.sif"
-tar_file="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/cryosparc_master_run_init_files-v5.0.4.tar.gz"
-
+case "$SELECTED_CRYO_VERSION" in
+  "v5.0.4-beta")
+    simage_path="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5.0.4.sif"
+    tar_file="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/cryosparc_master_run_init_files-v5.0.4.tar.gz"
+    ;;
+  "v4.7.1-cuda12+250814")
+    simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814.sif"
+    tar_file="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz"
+    ;;
+  *)
+    echo "Unsupported CryoSPARC version: $SELECTED_CRYO_VERSION" >&2
+    exit 1
+    ;;
+esac
 
 user_cryosparc_directory=$APPTAINERENV_USER_CRYOSPARC_DIRECTORY
 
@@ -31,6 +37,7 @@ if [ ! -d "$user_cryosparc_directory" ]; then
     export APPTAINERENV_FIRST_LAUNCH=true
     mkdir -p "$user_cryosparc_directory"
     mkdir "$user_cryosparc_directory/cryosparc_license"
+    echo "${APPTAINERENV_CRYOSPARC_ADMIN_EMAIL}" > $user_cryosparc_directory/cryosparc_license/email
     mkdir "$user_cryosparc_directory/cryosparc_cache"
     mkdir "$user_cryosparc_directory/cryosparc_database"
 
@@ -40,8 +47,7 @@ else
     export APPTAINERENV_FIRST_LAUNCH=false
 fi
 
-
-cryo_apptainer_instance=ood_cryosparc_${USER}_${SLURM_JOB_ID}_${port}
+cryo_apptainer_instance="ood_cryosparc_${SUBDOMAIN}"
 echo $cryo_apptainer_instance
 
 apptainer instance start --writable-tmpfs --nv \

@@ -20,6 +20,23 @@ attributes:
     help: "This defines the version of Crypsparc you want to load."
     options:
       - [ "v4.7.1-cuda12+250814", "v4.7.1-cuda12+250814"]
+      - [ "v5.0.4-beta", "v5.0.4-beta"]
+  cryosparc_admin_email:
+    label:  "CryoSPARC Admin Email"
+    widget: 'text_field'
+    required: true
+    value: "admin@cryo.edu"
+  cryosparc_license_id:
+    widget: 'password_field'
+    label:  "CryoSPARC License ID (The first 4 characters will be the admin password)"
+    required: true
+    pattern: "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}"
+    value:  ""
+    help: |
+      - You must get an individual academic license id from <a href='https://cryosparc.com/download' target='_blank'>cryosparc.com/download</a>
+      - After you click the blue Launch button below, it may take up to 5 minutes before CryoSPARC is available
+      - You can only launch one CryoSPARC portal app job but you can run multiple computational jobs within CryoSPARC
+
   cluster:
     widget: select
     options:
@@ -48,6 +65,8 @@ attributes:
 
 form:
   - version
+  - cryosparc_admin_email
+  - cryosparc_license_id
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
 <% end %>

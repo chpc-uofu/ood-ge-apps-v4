@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
 
+export OOD_SESSION_ID="<%= File.basename(session.staged_root.to_s) %>"
+echo "$OOD_SESSION_ID"
+
+export SELECTED_CRYO_VERSION="<%= context.version %>"
+echo "Selected version: $SELECTED_CRYO_VERSION"
 
 # port=$(find_port ${host} 2000 30000)
 # echo "nginx port=$port"
@@ -19,7 +23,6 @@ export CRYOSPARC_PORT
 # -----------------------------
 FRPS_ADDR="155.101.26.122"
 FRPS_PORT="7000"
-#FRPS_TOKEN="your-shared-secret"
 
 BASE_DOMAIN="cryosparc.ondemand-staging.chpc.utah.edu"   # or cryosparc.example.edu
 VHOST_PORT="7001"
@@ -40,13 +43,13 @@ sanitize() {
 
 USER_NAME=$(sanitize "$USER_NAME")
 CLUSTER_NAME=$(sanitize "$CLUSTER_NAME")
-
+export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
 # -----------------------------
 # RANDOM SUFFIX
 # -----------------------------
 RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
 
-SUBDOMAIN="${USER_NAME}-${CLUSTER_NAME}-${JOB_ID}-${RAND_SUFFIX}"
+export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME}-j${JOB_ID}-p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
 EXTERNAL_URL="http://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}"
 
 export SUBDOMAIN

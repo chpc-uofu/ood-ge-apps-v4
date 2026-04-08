@@ -57,8 +57,8 @@ if [ "$first_launch" = true ]; then
     sleep 10
     cryosparcm checkdb
     cryosparcm createuser \
-      --email "admin@cryo.edu" \
-      --password "admin" \
+      --email "${CRYOSPARC_ADMIN_EMAIL}" \
+      --password "${CRYOSPARC_LICENSE_ID:0:4}" \
       --username "admin" \
       --firstname "admin" \
       --lastname "admin"
