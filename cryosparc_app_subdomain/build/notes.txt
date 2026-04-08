@@ -1,0 +1,9 @@
+
+export LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
+curl -L https://get.cryosparc.com/download/master-v5.0.4/$LICENSE_ID -o ./cryosparc_master.tar.gz
+
+curl -L https://get.cryosparc.com/download/worker-v5.0.4/$LICENSE_ID -o ./cryosparc_worker.tar.gz
+
+
+
+SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def

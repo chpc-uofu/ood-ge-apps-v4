@@ -79,30 +79,30 @@ else
     remove_hosts.sh
     sleep 10
     cryosparcm status
-    # Count users in Mongo
-    USER_COUNT=$(cryosparcm mongo --eval "
-    db = db.getSiblingDB('meteor');
-    print(db.users.countDocuments({}));
-    " | tail -n1)
+    # # Count users in Mongo
+    # USER_COUNT=$(cryosparcm mongo --eval "
+    # db = db.getSiblingDB('meteor');
+    # print(db.users.countDocuments({}));
+    # " | tail -n1)
 
-    echo "User count: $USER_COUNT"
+    # echo "User count: $USER_COUNT"
 
-    if [[ "$USER_COUNT" == "0" ]]; then
-        echo "No users found — creating initial admin user"
+    # if [[ "$USER_COUNT" == "0" ]]; then
+    #     echo "No users found — creating initial admin user"
 
-        cryosparcm createuser \
-      --email "admin@cryo.edu" \
-      --password "admin" \
-      --username "admin" \
-      --firstname "admin" \
-      --lastname "admin"
+    #     cryosparcm createuser \
+    #   --email "admin@cryo.edu" \
+    #   --password "admin" \
+    #   --username "admin" \
+    #   --firstname "admin" \
+    #   --lastname "admin"
 
-        cryosparcm makeuseradmin --email "${EMAIL}"
+    #     cryosparcm makeuseradmin --email "${EMAIL}"
 
-        echo "Admin user created"
-    else
-        echo "Users already exist — skipping"
-    fi
+    #     echo "Admin user created"
+    # else
+    #     echo "Users already exist — skipping"
+    # fi
 fi
 
 sleep 10

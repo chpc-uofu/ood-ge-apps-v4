@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -x
+#version="4.7.1"
+version="v5.0.4"
 
 cleanup() {
   [[ -n "${FRPC_PID:-}" ]] && kill "${FRPC_PID}" 2>/dev/null || true
@@ -10,11 +12,17 @@ trap cleanup EXIT
 module purge
 module load apptainer
 
-export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-v4.7.1"
+export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-${version}"
 export APPTAINERENV_CRYOSPARC_BASE_PORT=${port}
 export APPTAINERENV_CRYOSPARC_LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
 
-simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814-nginx.sif"
+#simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814-nginx.sif"
+#simage_path="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814.sif"
+#tar_file="/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz"
+
+simage_path="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5.0.4.sif"
+tar_file="/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/cryosparc_master_run_init_files-v5.0.4.tar.gz"
+
 
 user_cryosparc_directory=$APPTAINERENV_USER_CRYOSPARC_DIRECTORY
 
@@ -26,7 +34,7 @@ if [ ! -d "$user_cryosparc_directory" ]; then
     mkdir "$user_cryosparc_directory/cryosparc_cache"
     mkdir "$user_cryosparc_directory/cryosparc_database"
 
-    tar xzf /uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz -C $user_cryosparc_directory
+    tar xzf $tar_file -C $user_cryosparc_directory
 else
     echo "NOT first launch"
     export APPTAINERENV_FIRST_LAUNCH=false
