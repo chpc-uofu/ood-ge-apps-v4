@@ -64,8 +64,15 @@ sleep 10
 
 # Start FRP client
 echo "${PWD}/frpc"
-${PWD}/frpc -c "${PWD}/frpc.toml" &
+${PWD}/frpc -c "${PWD}/frpc.toml" > "${PWD}/.frpc.log" &
 FRPC_PID=$!
+(
+  while ! grep -q "success" "${PWD}/.frpc.log"; do
+    kill -0 "${FRPC_PID}" 2>/dev/null || exit 0
+    sleep 1
+  done
+  rm -f "${TOKEN_FILE}"
+) &
 
 # Keep session alive
 wait "${FRPC_PID}"

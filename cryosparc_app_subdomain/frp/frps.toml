@@ -1,0 +1,11 @@
+# frps.toml on the FRP server host
+bindPort = 7000
+vhostHTTPPort = 7001
+subdomainHost = "cryosparc.ondemand-staging.chpc.utah.edu"
+
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "./.frp_token"
+
+log.to = "console"
+log.level = "info"
+log.disablePrintColor = true

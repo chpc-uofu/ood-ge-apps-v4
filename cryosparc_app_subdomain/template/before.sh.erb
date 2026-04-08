@@ -52,26 +52,21 @@ EXTERNAL_URL="http://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}"
 export SUBDOMAIN
 export EXTERNAL_URL
 
+export external_url=$EXTERNAL_URL
+
 echo "Subdomain: $SUBDOMAIN"
 echo "URL: $EXTERNAL_URL"
 
 # -----------------------------
-# CREATE TOKEN FILE (secure)
-# -----------------------------
-#TOKEN_FILE="${PWD}/frp_token"
-
-#umask 077
-#printf '%s\n' "${FRPS_TOKEN}" > "${TOKEN_FILE}"
-
-# -----------------------------
 # GENERATE FRPC CONFIG
 # -----------------------------
+export TOKEN_FILE="${PWD}/.frp_token"
 cat > "${PWD}/frpc.toml" <<EOF
 serverAddr = "${FRPS_ADDR}"
 serverPort = ${FRPS_PORT}
 
-# auth.tokenSource.type = "file"
-# auth.tokenSource.file.path = "${TOKEN_FILE}"
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "${TOKEN_FILE}"
 loginFailExit = false
 
 transport.dialServerTimeout = 30
@@ -86,4 +81,25 @@ localPort = ${CRYOSPARC_PORT}
 subdomain = "${SUBDOMAIN}"
 EOF
 
-#chmod 600 "${PWD}/frpc.toml"
+chmod 600 "${PWD}/frpc.toml"
+
+## render stage
+<%
+require "fileutils"
+render_logs = File.join(session.staged_root, ".render_logs")
+unless File.exist?(render_logs)
+  user = `whoami`.strip
+  File.open(render_logs, "a") do |f|
+    f.puts "user=#{user}"
+  end
+end
+%>
+<%
+require "fileutils"
+token_path = File.join(session.staged_root, ".frp_token")
+unless File.exist?(token_path)
+  src = "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/frp/.frp_token"
+  FileUtils.cp(src, token_path)
+  FileUtils.chmod(0600, token_path)
+end
+%>

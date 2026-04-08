@@ -1,0 +1,19 @@
+#serverAddr = "cryosparc.ondemand-staging.chpc.utah.edu"
+serverAddr = "155.101.26.122"
+serverPort = 7000   # your bindPort
+
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "./.frp_token"
+loginFailExit = false
+
+transport.dialServerTimeout = 30
+transport.heartbeatInterval = 30
+transport.heartbeatTimeout = 120
+
+[[proxies]]
+name = "test-web"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 9000
+subdomain = "test"
+
