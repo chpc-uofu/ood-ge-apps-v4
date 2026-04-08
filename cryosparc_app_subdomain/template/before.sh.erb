@@ -2,6 +2,7 @@
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
 
+
 export OOD_SESSION_ID="<%= File.basename(session.staged_root.to_s) %>"
 echo "$OOD_SESSION_ID"
 

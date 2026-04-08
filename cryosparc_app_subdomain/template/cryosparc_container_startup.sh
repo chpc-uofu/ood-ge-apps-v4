@@ -48,6 +48,79 @@ usegpu="--gpus $CUDA_VISIBLE_DEVICES"
 echo "=== CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 echo "=== SLURM_JOB_GPUS: $SLURM_JOB_GPUS"
 
+get_effective_admin_password() {
+    if [ "${USE_CUSTOM_ADMIN_PASSWORD:-0}" = "1" ] && [ -n "${CRYOSPARC_ADMIN_PASSWORD:-}" ]; then
+        printf '%s' "${CRYOSPARC_ADMIN_PASSWORD}"
+    else
+        printf '%s' "${CRYOSPARC_LICENSE_ID:0:4}"
+    fi
+}
+
+persist_effective_admin_password() {
+    local password_file="$user_cryosparc_directory/cryosparc_license/admin_password"
+    printf '%s' "$1" > "$password_file"
+    chmod 600 "$password_file"
+}
+
+reset_admin_password() {
+    local effective_password="$1"
+    local reset_output
+    local reset_status
+    echo "=== reset_admin_password: begin"
+    echo "=== reset_admin_password: selected version [$SELECTED_CRYO_VERSION]"
+    echo "=== reset_admin_password: target email [$CRYOSPARC_ADMIN_EMAIL]"
+
+    if [ -f /cryosparc_master/config.sh ]; then
+        # shellcheck disable=SC1091
+        source /cryosparc_master/config.sh
+        echo "=== reset_admin_password: sourced /cryosparc_master/config.sh"
+    fi
+
+    if [[ "${SELECTED_CRYO_VERSION}" == *"v5."* ]]; then
+        echo "=== reset_admin_password: using v5 command path"
+        reset_output=$(cryosparcm user resetpassword \
+          --email "${CRYOSPARC_ADMIN_EMAIL}" \
+          --password "${effective_password}" 2>&1)
+        reset_status=$?
+    else
+        echo "=== reset_admin_password: using legacy command path"
+        reset_output=$(cryosparcm resetpassword \
+          --email "${CRYOSPARC_ADMIN_EMAIL}" \
+          --password "${effective_password}" 2>&1)
+        reset_status=$?
+    fi
+
+    echo "=== reset_admin_password: reset command exit status [$reset_status]"
+    echo "${reset_output}"
+
+    if echo "${reset_output}" | grep -qi "user does not exist"; then
+        echo "CryoSPARC admin user ${CRYOSPARC_ADMIN_EMAIL} does not exist; creating it now."
+        echo "=== reset_admin_password: entering createuser fallback"
+        cryosparcm createuser \
+          --email "${CRYOSPARC_ADMIN_EMAIL}" \
+          --password "${effective_password}" \
+          --username "admin" \
+          --firstname "admin" \
+          --lastname "admin"
+        echo "Created CryoSPARC admin user ${CRYOSPARC_ADMIN_EMAIL}"
+        echo "=== reset_admin_password: completed via createuser fallback"
+        return 0
+    fi
+
+    if [ "${reset_status}" -eq 0 ]; then
+        echo "Reset CryoSPARC admin password for ${CRYOSPARC_ADMIN_EMAIL}"
+        echo "=== reset_admin_password: completed via reset"
+        return 0
+    fi
+
+    echo "Failed to reset CryoSPARC admin password for ${CRYOSPARC_ADMIN_EMAIL}" >&2
+    echo "=== reset_admin_password: failed with non-recoverable error" >&2
+    return 1
+}
+
+EFFECTIVE_ADMIN_PASSWORD="$(get_effective_admin_password)"
+persist_effective_admin_password "$EFFECTIVE_ADMIN_PASSWORD"
+
 
 if [ "$first_launch" = true ]; then
     export FIRST_LAUNCH=false
@@ -58,11 +131,10 @@ if [ "$first_launch" = true ]; then
     cryosparcm checkdb
     cryosparcm createuser \
       --email "${CRYOSPARC_ADMIN_EMAIL}" \
-      --password "${CRYOSPARC_LICENSE_ID:0:4}" \
+      --password "${EFFECTIVE_ADMIN_PASSWORD}" \
       --username "admin" \
       --firstname "admin" \
       --lastname "admin"
-    sleep 10
 else
     cryosparcm stop
     sleep 10
@@ -78,6 +150,7 @@ else
     # clear previous worker node
     remove_hosts.sh
     sleep 10
+    reset_admin_password "${EFFECTIVE_ADMIN_PASSWORD}" || exit 1
     cryosparcm status
     # # Count users in Mongo
     # USER_COUNT=$(cryosparcm mongo --eval "
