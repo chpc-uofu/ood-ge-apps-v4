@@ -36,7 +36,7 @@ attributes:
     widget: "check_box"
     label: "Set a custom Admin password"
     help: |
-      - Your CryoSPARC Admin Email will be: `<%= ENV["USER"] %>@cryo.edu`  
+      - Your CryoSPARC Admin Email will be: `<%= ENV["USER"] %>@cryo.edu` (unchangable)
       - Leave unchecked to use the `first 4 characters of the license ID` as the admin password.
       - Check this box to provide a custom password for the admin account.
     value: "0"
@@ -45,6 +45,13 @@ attributes:
     label: "Custom password for Admin user `<%= ENV["USER"] %>@cryo.edu` "
     value: ""
     help: "Used only when the custom admin password checkbox is checked."
+  cryosparc_database_root:
+    widget: path_selector
+    label: "Cryosparc Database Root (permanent storage)"
+    directory: "<%= ENV["HOME"] %>"
+    value: "<%= ENV["HOME"] %>"
+    show_files: false
+    help: "CryoSPARC data for the selected version will be stored under folder `.cryosparc-${SELECTED_CRYO_VERSION}` within this root path."
   
   cluster:
     widget: select
@@ -74,10 +81,11 @@ attributes:
 
 form:
   - version
+  - cryosparc_database_root
   - cryosparc_license_id
   - use_custom_admin_password
   - cryosparc_admin_password
- 
+
   
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>

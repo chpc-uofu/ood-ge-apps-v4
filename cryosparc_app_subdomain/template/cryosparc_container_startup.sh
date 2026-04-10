@@ -93,7 +93,7 @@ reset_admin_password() {
     echo "=== reset_admin_password: reset command exit status [$reset_status]"
     echo "${reset_output}"
 
-    if echo "${reset_output}" | grep -qi "user does not exist"; then
+    if echo "${reset_output}" | grep -Eqi "user does not exist|not found"; then
         echo "CryoSPARC admin user ${CRYOSPARC_ADMIN_EMAIL} does not exist; creating it now."
         echo "=== reset_admin_password: entering createuser fallback"
         cryosparcm createuser \
@@ -143,7 +143,13 @@ else
 #    $cryosparc_singularity_command cryosparcm mongo
 #nc -zv localhost 39400
 #nc -zv localhost 39401
-    cryosparcm fixdbport
+    if [[ "${SELECTED_CRYO_VERSION}" == *"v5."* ]]; then
+        echo "=== existing instance: using v5 database fixport command"
+        cryosparcm database fixport
+    else
+        echo "=== existing instance: using legacy fixdbport command"
+        cryosparcm fixdbport
+    fi
     sleep 10
     cryosparcm restart
     sleep 10

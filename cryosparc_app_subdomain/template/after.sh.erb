@@ -6,4 +6,27 @@ else
   echo "Timed out waiting for Cryosparc Server to open port ${port}!"
   clean_up 1
 fi
+
+wait_until_frpc_success() {
+  local time="${1:-600}"
+  local log_file="${PWD}/.frpc.log"
+
+  for ((i=1; i<=time; i++)); do
+    if [ -f "${log_file}" ] && grep -q "success" "${log_file}"; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
+}
+
+echo "Waiting for FRPC tunnel success in ${PWD}/.frpc.log..."
+if wait_until_frpc_success 600; then
+  echo "Discovered FRPC tunnel success."
+else
+  echo "Timed out waiting for FRPC tunnel success!"
+  clean_up 1
+fi
+
 sleep 2

@@ -2,6 +2,19 @@
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
 
+CRYOSPARC_SUBDOMAIN_JOB_NAME="ondemand/sys/dashboard/<%= File.basename(File.dirname(File.dirname(File.dirname(session.staged_root.to_s)))) %>/<%= File.basename(File.dirname(File.dirname(session.staged_root.to_s))) %>"
+
+existing_cryosparc_job_id=$(
+  squeue -M All -h -u "${USER}" -t RUNNING,PENDING -o "%i|%j" 2>/dev/null | \
+    awk -F'|' -v job_name="${CRYOSPARC_SUBDOMAIN_JOB_NAME}" -v current_job_id="${SLURM_JOB_ID:-}" '
+      $2 == job_name && $1 != current_job_id { print $1; exit }
+    '
+)
+
+if [[ -n "${existing_cryosparc_job_id}" ]]; then
+  echo "You already have a running or queued CryoSPARC subdomain session. Stop that session before starting another."
+  exit 1
+fi
 
 export OOD_SESSION_ID="<%= File.basename(session.staged_root.to_s) %>"
 echo "$OOD_SESSION_ID"
@@ -51,7 +64,7 @@ export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
 RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
 
 export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME}-j${JOB_ID}-p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
-EXTERNAL_URL="http://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}"
+EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
 
 export SUBDOMAIN
 export EXTERNAL_URL

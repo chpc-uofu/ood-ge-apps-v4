@@ -11,7 +11,8 @@ trap cleanup EXIT
 module purge
 module load apptainer
 
-export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="/scratch/general/vast/$USER/ood_cryosparc_app_subdomain/.cryosparc-${SELECTED_CRYO_VERSION}"
+export APPTAINERENV_CRYOSPARC_DATABASE_ROOT=<%= Shellwords.escape(context.cryosparc_database_root.to_s) %>
+export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="${APPTAINERENV_CRYOSPARC_DATABASE_ROOT}/.cryosparc-${SELECTED_CRYO_VERSION}"
 export APPTAINERENV_CRYOSPARC_BASE_PORT=${port}
 export APPTAINERENV_CRYOSPARC_LICENSE_ID=<%= Shellwords.escape(context.cryosparc_license_id.to_s) %>
 export APPTAINERENV_CRYOSPARC_ADMIN_EMAIL="${USER}@cryo.edu"
