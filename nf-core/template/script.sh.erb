@@ -76,46 +76,39 @@ num_core="<%= context.num_cores %>"
 nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
 
 gpu_type="<%= context.gpu_type %>"
+gpustr=""
 
 if [[ "$gpu_type" != "none"]]; then
-    if "$gpu_type" == "any" 
+    echo "Using a GPU, modifying process block to include gres flag"
+    if [["$gpu_type" == "any"]]; then 
         gpustr="--gres=gpu:"+gpu_count
     else
         gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
-    end
-    if gpu_profile == "1" 
+    fi
+    if [[gpu_profile == "1" ]]; then
         gpustr << ",nsight:1"
-    end
-    echo "Using a GPU, modifying process block to include gres flag"
-    cat <<EOF > custom.config
-    cleanup = true
-    process {
-        executor = 'slurm'
-        queue = "$queue"
-        clusterOptions = '--account="$account" --qos="$qos" "$gpustr"'
-        resourceLimits = [
-            cpus: "$num_core",
-            memory: "$num_memory"
-        ]
-    }
-    EOF
-    echo "custom.config file created with cpus=$num_core, memory=$num_memory, and gpu=$gpustr."
+    fi
 else
     echo "No GPU selected"
-    cat <<EOF > custom.config
-    cleanup = true
-    process {
-        executor = 'slurm'
-        queue = $queue
-        clusterOptions = '--account=$account --qos=$qos'
-        resourceLimits = [
-            cpus: $num_core,
-            memory: "$num_memory"
-        ]
-    }
-    EOF
-    echo "custom.config file created with cpus=$num_core and memory=$num_memory."
 fi
+
+    
+cat <<EOF > custom.config
+cleanup = true
+    
+process {
+    executor = 'slurm'
+    queue = "$queue"
+    clusterOptions = '--account="$account" --qos="$qos" "$gpustr"'
+    resourceLimits = [
+        cpus: "$num_core"
+        memory: "$num_memory"
+    ]
+}
+EOF
+
+echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
+
 
 nextflow_command+=( "-c custom.config")
 
