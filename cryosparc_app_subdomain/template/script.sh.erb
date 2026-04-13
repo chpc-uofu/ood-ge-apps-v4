@@ -9,7 +9,8 @@ trap cleanup EXIT
 
 # Start CryoSPARC (daemon)
 module purge
-module load apptainer
+module load apptainer/1.4.1
+module load frp/0.68.1
 
 export APPTAINERENV_CRYOSPARC_DATABASE_ROOT=<%= Shellwords.escape(context.cryosparc_database_root.to_s) %>
 export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="${APPTAINERENV_CRYOSPARC_DATABASE_ROOT}/.cryosparc-${SELECTED_CRYO_VERSION}"
@@ -73,8 +74,9 @@ apptainer exec instance://$cryo_apptainer_instance ${PWD}/cryosparc_container_st
 sleep 10
 
 # Start FRP client
-echo "${PWD}/frpc"
-${PWD}/frpc -c "${PWD}/frpc.toml" > "${PWD}/.frpc.log" &
+frpc_path=`which frpc`
+echo $frpc_path
+${frpc_path} -c "${PWD}/frpc.toml" > "${PWD}/.frpc.log" &
 FRPC_PID=$!
 (
   while ! grep -q "success" "${PWD}/.frpc.log"; do

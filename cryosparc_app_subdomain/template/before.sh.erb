@@ -40,6 +40,8 @@ FRPS_PORT="7000"
 
 BASE_DOMAIN="cryosparc.ondemand-staging.chpc.utah.edu"   # or cryosparc.example.edu
 VHOST_PORT="7001"
+USER_ACCESS_PORT="8443"
+
 
 CRYOSPARC_PORT="${port}"
 CLUSTER_NAME="${SLURM_CLUSTER_NAME:-cluster}"
@@ -64,7 +66,9 @@ export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
 RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
 
 export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME}-j${JOB_ID}-p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
-EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
+#EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
+
+EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${USER_ACCESS_PORT}/login"
 
 export SUBDOMAIN
 export EXTERNAL_URL
