@@ -65,14 +65,12 @@ apptainer instance start --writable-tmpfs --nv \
 $simage_path \
 $cryo_apptainer_instance
 
-##the last step of this script is a blocking process (nginx)
 apptainer exec instance://$cryo_apptainer_instance ${PWD}/cryosparc_container_startup.sh
 
-
 # End Start CryoSPARC (daemon)
-# Give it time to start (optional improvement later: health check)
 sleep 10
 
+##the last step of this script is a blocking process (frpc)
 # Start FRP client
 frpc_path=`which frpc`
 echo $frpc_path

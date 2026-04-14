@@ -1,9 +1,22 @@
 
-export LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
-curl -L https://get.cryosparc.com/download/master-v5.0.4/$LICENSE_ID -o ./cryosparc_master.tar.gz
 
+v4.7.1-cuda12: whole installation and update (from v4.7.1 without cuda12) share same xxxxx.tar.gz files
+
+export LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
+
+VERSION="v4.7.1"
+#VERSION="v4.7.1-cuda12"
+#VERSION="v5.0.4"
+mkdir -p ./$VERSION
+curl -L https://get.cryosparc.com/download/master-$VERSION/$LICENSE_ID -o ./$VERSION/cryosparc_master.tar.gz
+curl -L https://get.cryosparc.com/download/worker-$VERSION/$LICENSE_ID -o ./$VERSION/cryosparc_worker.tar.gz
+
+SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --fakeroot --nv -B $PWD/$VERSION:/mnt $VERSION.sif $PWD/$VERSION/$VERSION.def
+
+
+
+
+curl -L https://get.cryosparc.com/download/master-v5.0.4/$LICENSE_ID -o ./cryosparc_master.tar.gz
 curl -L https://get.cryosparc.com/download/worker-v5.0.4/$LICENSE_ID -o ./cryosparc_worker.tar.gz
 
-
-
-SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def
+SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --fakeroot --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def
