@@ -49,6 +49,7 @@ entries:
   multitenant-llm: []
   multitenant-jupyter: []
   windows_vm_app: []
+  cryosparc_app_subdomain: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []
