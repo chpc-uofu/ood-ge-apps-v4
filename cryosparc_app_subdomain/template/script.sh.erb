@@ -122,7 +122,7 @@ apptainer exec instance://$cryo_apptainer_instance ${PWD}/cryosparc_container_st
 # Start FRP client
 frpc_path=`which frpc`
 echo $frpc_path
-${frpc_path} -c "${PWD}/frpc.toml" > "${PWD}/.frpc.log" &
+${frpc_path} -c "${PWD}/.frpc.toml" > "${PWD}/.frpc.log" &
 FRPC_PID=$!
 
 # Startup-only watcher: wait for FRP to report success so the one-time token

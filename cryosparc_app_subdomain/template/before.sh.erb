@@ -106,7 +106,7 @@ echo "URL: $EXTERNAL_URL"
 # GENERATE FRPC CONFIG
 # -----------------------------
 export TOKEN_FILE="${PWD}/.frp_token"
-cat > "${PWD}/frpc.toml" <<EOF
+cat > "${PWD}/.frpc.toml" <<EOF
 serverAddr = "${FRPS_ADDR}"
 serverPort = ${FRPS_PORT}
 
@@ -126,7 +126,7 @@ localPort = ${CRYOSPARC_PORT}
 subdomain = "${SUBDOMAIN}"
 EOF
 
-chmod 600 "${PWD}/frpc.toml"
+chmod 600 "${PWD}/.frpc.toml"
 
 ## render stage
 <% 
