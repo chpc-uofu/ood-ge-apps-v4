@@ -10,6 +10,7 @@
   - gpu_checkbox
   - gpu_type
   - gpu_count
+  - gpu_profile
   - nodelist_checkbox
   - nodelist
   - add_env_checkbox

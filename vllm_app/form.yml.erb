@@ -14,18 +14,6 @@ attributes:
     cacheable: false
     value: |
       "<%= gpu_data.to_json %>"
-  llm:
-    widget: select
-    label: Large Language Model Servers (LLM)
-    help: "Select the microservice you want to run."
-    # I should be able to use the two fields here
-    options:
-#      - [ "ollama server", "ollama server"
-#      ]
-#      - [ "ollama", "ollama"
-#      ]
-      - [ "vLLM", "vLLM"
-        ]
   
   llmmodel:
     widget: select
@@ -57,17 +45,8 @@ attributes:
       - ["allenai/OLMo-2-0325-32B-Instruct"]
       - ["deepseek-ai/DeepSeek-R1"]
       - ["deepseek-ai/DeepSeek-V3"]
+      - ["openai/gpt-oss-20b"]
     required: true
-
-  task_widget:
-    widget: select
-    label: Select model task (leave on generate if you are unsure)
-    help: Models must be initialized with a task
-    options:
-      - ["generate"]
-      - ["embed"]        
-      - ["score"]
-      - ["reward"]
 
   scratch_dir:
     widget: "path_selector"
@@ -88,6 +67,16 @@ attributes:
     label: Huggingface token (required for some models)
     help: Check SessionID and then llm.log if your model fails to start
 
+  quantization:
+    widget: select
+    label: Quantization
+    help: Decrease GPU space required for a model with quantization. Can result in worse performance.
+    options:
+      - ["None","None"]
+      - ["awq","awq"]            
+      - ["fp8","fp8"]
+      - ["int4", "int4"]
+    
   interface:
     widget: select
     label: <%= app_name %> interface
@@ -95,13 +84,52 @@ attributes:
     options:
       - [ "Notebook", "notebook" ]
       - [ "Lab", "lab" ]
+
   python:
     widget: select
     label: <%= app_name %> Python version
     help: "This defines the Python distribution of <%= app_name %> you want to start."
     options:
-      - [  "CHPC Python 3.11.3", "python/3.11.3",
+      - [  "CHPC Python 3.13.5", "python/3.13.5",
+           data-hide-custom-environment: true
         ]
+      - [  "CHPC Python 3.12.4", "python/3.12.4",
+           data-hide-custom-environment: true
+        ]
+      - [  "CHPC Python 3.11.3", "python/3.11.3",
+           data-hide-custom-environment: true
+        ]
+      - [  "CHPC Python 3.10.3", "python/3.10.3",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Deep Learning 2024.2", "deeplearning/2024.2.0",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Deep Learning 2024.1", "deeplearning/2024.1",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Deep Learning 2023.3", "deeplearning/2023.3",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Deep Learning 2022.1", "deeplearning/2022.1",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Generative AI 2025.3", "genai/2025.3",
+           data-hide-custom-environment: true
+        ]
+      - [ "CHPC Generative AI 2024.5", "genai/2024.5",
+           data-hide-custom-environment: true
+        ]
+      - [ "Custom (Environment Setup below)", "custom",
+           data-hide-custom-environment: false
+        ]
+  custom_environment:
+    widget: text_area
+    label: Environment Setup for Custom Python
+    help: "Enter commands (module load, source activate, etc) to create your desired Jupyter environment; jupyter MUST be on your path and either notebook or jupyterlab installed in your Python environment. For instructions how to install your own Python using Miniconda see https://www.chpc.utah.edu/documentation/software/python-anaconda.php."
+    value: |
+        module load python/3.10.3
+  
   cluster:
     widget: select
     options:
@@ -129,13 +157,13 @@ attributes:
 <% end %>   
 
 form:
-  - llm
   - llmmodel
-  - task_widget
+  - quantization
   - scratch_dir
   - huggingfacetoken
   - interface
   - python
+  - custom_environment    
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
 <% end %>   

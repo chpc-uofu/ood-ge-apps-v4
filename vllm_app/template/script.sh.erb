@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+<%- if context.python == "custom" -%>
+  <%= context.custom_environment.gsub /\r\n?/, "\n" %>
+<%- else -%>
   module load <%= context.python %>
+<%- end -%>
 # additional environment
 <%- if context.additional_environment != "" -%>
   <%= context.additional_environment.gsub /\r\n?/, "\n" %>
 <%- end -%>
 
 # debugging info
-module load genai
 module load apptainer/1.4.1
 apptainer --version
 module list
@@ -18,14 +21,14 @@ export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
-export TASK_CHOICE=<%= context.task_widget %>
+if [[ <%= context.quantization %> != "None" ]]; then
+  QUANT_STRING=" --quantization <%= context.quantization %>"
+else
+  QUANT_STRING=""
+fi
 
-echo LLM port is $nimport, jupyter port is $port
-<%- if context.llm == "ollama" -%>
-./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR $TASK_CHOICE >& llm.log &
-<%- elsif context.llm == "vLLM" -%>
-./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
-<%- end -%>
+echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING
+./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN $QUANT_STRING >& llm.log &
 
 #source_helpers
 #set -x
@@ -51,6 +54,18 @@ cd "${HOME}"
 
 # List available kernels for debugging purposes
 #set -x
+
+#check if jupyter exists in user env
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found in user env"
+else export PATH=$HOME/.local/bin:$PATH
+fi
+#Check again, if we don't find it after this we give up.
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found at second time of asking"
+else exit 1
+fi
+
 jupyter kernelspec list
 { set +x; } 2>/dev/null
 echo "TTT - $(date)"

@@ -23,13 +23,16 @@ CODE_SERVER_DATAROOT="$HOME/.local/share/codeserver-ood"
 #
 # ln -s code-server-3.3.1-linux-x86_64 code-server
 #CODE_SERVER="${CODE_SERVER:-${APP_ROOT}/code-server/bin/code-server}"
-CODE_SERVER="/uufs/chpc.utah.edu/sys/installdir/codeserver/3.5.0/code-server"
+#CODE_SERVER="/uufs/chpc.utah.edu/sys/installdir/codeserver/3.5.0/code-server"
+CODE_SERVER="/uufs/chpc.utah.edu/sys/installdir/codeserver/4.109.2/bin/code-server"
 
 # Ensure a dataroot for Code Server.
 mkdir -p "$CODE_SERVER_DATAROOT/extensions"
 
 # Expose the password to the server.
 export PASSWORD="$password"
+
+echo Password is $PASSWORD
 
 # Print compute node.
 echo "$(date): Running on compute node ${compute_node}:$port"
@@ -50,8 +53,9 @@ $CODE_SERVER \
     --auth="password" \
     --bind-addr="0.0.0.0:${port}" \
     --disable-telemetry \
-    --extra-extensions-dir="$CODE_SERVER_DATAROOT/extensions" \
+    --extensions-dir="$CODE_SERVER_DATAROOT/extensions" \
     --user-data-dir="$CODE_SERVER_DATAROOT" \
     --log debug \
     "<%= working_dir.to_s %>"
 
+#    --extra-extensions-dir="$CODE_SERVER_DATAROOT/extensions" \

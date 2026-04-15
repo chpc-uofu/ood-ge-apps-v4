@@ -161,6 +161,11 @@
     min: 1
     max: 8
     step: 1
+  gpu_profile:
+    widget: "check_box"
+    label: "Enable GPU profiling"
+    checked_value: 1
+    unchecked_value: 0
   nodelist_checkbox:
     widget: "check_box"
     label: "Nodelist"

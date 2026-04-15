@@ -10,7 +10,8 @@ module purge
   module load R/<%= context.version %>
   echo R version is <%= context.version %>
  # RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2023.12.0-369/bin/"
-  RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2024.12.0-467/bin/"
+ # RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2024.12.0-467/bin/"
+  RSPATH="/uufs/chpc.utah.edu/sys/installdir/rstudio-server/2025.09.2-418/bin/"
   # let the RStudio session use all the threads it can get (we set OMP_NUM_THREADS=1 in some R modules)
   unset OMP_NUM_THREADS
 <%- if context.additional_environment != "" -%>
