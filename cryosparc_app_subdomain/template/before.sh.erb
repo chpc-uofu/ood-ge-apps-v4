@@ -1,3 +1,21 @@
+<%
+site_config_candidates = [
+  File.expand_path("./site_config", Dir.pwd),
+  File.expand_path("./cryosparc_app_subdomain/site_config", Dir.pwd),
+  "/var/www/ood/apps/dev/u6047586/gateway/cryosparc_app_subdomain/site_config",
+  ]
+
+site_config_path = site_config_candidates.find do |candidate|
+  File.exist?("#{candidate}.rb")
+end
+
+if site_config_path.nil?
+  raise LoadError, "cannot load site_config; tried: #{site_config_candidates.join(', ')}"
+end
+
+require site_config_path
+site_cfg = CryoSPARCSiteConfig.load
+%>
 #!/usr/bin/env bash
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
@@ -35,12 +53,13 @@ export CRYOSPARC_PORT
 # -----------------------------
 # CONFIG (adjust these)
 # -----------------------------
-FRPS_ADDR="155.101.26.122"
-FRPS_PORT="7000"
+FRPS_ADDR="<%= site_cfg["frps_addr"] %>"
+FRPS_PORT="<%= site_cfg["frps_port"] %>"
 
-BASE_DOMAIN="cryosparc.ondemand-staging.chpc.utah.edu"   # or cryosparc.example.edu
+BASE_DOMAIN="<%= site_cfg["base_domain"] %>"   # or cryosparc.example.edu
 VHOST_PORT="7001"
-USER_ACCESS_PORT="8443"
+USER_ACCESS_PORT="<%= site_cfg["user_access_port"] %>"
+FRP_TOKEN_SOURCE_PATH="<%= site_cfg["frp_token_file_path"] %>"
 
 
 CRYOSPARC_PORT="${port}"
@@ -59,16 +78,21 @@ sanitize() {
 
 USER_NAME=$(sanitize "$USER_NAME")
 CLUSTER_NAME=$(sanitize "$CLUSTER_NAME")
+CLUSTER_NAME_SHORT="${CLUSTER_NAME:0:2}"
 export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
 # -----------------------------
 # RANDOM SUFFIX
 # -----------------------------
 RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
 
-export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME}-j${JOB_ID}-p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
+export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME_SHORT}${JOB_ID}-${RAND_SUFFIX}"
 #EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
 
-EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${USER_ACCESS_PORT}/login"
+if [[ "${USER_ACCESS_PORT}" == "443" ]]; then
+  EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}/login"
+else
+  EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${USER_ACCESS_PORT}/login"
+fi
 
 export SUBDOMAIN
 export EXTERNAL_URL
@@ -105,21 +129,22 @@ EOF
 chmod 600 "${PWD}/frpc.toml"
 
 ## render stage
-<%
+<% 
 require "fileutils"
-render_logs = File.join(session.staged_root, ".render_logs")
-unless File.exist?(render_logs)
-  user = `whoami`.strip
-  File.open(render_logs, "a") do |f|
-    f.puts "user=#{user}"
-  end
+render_logs = File.join(session.staged_root, "render_logs")
+user = `whoami`.strip
+File.open(render_logs, "a") do |f|
+  f.puts "user=#{user}"
+  f.puts "site_config_path=#{site_config_path}"
+  f.puts "site_config_candidates=#{site_config_candidates.join(' | ')}"
 end
 %>
 <%
 require "fileutils"
+frp_token_source_path = site_cfg["frp_token_file_path"]
 token_path = File.join(session.staged_root, ".frp_token")
 unless File.exist?(token_path)
-  src = "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/frp/.frp_token"
+  src = frp_token_source_path
   FileUtils.cp(src, token_path)
   FileUtils.chmod(0600, token_path)
 end

@@ -26,7 +26,7 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 serverurl=unix://%(ENV_CRYOSPARC_SUPERVISOR_SOCK_FILE)s
 
 [program:database]
-command=mongod -vvvvv %(ENV_CRYOSPARC_DB_ENABLE_AUTH_FLAG)s --dbpath "%(ENV_CRYOSPARC_DB_PATH)s" --port %(ENV_CRYOSPARC_MONGO_PORT)s --oplogSize 64 --replSet meteor %(ENV_CRYOSPARC_MONGO_EXTRA_FLAGS)s --wiredTigerCacheSizeGB %(ENV_CRYOSPARC_MONGO_CACHE_GB)s --bind_ip_all
+command=mongod -v %(ENV_CRYOSPARC_DB_ENABLE_AUTH_FLAG)s --dbpath "%(ENV_CRYOSPARC_DB_PATH)s" --port %(ENV_CRYOSPARC_MONGO_PORT)s --oplogSize 64 --replSet meteor %(ENV_CRYOSPARC_MONGO_EXTRA_FLAGS)s --wiredTigerCacheSizeGB %(ENV_CRYOSPARC_MONGO_CACHE_GB)s --bind_ip_all
 directory=%(ENV_CRYOSPARC_ROOT_DIR)s
 autostart=false
 autorestart=false

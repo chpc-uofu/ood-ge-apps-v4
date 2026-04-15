@@ -14,8 +14,9 @@ script:
   queue_name: "<%= custom_accpart.split(":")[1] %>"
   qos: "<%= custom_accpart.split(":")[2] %>"
   email: <%= emailaddr %>
-  <%- if /frisco/.match(cluster) == nil and /crystalpeak/.match(cluster) == nil -%>
   native:
+    - "--mail-type=TIME_LIMIT_80,TIME_LIMIT_90,FAIL"
+  <%- if /frisco/.match(cluster) == nil and /crystalpeak/.match(cluster) == nil -%>
     - "-N"
     - "1"
     - "-n"
