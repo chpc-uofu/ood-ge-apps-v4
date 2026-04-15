@@ -1,0 +1,11 @@
+Bootstrap: localimage
+From: cuda128_ubuntu22.04_base.sif
+
+%environment
+  export no_proxy=localhost,127.0.0.0/8
+  export PATH=/cryosparc_master/bin:$PATH
+  export PATH=/cryosparc_worker/bin:$PATH
+
+%post
+
+  bash /mnt/install_cryosparc_v5.0.4.sh

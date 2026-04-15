@@ -1,0 +1,5 @@
+/frp/frpc
+/frp/frps
+*.tar.gz
+*.sif
+*.log

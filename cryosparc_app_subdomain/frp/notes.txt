@@ -1,0 +1,34 @@
+# ondemand host
+podman run \
+  --name frps \
+  --restart=unless-stopped \
+  -p 7000:7000 \
+  -p 7001:7001 \
+  -v "$PWD/frps.toml:/etc/frp/frps.toml:ro" \
+  ghcr.io/fatedier/frps:v0.68.0 \
+  -c /etc/frp/frps.toml
+
+ml apptainer
+apptainer exec   --bind "$PWD/frps.toml:/etc/frp/frps.toml"   docker://ghcr.io/fatedier/frps:v0.68.0   frps -c /etc/frp/frps.toml
+
+
+# compute node:
+python3 -m http.server 9000
+
+./frpc -c frpc.toml
+
+# browser
+http://test.cryosparc.ondemand-staging.chpc.utah.edu:7001/
+
+
+# frp_token needs to be 600 but readable by user apache in production
+# file owned by you
+install -o "$USER" -g "$USER" -m 600 /dev/null /path/to/.frp_token
+printf '%s\n' 'YOUR_TOKEN' > /path/to/.frp_token
+
+# allow apache to read the file
+setfacl -m u:apache:r-- /path/to/.frp_token
+
+# allow apache to traverse the directory path
+setfacl -m u:apache:--x /path/to
+setfacl -m u:apache:--x /path/to/parent
