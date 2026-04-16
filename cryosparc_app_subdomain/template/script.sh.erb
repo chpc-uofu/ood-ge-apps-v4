@@ -28,7 +28,7 @@ cryosparc_status_healthy() {
   fi
 
   for required_service in app app_api command_core command_rtp command_vis database; do
-    if ! echo "${status_output}" | grep -Eq "^${required_service}[[:space:]]+RUNNING([[:space:]]|$)"; then
+    if ! grep -Eq "^${required_service}[[:space:]]+RUNNING([[:space:]]|$)" <<< "${status_output}"; then
       echo "CryoSPARC health check reported required service ${required_service} is not RUNNING" >&2
       echo "${status_output}"
       return 1
@@ -120,6 +120,13 @@ FRPC_PID=$!
 # Session supervisor: keep the job alive while FRP is running and CryoSPARC
 # stays healthy enough to pass the consecutive-failure threshold.
 CRYOSPARC_HEALTHCHECK_FAILURES=0
+supervisor_xtrace_was_on=0
+case "$-" in
+  *x*)
+    supervisor_xtrace_was_on=1
+    set +x
+    ;;
+esac
 while true; do
   if ! frpc_is_running; then
     echo "FRPC process exited; ending session"
@@ -139,5 +146,9 @@ while true; do
 
   sleep 5
 done
+
+if [[ "${supervisor_xtrace_was_on}" -eq 1 ]]; then
+  set -x
+fi
 
 #####################
