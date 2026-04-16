@@ -21,20 +21,19 @@ cryosparc_status_healthy() {
   status_output=$(apptainer exec "instance://${cryo_apptainer_instance}" cryosparcm status 2>&1)
   status_rc=$?
 
-  echo "${status_output}"
-
   if [[ "${status_rc}" -ne 0 ]]; then
     echo "CryoSPARC health check failed: cryosparcm status exited with ${status_rc}" >&2
+    echo "${status_output}"
     return 1
   fi
 
   for required_service in app app_api command_core command_rtp command_vis database; do
     if ! echo "${status_output}" | grep -Eq "^${required_service}[[:space:]]+RUNNING([[:space:]]|$)"; then
       echo "CryoSPARC health check reported required service ${required_service} is not RUNNING" >&2
+      echo "${status_output}"
       return 1
     fi
   done
-
   return 0
 }
 
