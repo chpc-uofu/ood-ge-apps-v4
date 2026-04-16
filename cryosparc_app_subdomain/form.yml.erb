@@ -1,10 +1,16 @@
 <%
+require "yaml"
 app_name = "Cryosparc Server (subdomain)"
 template_root = "/var/www/ood/apps/templates/"
 gpu_data = {
   gpu_partitions: CustomGPUPartitions.gpu_partitions,
   gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
 }
+site_config_path = File.expand_path("site_config.yml", __dir__)
+site_cfg = YAML.safe_load(File.read(site_config_path), aliases: false) || {}
+artifact_cfg = site_cfg["artifacts"] || {}
+v5_cfg = artifact_cfg["v5.0.4-beta"] || {}
+v4_cfg = artifact_cfg["v4.7.1-cuda12+250814"] || {}
 %>
 ---
 title: <%= app_name %>
@@ -14,6 +20,66 @@ attributes:
       cacheable: false
       value: |
         "<%= gpu_data.to_json %>"
+  cfg_frp_token_file_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frp_token_file_path"] %>"
+  cfg_frps_addr:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frps_addr"] %>"
+  cfg_frps_port:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frps_port"] %>"
+  cfg_base_domain:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["base_domain"] %>"
+  cfg_user_access_port:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["user_access_port"] %>"
+  cfg_module_apptainer:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["module_apptainer"] %>"
+  cfg_module_frp:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["module_frp"] %>"
+  cfg_v5_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["image_path"] %>"
+  cfg_v5_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["init_tarball_path"] %>"
+  cfg_v4_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_cfg["image_path"] %>"
+  cfg_v4_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_cfg["init_tarball_path"] %>"
+  cfg_site_config_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_config_path %>"
+  cfg_test_hostname:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_hostname"] %>"
+  cfg_test_pwd:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_pwd"] %>"
+  cfg_test_user:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_user"] %>"
   version:
     widget: select
     label: "Cryosparc version"
@@ -80,6 +146,21 @@ attributes:
 <% end %>   
 
 form:
+  - cfg_frp_token_file_path
+  - cfg_frps_addr
+  - cfg_frps_port
+  - cfg_base_domain
+  - cfg_user_access_port
+  - cfg_module_apptainer
+  - cfg_module_frp
+  - cfg_v5_image_path
+  - cfg_v5_init_tarball_path
+  - cfg_v4_image_path
+  - cfg_v4_init_tarball_path
+  - cfg_site_config_path
+  - cfg_test_hostname
+  - cfg_test_pwd
+  - cfg_test_user
   - version
   - cryosparc_database_root
   - cryosparc_license_id

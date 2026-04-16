@@ -1,24 +1,3 @@
-<%
-# Production: Dir.pwd --> /var/www/ood/apps/sys/dashboard
-#             App --> /var/www/ood/apps/sys/cryosparc_app_subdomain
-# Dev/Sandbox: Dir.pwd --> 
-#              App --> /var/www/ood/apps/dev/$USER/gateway/cryosparc_app_subdomain
-site_config_candidates = [
-  File.expand_path("../cryosparc_app_subdomain/site_config", Dir.pwd),
-  File.expand_path("../../dev/$USER/gateway/cryosparc_app_subdomain/site_config", Dir.pwd),
-  ]
-
-site_config_path = site_config_candidates.find do |candidate|
-  File.exist?("#{candidate}.rb")
-end
-
-if site_config_path.nil?
-  raise LoadError, "cannot load site_config; tried: #{site_config_candidates.join(', ')}"
-end
-
-require site_config_path
-site_cfg = CryoSPARCSiteConfig.load
-%>
 #!/usr/bin/env bash
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
@@ -56,13 +35,13 @@ export CRYOSPARC_PORT
 # -----------------------------
 # CONFIG (adjust these)
 # -----------------------------
-FRPS_ADDR="<%= site_cfg["frps_addr"] %>"
-FRPS_PORT="<%= site_cfg["frps_port"] %>"
+FRPS_ADDR="<%= ENV.fetch("CRYOSPARC_FRPS_ADDR", context.cfg_frps_addr.to_s) %>"
+FRPS_PORT="<%= ENV.fetch("CRYOSPARC_FRPS_PORT", context.cfg_frps_port.to_s) %>"
 
-BASE_DOMAIN="<%= site_cfg["base_domain"] %>"   # or cryosparc.example.edu
+BASE_DOMAIN="<%= ENV.fetch("CRYOSPARC_BASE_DOMAIN", context.cfg_base_domain.to_s) %>"   # or cryosparc.example.edu
 VHOST_PORT="7001"
-USER_ACCESS_PORT="<%= site_cfg["user_access_port"] %>"
-FRP_TOKEN_SOURCE_PATH="<%= site_cfg["frp_token_file_path"] %>"
+USER_ACCESS_PORT="<%= ENV.fetch("CRYOSPARC_USER_ACCESS_PORT", context.cfg_user_access_port.to_s) %>"
+FRP_TOKEN_SOURCE_PATH="<%= ENV.fetch("CRYOSPARC_FRP_TOKEN_FILE_PATH", context.cfg_frp_token_file_path.to_s) %>"
 
 
 CRYOSPARC_PORT="${port}"
@@ -138,13 +117,15 @@ render_logs = File.join(session.staged_root, "render_logs")
 user = `whoami`.strip
 File.open(render_logs, "a") do |f|
   f.puts "user=#{user}"
-  f.puts "site_config_path=#{site_config_path}"
-  f.puts "site_config_candidates=#{site_config_candidates.join(' | ')}"
+  f.puts "site_config_path=#{context.cfg_site_config_path.to_s}"
+  f.puts "test_hostname=#{ENV.fetch("HOSTNAME", context.cfg_test_hostname.to_s)}"
+  f.puts "test_pwd=#{ENV.fetch("PWD", context.cfg_test_pwd.to_s)}"
+  f.puts "test_user=#{ENV.fetch("USER", context.cfg_test_user.to_s)}"
 end
 %>
 <%
 require "fileutils"
-frp_token_source_path = site_cfg["frp_token_file_path"]
+frp_token_source_path = ENV.fetch("CRYOSPARC_FRP_TOKEN_FILE_PATH", context.cfg_frp_token_file_path.to_s)
 token_path = File.join(session.staged_root, ".frp_token")
 unless File.exist?(token_path)
   src = frp_token_source_path

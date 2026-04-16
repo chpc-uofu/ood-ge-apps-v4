@@ -1,25 +1,5 @@
 <%
 require "shellwords"
-# Production: Dir.pwd --> /var/www/ood/apps/sys/dashboard
-#             App --> /var/www/ood/apps/sys/cryosparc_app_subdomain
-# Dev/Sandbox: Dir.pwd --> 
-#              App --> /var/www/ood/apps/dev/$USER/gateway/cryosparc_app_subdomain 
-site_config_candidates = [
-  File.expand_path("../cryosparc_app_subdomain/site_config", Dir.pwd),
-  File.expand_path("../../dev/$USER/gateway/cryosparc_app_subdomain/site_config", Dir.pwd),
-  ]
-
-site_config_path = site_config_candidates.find do |candidate|
-  File.exist?("#{candidate}.rb")
-end
-
-if site_config_path.nil?
-  raise LoadError, "cannot load site_config; tried: #{site_config_candidates.join(', ')}"
-end
-
-require site_config_path
-site_cfg = CryoSPARCSiteConfig.load
-artifact_cfg = site_cfg["artifacts"]
 -%>
 #!/usr/bin/env bash
 set -x
@@ -60,8 +40,8 @@ cryosparc_status_healthy() {
 
 # Start CryoSPARC (daemon)
 module purge
-module load <%= Shellwords.escape(site_cfg["module_apptainer"]) %>
-module load <%= Shellwords.escape(site_cfg["module_frp"]) %>
+module load <%= Shellwords.escape(ENV.fetch("CRYOSPARC_MODULE_APPTAINER", context.cfg_module_apptainer.to_s)) %>
+module load <%= Shellwords.escape(ENV.fetch("CRYOSPARC_MODULE_FRP", context.cfg_module_frp.to_s)) %>
 
 export APPTAINERENV_CRYOSPARC_DATABASE_ROOT=<%= Shellwords.escape(context.cryosparc_database_root.to_s) %>
 export APPTAINERENV_USER_CRYOSPARC_DIRECTORY="${APPTAINERENV_CRYOSPARC_DATABASE_ROOT}/.cryosparc-${SELECTED_CRYO_VERSION}"
@@ -73,12 +53,12 @@ export APPTAINERENV_CRYOSPARC_ADMIN_PASSWORD=<%= Shellwords.escape(context.cryos
 
 case "$SELECTED_CRYO_VERSION" in
   "v5.0.4-beta")
-    simage_path=<%= Shellwords.escape(artifact_cfg["v5.0.4-beta"]["image_path"]) %>
-    tar_file=<%= Shellwords.escape(artifact_cfg["v5.0.4-beta"]["init_tarball_path"]) %>
+    simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_IMAGE_PATH", context.cfg_v5_image_path.to_s)) %>
+    tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_INIT_TARBALL_PATH", context.cfg_v5_init_tarball_path.to_s)) %>
     ;;
   "v4.7.1-cuda12+250814")
-    simage_path=<%= Shellwords.escape(artifact_cfg["v4.7.1-cuda12+250814"]["image_path"]) %>
-    tar_file=<%= Shellwords.escape(artifact_cfg["v4.7.1-cuda12+250814"]["init_tarball_path"]) %>
+    simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_IMAGE_PATH", context.cfg_v4_image_path.to_s)) %>
+    tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_INIT_TARBALL_PATH", context.cfg_v4_init_tarball_path.to_s)) %>
     ;;
   *)
     echo "Unsupported CryoSPARC version: $SELECTED_CRYO_VERSION" >&2
