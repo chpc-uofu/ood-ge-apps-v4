@@ -1,0 +1,36 @@
+# Default site-level CryoSPARC app settings.
+# Runtime precedence:
+# 1) CRYOSPARC_* environment variables (in templates)
+# 2) these YAML values (passed through form context as cfg_*)
+
+# Path to FRP token file copied into each session work dir.
+frp_token_file_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/frp/.frp_token"
+# FRP server hostname/IP.
+frps_addr: "155.101.26.122"
+# FRP server port.
+frps_port: "7000"
+# Base DNS domain used to build per-session subdomain URLs.
+base_domain: "cryosparc.ondemand-staging.chpc.utah.edu"
+# External user-facing HTTPS port (use "443" for default HTTPS URL without port).
+user_access_port: "8443"
+# Module name for Apptainer runtime.
+module_apptainer: "apptainer/1.4.1"
+# Module name for FRP client.
+module_frp: "frp/0.68.1"
+# Fallback for HOSTNAME when HOSTNAME is not set at render time.
+test_hostname: "yaml-fallback-hostname"
+# Fallback for PWD when PWD is not set at render time.
+test_pwd: "/tmp/yaml-fallback-pwd"
+# Fallback for USER when USER is not set at render time.
+test_user: "yaml-fallback-user"
+
+# Version-specific CryoSPARC deployment artifacts.
+artifacts:
+  # CryoSPARC v5 image and first-run init tarball.
+  v5.0.4-beta:
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5.0.4.sif"
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/cryosparc_master_run_init_files-v5.0.4.tar.gz"
+  # CryoSPARC v4 image and first-run init tarball.
+  v4.7.1-cuda12+250814:
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814.sif"
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz"
