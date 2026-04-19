@@ -32,9 +32,8 @@ sleep 10
 /cryosparc_master/bin/cryosparcm patch --yes
 /cryosparc_master/bin/cryosparcm stop
 cat /cryosparc_master/version
+cat /cryosparc_master/patch 2>/dev/null
 sleep 10
-
-exit
 
 # create a script to remove previous compute node host
 cat > /cryosparc_master/bin/remove_hosts.sh <<EOTF
@@ -66,5 +65,6 @@ echo "export no_proxy=localhost,127.0.0.0/8" >> /cryosparc_master/config.sh
 mv /cryosparc_master/config.sh /cryosparc_master/run/
 ln -s /cryosparc_master/run/config.sh /cryosparc_master/config.sh
 
-#tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
-tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run
+tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
+cp cryosparc_master_run_init_files-v4.7.1.tar.gz /mnt
+#tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run

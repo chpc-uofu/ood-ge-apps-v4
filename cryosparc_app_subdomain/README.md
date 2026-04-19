@@ -30,6 +30,8 @@ Artifact keys:
 - `artifacts.v5.0.4-beta.init_tarball_path`
 - `artifacts.v4.7.1-cuda12+250814.image_path`
 - `artifacts.v4.7.1-cuda12+250814.init_tarball_path`
+- `artifacts.v4.7.1-cuda12+251124.image_path`
+- `artifacts.v4.7.1-cuda12+251124.init_tarball_path`
 
 ## Supported Environment Overrides
 
@@ -44,6 +46,8 @@ Artifact keys:
 - `CRYOSPARC_V5_INIT_TARBALL_PATH`
 - `CRYOSPARC_V4_IMAGE_PATH`
 - `CRYOSPARC_V4_INIT_TARBALL_PATH`
+- `CRYOSPARC_V4_251124_IMAGE_PATH`
+- `CRYOSPARC_V4_251124_INIT_TARBALL_PATH`
 
 ## Files
 
@@ -69,6 +73,7 @@ Artifact keys:
 
 - Supported CryoSPARC versions:
   - `v4.7.1-cuda12+250814`
+  - `v4.7.1-cuda12+251124`
   - `v5.0.4-beta`
 - CryoSPARC user data root:
   - `${cryosparc_database_root}/.cryosparc-${SELECTED_CRYO_VERSION}`

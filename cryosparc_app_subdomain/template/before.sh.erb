@@ -67,7 +67,7 @@ export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
 # -----------------------------
 RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
 
-export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME_SHORT}${JOB_ID}-${RAND_SUFFIX}"
+export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME_SHORT}${JOB_ID}p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
 #EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
 
 if [[ "${USER_ACCESS_PORT}" == "443" ]]; then

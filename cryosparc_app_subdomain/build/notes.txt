@@ -1,17 +1,19 @@
-
-
-v4.7.1-cuda12: whole installation and update (from v4.7.1 without cuda12) share same xxxxx.tar.gz files
+v4.7.1-cuda12 needs to be built by podman or docker first due to permission inssues with apptainer build
+v5.0.4 is ok with apptainer build
 
 export LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
 
-VERSION="v4.7.1"
-#VERSION="v4.7.1-cuda12"
-#VERSION="v5.0.4"
-mkdir -p ./$VERSION
-curl -L https://get.cryosparc.com/download/master-$VERSION/$LICENSE_ID -o ./$VERSION/cryosparc_master.tar.gz
-curl -L https://get.cryosparc.com/download/worker-$VERSION/$LICENSE_ID -o ./$VERSION/cryosparc_worker.tar.gz
+#export RELEASE_VERSION="v4.7.1-cuda12"
+export RELEASE_VERSION="v5.0.4"
 
-SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --fakeroot --nv -B $PWD/$VERSION:/mnt $VERSION.sif $PWD/$VERSION/$VERSION.def
+# Pre-download installation packages
+curl -L https://get.cryosparc.com/download/master-$RELEASE_VERSION/$LICENSE_ID -o ./cryosparc_master.tar.gz
+curl -L https://get.cryosparc.com/download/worker-$RELEASE_VERSION/$LICENSE_ID -o ./cryosparc_worker.tar.gz
+
+VERSION=v5
+cd $VERSION
+APPTAINERENV_LICENSE_ID=$LICENSE_ID \
+apptainer build --fakeroot --nv -B $PWD:/mnt ./$VERSION.sif ./$VERSION.def
 
 
 
@@ -19,4 +21,4 @@ SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_I
 curl -L https://get.cryosparc.com/download/master-v5.0.4/$LICENSE_ID -o ./cryosparc_master.tar.gz
 curl -L https://get.cryosparc.com/download/worker-v5.0.4/$LICENSE_ID -o ./cryosparc_worker.tar.gz
 
-SINGULARITY_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR SINGULARITYENV_LICENSE_ID=$LICENSE_ID singularity build --fakeroot --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def
+APPTAINERE_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR APPTAINERENV_LICENSE_ID=$LICENSE_ID APPTAINERE build --fakeroot --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def

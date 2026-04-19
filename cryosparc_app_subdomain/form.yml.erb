@@ -10,7 +10,8 @@ site_config_path = File.expand_path("site_config.yml", __dir__)
 site_cfg = YAML.safe_load(File.read(site_config_path), aliases: false) || {}
 artifact_cfg = site_cfg["artifacts"] || {}
 v5_cfg = artifact_cfg["v5.0.4-beta"] || {}
-v4_cfg = artifact_cfg["v4.7.1-cuda12+250814"] || {}
+v4_250814_cfg = artifact_cfg["v4.7.1-cuda12+250814"] || {}
+v4_251124_cfg = artifact_cfg["v4.7.1-cuda12+251124"] || {}
 %>
 ---
 title: <%= app_name %>
@@ -56,14 +57,34 @@ attributes:
     widget: hidden_field
     cacheable: false
     value: "<%= v5_cfg["init_tarball_path"] %>"
+  cfg_v5_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["supervisord_conf_path"] %>"
   cfg_v4_image_path:
     widget: hidden_field
     cacheable: false
-    value: "<%= v4_cfg["image_path"] %>"
+    value: "<%= v4_250814_cfg["image_path"] %>"
   cfg_v4_init_tarball_path:
     widget: hidden_field
     cacheable: false
-    value: "<%= v4_cfg["init_tarball_path"] %>"
+    value: "<%= v4_250814_cfg["init_tarball_path"] %>"
+  cfg_v4_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_250814_cfg["supervisord_conf_path"] %>"
+  cfg_v4_251124_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["image_path"] %>"
+  cfg_v4_251124_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["init_tarball_path"] %>"
+  cfg_v4_251124_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["supervisord_conf_path"] %>"
   cfg_site_config_path:
     widget: hidden_field
     cacheable: false
@@ -86,6 +107,7 @@ attributes:
     help: "This defines the version of Crypsparc you want to load."
     options:
       - [ "v4.7.1-cuda12+250814", "v4.7.1-cuda12+250814"]
+      - [ "v4.7.1-cuda12+251124", "v4.7.1-cuda12+251124"]
       - [ "v5.0.4-beta", "v5.0.4-beta"]
   cryosparc_license_id:
     widget: 'password_field'
@@ -155,8 +177,13 @@ form:
   - cfg_module_frp
   - cfg_v5_image_path
   - cfg_v5_init_tarball_path
+  - cfg_v5_supervisord_conf_path
   - cfg_v4_image_path
   - cfg_v4_init_tarball_path
+  - cfg_v4_supervisord_conf_path
+  - cfg_v4_251124_image_path
+  - cfg_v4_251124_init_tarball_path
+  - cfg_v4_251124_supervisord_conf_path
   - cfg_site_config_path
   - cfg_test_hostname
   - cfg_test_pwd

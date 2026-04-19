@@ -41,6 +41,7 @@ ENV PATH=/cryosparc_master/bin:/cryosparc_worker/bin:${PATH}
 
 ARG LICENSE_ID
 ENV LICENSE_ID=${LICENSE_ID}
+
 RUN --mount=type=bind,source=.,target=/mnt \
     bash /mnt/install_cryosparc_v4.7.1.sh
 
