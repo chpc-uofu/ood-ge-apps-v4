@@ -12,6 +12,7 @@ echo $first_launch
 
 cryo_port=$CRYOSPARC_BASE_PORT
 echo $cryo_port
+echo $cryo_port > /CRYOSPARC_BASE_PORT
 
 echo $CRYOSPARC_LICENSE_ID > $user_cryosparc_directory/cryosparc_license/license_id
 chmod 600 $user_cryosparc_directory/cryosparc_license/license_id
@@ -111,7 +112,7 @@ if [ "$first_launch" = true ]; then
     # first launch order of commands
     echo "=== initializing first launch"
     cryosparcm start
-    # sleep 10
+    sleep 5
     cryosparcm checkdb
     cryosparcm createuser \
       --email "${CRYOSPARC_ADMIN_EMAIL}" \
@@ -121,9 +122,9 @@ if [ "$first_launch" = true ]; then
       --lastname "admin"
 else
     cryosparcm stop
-    # sleep 5
+    sleep 5
     cryosparcm start database
-    # sleep 10
+    sleep 5
     if [[ "${SELECTED_CRYO_VERSION}" == *"v5."* ]]; then
         echo "=== existing instance: using v5 database fixport command"
         cryosparcm database fixport
@@ -133,7 +134,7 @@ else
     fi
     # sleep 5
     cryosparcm restart
-    # sleep 5
+    sleep 5
     # clear previous worker node
     remove_hosts.sh
     # sleep 5

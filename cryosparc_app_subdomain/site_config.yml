@@ -39,9 +39,20 @@ artifacts:
     image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5.0.4.sif"
     # Fallback for ENV: CRYOSPARC_V5_INIT_TARBALL_PATH
     init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/cryosparc_master_run_init_files-v5.0.4.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: ""
   # CryoSPARC v4 image and first-run init tarball.
   v4.7.1-cuda12+250814:
     # Fallback for ENV: CRYOSPARC_V4_IMAGE_PATH
-    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/INSTALL/cryosparc-v4.7.1-cuda12+250814.sif"
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc-v4.7.1-cuda12+250814.sif"
     # Fallback for ENV: CRYOSPARC_V4_INIT_TARBALL_PATH
-    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/dor-hprc-ood-apps/cryosparc/bk_cryosparc_master_run_init_files-v4.7.1.tar.gz"
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_master_run_init_files-v4.7.1-cuda12+250814.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/supervisord.conf_daemon_v4.7.1-cuda12+250814"
+  v4.7.1-cuda12+251124:
+    # Fallback for ENV: CRYOSPARC_V4_IMAGE_PATH
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_v4.7.1-cuda12+251124.sif"
+    # Fallback for ENV: CRYOSPARC_V4_INIT_TARBALL_PATH
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_master_run_init_files-v4.7.1-cuda12+251124.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/supervisord.conf_daemon_v4.7.1-cuda12+251124"

@@ -22,14 +22,14 @@ cryosparc_status_healthy() {
   status_rc=$?
 
   if [[ "${status_rc}" -ne 0 ]]; then
-    echo "CryoSPARC health check failed: cryosparcm status exited with ${status_rc}" >&2
+    echo "CryoSPARC health check failed for profile ${CRYOSPARC_HEALTHCHECK_PROFILE}: cryosparcm status exited with ${status_rc}" >&2
     echo "${status_output}"
     return 1
   fi
 
-  for required_service in app app_api command_core command_rtp command_vis database; do
+  for required_service in "${CRYOSPARC_REQUIRED_SERVICES[@]}"; do
     if ! grep -Eq "^${required_service}[[:space:]]+RUNNING([[:space:]]|$)" <<< "${status_output}"; then
-      echo "CryoSPARC health check reported required service ${required_service} is not RUNNING" >&2
+      echo "CryoSPARC health check reported profile ${CRYOSPARC_HEALTHCHECK_PROFILE} missing required service ${required_service} (not RUNNING)" >&2
       echo "${status_output}"
       return 1
     fi
@@ -50,14 +50,29 @@ export APPTAINERENV_CRYOSPARC_ADMIN_EMAIL="${USER}@cryo.edu"
 export APPTAINERENV_USE_CUSTOM_ADMIN_PASSWORD=<%= Shellwords.escape(context.use_custom_admin_password.to_s) %>
 export APPTAINERENV_CRYOSPARC_ADMIN_PASSWORD=<%= Shellwords.escape(context.cryosparc_admin_password.to_s) %>
 
+supervisord_conf_path=""
+
 case "$SELECTED_CRYO_VERSION" in
   "v5.0.4-beta")
     simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_IMAGE_PATH", context.cfg_v5_image_path.to_s)) %>
     tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_INIT_TARBALL_PATH", context.cfg_v5_init_tarball_path.to_s)) %>
+    supervisord_conf_path=<%= Shellwords.escape(context.cfg_v5_supervisord_conf_path.to_s) %>
+    CRYOSPARC_HEALTHCHECK_PROFILE="v5"
+    CRYOSPARC_REQUIRED_SERVICES=(app app_api command_vis database scheduler)
     ;;
   "v4.7.1-cuda12+250814")
     simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_IMAGE_PATH", context.cfg_v4_image_path.to_s)) %>
     tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_INIT_TARBALL_PATH", context.cfg_v4_init_tarball_path.to_s)) %>
+    supervisord_conf_path=<%= Shellwords.escape(context.cfg_v4_supervisord_conf_path.to_s) %>
+    CRYOSPARC_HEALTHCHECK_PROFILE="v4"
+    CRYOSPARC_REQUIRED_SERVICES=(app app_api command_core command_rtp command_vis database)
+    ;;
+  "v4.7.1-cuda12+251124")
+    simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_251124_IMAGE_PATH", context.cfg_v4_251124_image_path.to_s)) %>
+    tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V4_251124_INIT_TARBALL_PATH", context.cfg_v4_251124_init_tarball_path.to_s)) %>
+    supervisord_conf_path=<%= Shellwords.escape(context.cfg_v4_251124_supervisord_conf_path.to_s) %>
+    CRYOSPARC_HEALTHCHECK_PROFILE="v4"
+    CRYOSPARC_REQUIRED_SERVICES=(app app_api command_core command_rtp command_vis database)
     ;;
   *)
     echo "Unsupported CryoSPARC version: $SELECTED_CRYO_VERSION" >&2
@@ -68,7 +83,7 @@ esac
 user_cryosparc_directory=$APPTAINERENV_USER_CRYOSPARC_DIRECTORY
 
 if [ ! -d "$user_cryosparc_directory" ]; then
-    echo "first launch"
+    echo "****** First Launch *******"
     export APPTAINERENV_FIRST_LAUNCH=true
     mkdir -p "$user_cryosparc_directory"
     mkdir "$user_cryosparc_directory/cryosparc_license"
@@ -78,22 +93,31 @@ if [ ! -d "$user_cryosparc_directory" ]; then
 
     tar xzf $tar_file -C $user_cryosparc_directory
 else
-    echo "NOT first launch"
+    echo "******** NOT first launch *********"
     export APPTAINERENV_FIRST_LAUNCH=false
 fi
 
 cryo_apptainer_instance="ood_cryosparc_${SUBDOMAIN}"
 echo $cryo_apptainer_instance
 
+apptainer_bind_args=(
+  -B "$user_cryosparc_directory/cryosparc_master/run:/cryosparc_master/run"
+  -B "$TMPDIR:/tmp"
+  -B /uufs
+  -B /scratch
+  -B "$user_cryosparc_directory/cryosparc_database:/cryosparc_database"
+  -B "$user_cryosparc_directory/cryosparc_cache:/cryosparc_cache"
+  -B "$user_cryosparc_directory/cryosparc_license:/cryosparc_license"
+)
+
+if [[ -n "$supervisord_conf_path" && -f "$supervisord_conf_path" ]]; then
+  apptainer_bind_args+=(-B "${supervisord_conf_path}:/cryosparc_master/supervisord.conf")
+fi
+
 apptainer instance start --writable-tmpfs --nv \
--B $user_cryosparc_directory/cryosparc_master/run:/cryosparc_master/run \
--B $TMPDIR:/tmp -B /uufs -B /scratch \
--B $user_cryosparc_directory/cryosparc_database:/cryosparc_database \
--B $user_cryosparc_directory/cryosparc_cache:/cryosparc_cache \
--B $user_cryosparc_directory/cryosparc_license:/cryosparc_license \
--B ${PWD}/supervisord.conf_daemon:/cryosparc_master/supervisord.conf \
-$simage_path \
-$cryo_apptainer_instance
+  "${apptainer_bind_args[@]}" \
+  "$simage_path" \
+  "$cryo_apptainer_instance"
 
 apptainer exec instance://$cryo_apptainer_instance ${PWD}/cryosparc_container_startup.sh
 
@@ -120,6 +144,9 @@ FRPC_PID=$!
 # Session supervisor: keep the job alive while FRP is running and CryoSPARC
 # stays healthy enough to pass the consecutive-failure threshold.
 CRYOSPARC_HEALTHCHECK_FAILURES=0
+CRYOSPARC_HEALTHCHECK_WARMUP_SECONDS="${CRYOSPARC_HEALTHCHECK_WARMUP_SECONDS:-90}"
+CRYOSPARC_HEALTHCHECK_START_TS=$(date +%s)
+CRYOSPARC_HEALTHCHECK_WARMUP_END_TS=$((CRYOSPARC_HEALTHCHECK_START_TS + CRYOSPARC_HEALTHCHECK_WARMUP_SECONDS))
 supervisor_xtrace_was_on=0
 case "$-" in
   *x*)
@@ -134,11 +161,17 @@ while true; do
   fi
 
   if ! cryosparc_status_healthy; then
-    CRYOSPARC_HEALTHCHECK_FAILURES=$((CRYOSPARC_HEALTHCHECK_FAILURES + 1))
-    echo "CryoSPARC health check failed ${CRYOSPARC_HEALTHCHECK_FAILURES} consecutive time(s)" >&2
-    if [[ "${CRYOSPARC_HEALTHCHECK_FAILURES}" -ge 3 ]]; then
-      echo "CryoSPARC services are unhealthy after 3 consecutive failed checks; ending session" >&2
-      break
+    now_ts=$(date +%s)
+    if (( now_ts < CRYOSPARC_HEALTHCHECK_WARMUP_END_TS )); then
+      warmup_remaining=$((CRYOSPARC_HEALTHCHECK_WARMUP_END_TS - now_ts))
+      echo "CryoSPARC health check failed during warm-up (${warmup_remaining}s remaining); not counting failure yet" >&2
+    else
+      CRYOSPARC_HEALTHCHECK_FAILURES=$((CRYOSPARC_HEALTHCHECK_FAILURES + 1))
+      echo "CryoSPARC health check failed ${CRYOSPARC_HEALTHCHECK_FAILURES} consecutive time(s)" >&2
+      if [[ "${CRYOSPARC_HEALTHCHECK_FAILURES}" -ge 3 ]]; then
+        echo "CryoSPARC services are unhealthy after 3 consecutive failed checks; ending session" >&2
+        break
+      fi
     fi
   else
     CRYOSPARC_HEALTHCHECK_FAILURES=0
