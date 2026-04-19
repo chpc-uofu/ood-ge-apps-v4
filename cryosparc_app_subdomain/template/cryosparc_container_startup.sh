@@ -132,7 +132,7 @@ else
         echo "=== existing instance: using legacy fixdbport command"
         cryosparcm fixdbport
     fi
-    # sleep 5
+    sleep 5
     cryosparcm restart
     sleep 5
     # clear previous worker node
@@ -142,7 +142,7 @@ else
     cryosparcm status
 fi
 
-# sleep 5
+sleep 5
 # connect current compute node
 # use local SSD up to 1TB
 cryosparcw connect \
@@ -156,7 +156,7 @@ cryosparcw connect \
     --ssdquota 1000000 \
     $usegpu
 
-# sleep 5
+sleep 5
 
 if [[ "${SELECTED_CRYO_VERSION}" == *"v4."* ]]; then
     # update worker node with ssdquota since it doesn't work with the first connection command (maybe it does in newer versions)
@@ -166,7 +166,7 @@ if [[ "${SELECTED_CRYO_VERSION}" == *"v4."* ]]; then
         --worker localhost \
         --master localhost \
         --update --ssdquota 1000000
-    # sleep 5
+    sleep 5
 fi
 
 cryosparcm env

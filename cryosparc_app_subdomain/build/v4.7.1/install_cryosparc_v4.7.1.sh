@@ -66,4 +66,5 @@ mv /cryosparc_master/config.sh /cryosparc_master/run/
 ln -s /cryosparc_master/run/config.sh /cryosparc_master/config.sh
 
 tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
+cp cryosparc_master_run_init_files-v4.7.1.tar.gz /mnt
 #tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run

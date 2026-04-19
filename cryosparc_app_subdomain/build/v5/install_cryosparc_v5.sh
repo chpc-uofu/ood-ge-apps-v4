@@ -32,13 +32,13 @@ sleep 60
 /cryosparc_master/bin/cryosparcm patch --yes
 /cryosparc_master/bin/cryosparcm stop
 
-# create a script to remove previous compute node host
-cat > /cryosparc_master/bin/remove_hosts.sh <<EOTF
-#!/usr/bin/env bash
+# # create a script to remove previous compute node host
+# cat > /cryosparc_master/bin/remove_hosts.sh <<EOTF
+# #!/usr/bin/env bash
 
-/cryosparc_master/bin/cryosparcm cli 'get_scheduler_targets()'  | /usr/bin/python3 -c "import sys, ast, json; print( json.dumps(ast.literal_eval(sys.stdin.readline())) )" | /usr/bin/jq '.[].name' | sed 's:"::g' | xargs -I \{\} /cryosparc_master/bin/cryosparcm cli 'remove_scheduler_target_node("'{}'")'
+# /cryosparc_master/bin/cryosparcm cli 'get_scheduler_targets()'  | /usr/bin/python3 -c "import sys, ast, json; print( json.dumps(ast.literal_eval(sys.stdin.readline())) )" | /usr/bin/jq '.[].name' | sed 's:"::g' | xargs -I \{\} /cryosparc_master/bin/cryosparcm cli 'remove_scheduler_target_node("'{}'")'
 
-EOTF
+# EOTF
 chmod +x /cryosparc_master/bin/remove_hosts.sh
 
 # edit config.sh
@@ -62,7 +62,7 @@ echo "export no_proxy=localhost,127.0.0.0/8" >> /cryosparc_master/config.sh
 mv /cryosparc_master/config.sh /cryosparc_master/run/
 ln -s /cryosparc_master/run/config.sh /cryosparc_master/config.sh
 
-#tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
-tar czf /cryosparc_master_run_init_files-$VERSION.tar.gz /cryosparc_master/run
+tar czf /cryosparc_master_run_init_files-$VERSION.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
 cp /cryosparc_master_run_init_files-$VERSION.tar.gz /mnt
+cp /cryosparc_master/supervisord.conf /mnt
 echo "Done"
