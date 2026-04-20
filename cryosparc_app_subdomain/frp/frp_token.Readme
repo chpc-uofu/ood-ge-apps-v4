@@ -1,0 +1,5 @@
+# Create file (".frp_token") in this folder following the format below:
+# Fill in token string used by FRPS
+# Update "frp_token_file_path" in site_config.yml to reference this file
+Line 1: Token string
+Line 2: blank line

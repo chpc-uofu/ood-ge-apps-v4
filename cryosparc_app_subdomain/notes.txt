@@ -1,0 +1,16 @@
+A Cryosparc License ID is required, and you can request an individual academic license id from cryosparc.com/download;
+
+Each user can have only ONE (1) active Cryosparc instance at any time;
+
+Database will be stored at the location of you choice (Database Root) on a per-version basis.
+Next time when you start a new instance of same version, the previously stored database will be reused.
+Cryosparc database may grow fast, so you need to select a location with enough space.
+Database might get corrupted if Database Root is full and writings are blocked.
+Note that the free-tier HOME space is capped at 50G/user.
+
+You will use a local Cryosparc account to access your instance, which is separate from your CHPC account.
+The username is fixed at <uNID>>@cryo.edu, and you can set up a password in OOD UI or default password will be the first 4 characters of the License ID.
+
+You will receive slurm emails when your instance reaches 80% and 90% of walltime.
+We recommend saving your work and manually shutting down the instance before walltime.
+

@@ -3,3 +3,4 @@
 *.tar.gz
 *.sif
 *.log
+.frp_token
