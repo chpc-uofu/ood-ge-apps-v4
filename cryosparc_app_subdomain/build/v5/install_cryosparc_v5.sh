@@ -31,6 +31,11 @@ sleep 60
 
 /cryosparc_master/bin/cryosparcm patch --yes
 /cryosparc_master/bin/cryosparcm stop
+sleep 10
+cat /cryosparc_master/version
+cat /cryosparc_master/patch 2>/dev/null
+cat /cryosparc_worker/version
+cat /cryosparc_worker/patch 2>/dev/null
 
 # # create a script to remove previous compute node host
 # cat > /cryosparc_master/bin/remove_hosts.sh <<EOTF

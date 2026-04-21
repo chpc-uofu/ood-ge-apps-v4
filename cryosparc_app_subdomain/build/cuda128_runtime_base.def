@@ -1,0 +1,19 @@
+# ml apptainer
+# unset APPTAINER_BINDPATH
+# apptainer build --nv cuda128_runtime_base.sif cuda128_runtime_base.def 2>&1 | tee build.log
+
+BootStrap: docker
+From: nvidia/cuda:12.8.1-runtime-ubuntu22.04
+%setup
+  mkdir -p /uufs
+  mkdir -p /scratch
+%post
+  apt-get update
+  apt-get upgrade -y
+  ln -snf /usr/share/zoneinfo/America/Denver /etc/localtime && echo America/Denver > /etc/timezone
+  DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
+  apt-get install -y --no-install-recommends tzdata locales language-pack-en gnupg2 openssh-server openssh-client ssh-askpass lbzip2 zip
+  apt-get install -y software-properties-common wget curl less jq iputils-ping nano vim
+
+
+

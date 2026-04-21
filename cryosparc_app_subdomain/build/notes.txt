@@ -1,24 +1,24 @@
-v4.7.1-cuda12 needs to be built by podman or docker first due to permission inssues with apptainer build
-v5.0.4 is ok with apptainer build
+Due to tricky permission issues with Apptainer direct build from Def
+v4.7.1-cuda12 must to be built by Podman or Docker first and converted to sif 
+See Dockerfile in v4.7.1 folder
+
+v5.0.4 is OK with Apptainer direct build from Def
 
 export LICENSE_ID=cd5d7832-ae84-11f0-b06a-df8cfaccd61d
 
+# Pre-download installation packages
 #export RELEASE_VERSION="v4.7.1-cuda12"
 export RELEASE_VERSION="v5.0.4"
-
-# Pre-download installation packages
 curl -L https://get.cryosparc.com/download/master-$RELEASE_VERSION/$LICENSE_ID -o ./cryosparc_master.tar.gz
 curl -L https://get.cryosparc.com/download/worker-$RELEASE_VERSION/$LICENSE_ID -o ./cryosparc_worker.tar.gz
 
-VERSION=v5
-cd $VERSION
-APPTAINERENV_LICENSE_ID=$LICENSE_ID \
-apptainer build --fakeroot --nv -B $PWD:/mnt ./$VERSION.sif ./$VERSION.def
 
-
-
-
-curl -L https://get.cryosparc.com/download/master-v5.0.4/$LICENSE_ID -o ./cryosparc_master.tar.gz
-curl -L https://get.cryosparc.com/download/worker-v5.0.4/$LICENSE_ID -o ./cryosparc_worker.tar.gz
-
-APPTAINERE_CACHEDIR=$TMPDIR SREGISTRY_DATABASE=$TMPDIR APPTAINERENV_LICENSE_ID=$LICENSE_ID APPTAINERE build --fakeroot --nv -B $PWD:/mnt v5.0.4.sif v5.0.4.def
+# Must build on a GPU node. 
+# ml apptainer
+# unset APPTAINER_BINDPATH
+# export LICENSE_ID=xxxxxx
+# VERSION=v5
+# cd $VERSION
+# APPTAINERENV_LICENSE_ID=$LICENSE_ID \
+# APPTAINERE_CACHEDIR=$TMPDIR \
+# apptainer build --fakeroot --nv -B $PWD:/mnt ./$VERSION.sif ./$VERSION.def 2>&1 | tee build.log

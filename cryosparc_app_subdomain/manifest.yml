@@ -1,7 +1,7 @@
 ---
-name: Cryosparc Server (subdomain)
+name: Cryosparc Server
 category: Interactive Apps
 subcategory: Servers
 role: batch_connect
 description: |
-  Cryosparc Server (subdomain)
+  Cryosparc Server

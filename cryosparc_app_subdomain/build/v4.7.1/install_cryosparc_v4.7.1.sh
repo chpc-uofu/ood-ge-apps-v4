@@ -17,6 +17,19 @@ sed -i '/ping -c/ { N; N; N; s/^/#/; s/\n/&#/g }' /cryosparc_master/install.sh
 
 cd /cryosparc_master && ./install.sh --standalone --yes    --hostname localhost    --license $LICENSE_ID   --worker_path /cryosparc_worker   --port 39000   --nossd    --initial_email "admin@cryo.edu"               --initial_password "admin"               --initial_username "admin"               --initial_firstname "admin"               --initial_lastname "admin"
 
+# Fallback if NO GPU is present
+# If the above command fails due to NO GPU,
+# we try running the following command to connect the worker to the master without GPU.
+/cryosparc_worker/bin/cryosparcw connect \
+    --worker localhost \
+    --master localhost \
+    --port 39000 \
+    --nossd \
+    --cpus 1 \
+    --lane default \
+    --newlane \
+    --nogpu
+
 # add a new user (optional)
 # cryosparcm createuser --email "user@organization" --password "init-password" --username "myuser" --firstname "John" --lastname "Doe"
 cat /cryosparc_master/version
@@ -28,11 +41,18 @@ sleep 10
 #/cryosparc_master/bin/cryosparcm update --version=v4.7.1-cuda12
 #cat /cryosparc_master/version
 #sleep 10
-
+/cryosparc_master/bin/cryosparcm patch --download
+cp /cryosparc_master/cryosparc_*_patch.tar.gz /mnt/
+mv /cryosparc_master/cryosparc_worker_patch.tar.gz /cryosparc_worker
 /cryosparc_master/bin/cryosparcm patch --yes
+/cryosparc_worker/bin/cryosparcw patch --yes
+#/cryosparc_master/bin/cryosparcm restart
+
 /cryosparc_master/bin/cryosparcm stop
 cat /cryosparc_master/version
 cat /cryosparc_master/patch 2>/dev/null
+cat /cryosparc_worker/version
+cat /cryosparc_worker/patch 2>/dev/null
 sleep 10
 
 # create a script to remove previous compute node host
@@ -66,5 +86,6 @@ mv /cryosparc_master/config.sh /cryosparc_master/run/
 ln -s /cryosparc_master/run/config.sh /cryosparc_master/config.sh
 
 tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run && rm -rf /cryosparc_master/run/
-cp cryosparc_master_run_init_files-v4.7.1.tar.gz /mnt
+cp /cryosparc_master_run_init_files-v4.7.1.tar.gz /mnt/
 #tar czf /cryosparc_master_run_init_files-v4.7.1.tar.gz /cryosparc_master/run
+echo "Done"
