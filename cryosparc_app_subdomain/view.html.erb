@@ -1,7 +1,28 @@
-
 <div class="alert alert-info">
-  CryoSPARC is available at:
-  <a href="<%= external_url %>" target="_blank">
-    <%= external_url %>
+  <div style="font-weight: 600; margin-bottom: 0.75rem;">
+    CryoSPARC entry point:
+  </div>
+  <ol style="margin-top: 0; margin-bottom: 0.9rem; padding-left: 1.25rem;">
+    <li style="margin-bottom: 0.35rem;">
+      Sign in with your CHPC/UofUtah credentials if the UU login page shows up.
+    </li>
+    <li>
+      Then, sign in to CryoSPARC with
+      <strong><%= ENV["USER"] %>@cryo.edu + password</strong>
+      you set during app launch
+      (default password: the first 4 characters of the License ID).
+    </li>
+  </ol>
+  <a
+    class="btn btn-primary"
+    href="<%= external_url %>"
+    target="_blank"
+    rel="noopener noreferrer"
+    style="margin-bottom: 0.75rem;"
+  >
+    Open CryoSPARC
   </a>
+  <div style="font-size: 0.9rem; color: #4f5b66; word-break: break-all;">
+    <strong>URL:</strong> <%= external_url %>
+  </div>
 </div>
