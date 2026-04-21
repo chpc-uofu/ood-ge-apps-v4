@@ -1,4 +1,4 @@
-# CryoSPARC Server
+# CryoSPARC Server in Open OnDemand
 
 This Open OnDemand (OOD) app launches a per-user CryoSPARC instance on the HPC cluster. Both the CryoSPARC Master and Worker run within the same Slurm job on a GPU compute node.
 
