@@ -106,7 +106,6 @@ attributes:
     label: "Cryosparc version"
     help: "This defines the version of Crypsparc you want to load."
     options:
-      - [ "v4.7.1-cuda12+250814", "v4.7.1-cuda12+250814"]
       - [ "v4.7.1-cuda12+251124", "v4.7.1-cuda12+251124"]
       - [ "v5.0.4-beta", "v5.0.4-beta"]
   cryosparc_license_id:
@@ -135,7 +134,7 @@ attributes:
     help: "Used only when the custom admin password checkbox is checked."
   cryosparc_database_root:
     widget: path_selector
-    label: "Cryosparc Database Root (permanent storage)"
+    label: "Cryosparc Database Root (permanent storage with enough free space)"
     directory: "<%= ENV["HOME"] %>"
     value: "<%= ENV["HOME"] %>"
     show_files: false

@@ -1,16 +1,20 @@
-A Cryosparc License ID is required, and you can request an individual academic license id from cryosparc.com/download;
+This Open OnDemand (OOD) app launches a per-user CryoSPARC instance on the HPC cluster, which you can access from your local web browser.
+Both CryoSPARC Master and Worker run within the same Slurm job on a GPU compute node.
 
-Each user can have only ONE (1) active Cryosparc instance at any time;
+A CryoSPARC License ID is required. You can request an individual academic license ID at cryosparc.com/download.
 
-Database will be stored at the location of you choice (Database Root) on a per-version basis.
-Next time when you start a new instance of same version, the previously stored database will be reused.
-Cryosparc database may grow fast, so you need to select a location with enough space.
-Database might get corrupted if Database Root is full and writings are blocked.
+Each user can have only ONE (1) active Cryosparc instance at any time.
+
+The CryoSPARC database will be stored in the location you choose as the "Database Root", on a per-app-version basis.
+When you start a new instance of the same version later, the previously stored database will be reused.
+CryoSPARC databases may grow quickly, so choose a location with enough available space.
+If the Database Root becomes full and writes are blocked, the database may become corrupted.
 Note that the free-tier HOME space is capped at 50G/user.
 
-You will use a local Cryosparc account to access your instance, which is separate from your CHPC account.
-The username is fixed at <uNID>>@cryo.edu, and you can set up a password in OOD UI or default password will be the first 4 characters of the License ID.
+Access to the launched CryoSPARC instance is protected by both CHPC login and CryoSPARC's native login.
+After signing in with uNID credentials, you will be directed to CryoSPARC's login page.
+Your CryoSPARC native username is fixed as <uNID>@cryo.edu. You can set a password in the OOD UI, or use the default password, which is the first 4 characters of the License ID.
 
-You will receive slurm emails when your instance reaches 80% and 90% of walltime.
+You will receive Slurm email notifications when your instance reaches 80% and 90% of its walltime.
 We recommend saving your work and manually shutting down the instance before walltime.
 
