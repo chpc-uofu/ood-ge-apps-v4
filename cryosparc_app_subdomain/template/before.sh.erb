@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+CRYOSPARC_SUBDOMAIN_JOB_NAME="ondemand/sys/dashboard/<%= File.basename(File.dirname(File.dirname(File.dirname(session.staged_root.to_s)))) %>/<%= File.basename(File.dirname(File.dirname(session.staged_root.to_s))) %>"
+
+existing_cryosparc_job_id=$(
+  squeue -M All -h -u "${USER}" -t RUNNING,PENDING -o "%i|%j" 2>/dev/null | \
+    awk -F'|' -v job_name="${CRYOSPARC_SUBDOMAIN_JOB_NAME}" -v current_job_id="${SLURM_JOB_ID:-}" '
+      $2 == job_name && $1 != current_job_id { print $1; exit }
+    '
+)
+
+if [[ -n "${existing_cryosparc_job_id}" ]]; then
+  echo "You already have a running or queued CryoSPARC subdomain session. Stop that session before starting another."
+  exit 1
+fi
+
+export OOD_SESSION_ID="<%= File.basename(session.staged_root.to_s) %>"
+echo "$OOD_SESSION_ID"
+
+export SELECTED_CRYO_VERSION="<%= context.version %>"
+echo "Selected version: $SELECTED_CRYO_VERSION"
+
+# port=$(find_port ${host} 2000 30000)
+# echo "nginx port=$port"
+
+# Find available port to run cryosparc server on
+export port=$(find_port ${host} 30001 65535)
+echo "cryosparc port=$port"
+CRYOSPARC_PORT=$port
+export CRYOSPARC_PORT
+
+
+# -----------------------------
+# CONFIG (adjust these)
+# -----------------------------
+FRPS_ADDR="<%= ENV.fetch("CRYOSPARC_FRPS_ADDR", context.cfg_frps_addr.to_s) %>"
+FRPS_PORT="<%= ENV.fetch("CRYOSPARC_FRPS_PORT", context.cfg_frps_port.to_s) %>"
+
+BASE_DOMAIN="<%= ENV.fetch("CRYOSPARC_BASE_DOMAIN", context.cfg_base_domain.to_s) %>"   # or cryosparc.example.edu
+VHOST_PORT="7001"
+USER_ACCESS_PORT="<%= ENV.fetch("CRYOSPARC_USER_ACCESS_PORT", context.cfg_user_access_port.to_s) %>"
+FRP_TOKEN_SOURCE_PATH="<%= ENV.fetch("CRYOSPARC_FRP_TOKEN_FILE_PATH", context.cfg_frp_token_file_path.to_s) %>"
+
+
+CRYOSPARC_PORT="${port}"
+CLUSTER_NAME="${SLURM_CLUSTER_NAME:-cluster}"
+
+# -----------------------------
+# JOB CONTEXT
+# -----------------------------
+JOB_ID="${SLURM_JOB_ID:-jobid}"
+USER_NAME="${USER:-user}"
+
+# sanitize (DNS-safe)
+sanitize() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-'
+}
+
+USER_NAME=$(sanitize "$USER_NAME")
+CLUSTER_NAME=$(sanitize "$CLUSTER_NAME")
+CLUSTER_NAME_SHORT="${CLUSTER_NAME:0:2}"
+export OOD_SESSION_ID_SHORT="${OOD_SESSION_ID:0:4}"
+# -----------------------------
+# RANDOM SUFFIX
+# -----------------------------
+RAND_SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 4)
+
+export SUBDOMAIN="${USER_NAME}-o${OOD_SESSION_ID_SHORT}-${CLUSTER_NAME_SHORT}${JOB_ID}p${CRYOSPARC_PORT}-${RAND_SUFFIX}"
+#EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${VHOST_PORT}/login"
+
+if [[ "${USER_ACCESS_PORT}" == "443" ]]; then
+  EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}/login"
+else
+  EXTERNAL_URL="https://${SUBDOMAIN}.${BASE_DOMAIN}:${USER_ACCESS_PORT}/login"
+fi
+
+export SUBDOMAIN
+export EXTERNAL_URL
+
+export external_url=$EXTERNAL_URL
+
+echo "Subdomain: $SUBDOMAIN"
+echo "URL: $EXTERNAL_URL"
+
+# -----------------------------
+# GENERATE FRPC CONFIG
+# -----------------------------
+export TOKEN_FILE="${PWD}/.frp_token"
+cat > "${PWD}/.frpc.toml" <<EOF
+serverAddr = "${FRPS_ADDR}"
+serverPort = ${FRPS_PORT}
+
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "${TOKEN_FILE}"
+loginFailExit = false
+
+transport.dialServerTimeout = 30
+transport.heartbeatInterval = 30
+transport.heartbeatTimeout = 120
+
+[[proxies]]
+name = "cryosparc-${USER_NAME}-${JOB_ID}"
+type = "http"
+localIP = "127.0.0.1"
+localPort = ${CRYOSPARC_PORT}
+subdomain = "${SUBDOMAIN}"
+EOF
+
+chmod 600 "${PWD}/.frpc.toml"
+
+## render stage
+<% 
+require "fileutils"
+render_logs = File.join(session.staged_root, "render_logs")
+user = `whoami`.strip
+File.open(render_logs, "a") do |f|
+  f.puts "user=#{user}"
+  f.puts "site_config_path=#{context.cfg_site_config_path.to_s}"
+  f.puts "test_hostname=#{ENV.fetch("HOSTNAME", context.cfg_test_hostname.to_s)}"
+  f.puts "test_pwd=#{ENV.fetch("PWD", context.cfg_test_pwd.to_s)}"
+  f.puts "test_user=#{ENV.fetch("USER", context.cfg_test_user.to_s)}"
+end
+%>
+<%
+require "fileutils"
+frp_token_source_path = ENV.fetch("CRYOSPARC_FRP_TOKEN_FILE_PATH", context.cfg_frp_token_file_path.to_s)
+token_path = File.join(session.staged_root, ".frp_token")
+unless File.exist?(token_path)
+  src = frp_token_source_path
+  FileUtils.cp(src, token_path)
+  FileUtils.chmod(0600, token_path)
+end
+%>

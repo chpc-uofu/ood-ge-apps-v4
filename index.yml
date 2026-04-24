@@ -55,6 +55,7 @@ entries:
   multitenant-jupyter: []
   multitenant-llm: []
   ollama_openwebui-OOD: []
+  cryosparc_app_subdomain: []
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []

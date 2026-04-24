@@ -1,0 +1,58 @@
+# Default site-level CryoSPARC app settings.
+# Runtime precedence:
+# 1) CRYOSPARC_* environment variables (in templates)
+# 2) these YAML values (passed through form context as cfg_*)
+
+# Path to FRP token file copied into each session work dir.
+# Fallback for ENV: CRYOSPARC_FRP_TOKEN_FILE_PATH
+frp_token_file_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/frp/.frp_token"
+# FRP server hostname/IP.
+# Fallback for ENV: CRYOSPARC_FRPS_ADDR
+frps_addr: "155.101.26.122"
+# FRP server port.
+# Fallback for ENV: CRYOSPARC_FRPS_PORT
+frps_port: "7000"
+# Base DNS domain used to build per-session subdomain URLs.
+# Fallback for ENV: CRYOSPARC_BASE_DOMAIN
+base_domain: "cryosparc.ondemand-staging.chpc.utah.edu"
+# External user-facing HTTPS port (use "443" for default HTTPS URL without port).
+# Fallback for ENV: CRYOSPARC_USER_ACCESS_PORT
+user_access_port: "8443"
+# Module name for Apptainer runtime.
+# Fallback for ENV: CRYOSPARC_MODULE_APPTAINER
+module_apptainer: "apptainer/1.4.1"
+# Module name for FRP client.
+# Fallback for ENV: CRYOSPARC_MODULE_FRP
+module_frp: "frp/0.68.1"
+# Diagnostic fallback for ENV: HOSTNAME
+test_hostname: "yaml-fallback-hostname"
+# Diagnostic fallback for ENV: PWD
+test_pwd: "/tmp/yaml-fallback-pwd"
+# Diagnostic fallback for ENV: USER
+test_user: "yaml-fallback-user"
+
+# Version-specific CryoSPARC deployment artifacts.
+artifacts:
+  # CryoSPARC v5 image and first-run init tarball.
+  v5.0.4-beta:
+    # Fallback for ENV: CRYOSPARC_V5_IMAGE_PATH
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5/v5.0.4.sif"
+    # Fallback for ENV: CRYOSPARC_V5_INIT_TARBALL_PATH
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v5/cryosparc_master_run_init_files-v5.0.4.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: ""
+  # CryoSPARC v4 image and first-run init tarball.
+  v4.7.1-cuda12+250814:
+    # Fallback for ENV: CRYOSPARC_V4_IMAGE_PATH
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc-v4.7.1-cuda12+250814.sif"
+    # Fallback for ENV: CRYOSPARC_V4_INIT_TARBALL_PATH
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_master_run_init_files-v4.7.1-cuda12+250814.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/supervisord.conf_daemon_v4.7.1-cuda12+250814"
+  v4.7.1-cuda12+251124:
+    # Fallback for ENV: CRYOSPARC_V4_IMAGE_PATH
+    image_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_v4.7.1-cuda12+251124.sif"
+    # Fallback for ENV: CRYOSPARC_V4_INIT_TARBALL_PATH
+    init_tarball_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/cryosparc_master_run_init_files-v4.7.1-cuda12+251124.tar.gz"
+    # Optional path to a version-specific supervisord.conf bind-mounted into the container.
+    supervisord_conf_path: "/uufs/chpc.utah.edu/common/home/u6047586/ondemand/ood-ge-apps-v4/cryosparc_app_subdomain/build/v4.7.1/supervisord.conf_daemon_v4.7.1-cuda12+251124"

@@ -1,0 +1,199 @@
+<%
+require "yaml"
+app_name = "CryoSPARC Server"
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+site_config_path = File.expand_path("site_config.yml", __dir__)
+site_cfg = YAML.safe_load(File.read(site_config_path), aliases: false) || {}
+artifact_cfg = site_cfg["artifacts"] || {}
+v5_cfg = artifact_cfg["v5.0.4-beta"] || {}
+v4_250814_cfg = artifact_cfg["v4.7.1-cuda12+250814"] || {}
+v4_251124_cfg = artifact_cfg["v4.7.1-cuda12+251124"] || {}
+%>
+---
+title: <%= app_name %>
+attributes:
+  gpudata:
+      widget: hidden_field
+      cacheable: false
+      value: |
+        "<%= gpu_data.to_json %>"
+  cfg_frp_token_file_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frp_token_file_path"] %>"
+  cfg_frps_addr:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frps_addr"] %>"
+  cfg_frps_port:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["frps_port"] %>"
+  cfg_base_domain:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["base_domain"] %>"
+  cfg_user_access_port:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["user_access_port"] %>"
+  cfg_module_apptainer:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["module_apptainer"] %>"
+  cfg_module_frp:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["module_frp"] %>"
+  cfg_v5_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["image_path"] %>"
+  cfg_v5_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["init_tarball_path"] %>"
+  cfg_v5_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v5_cfg["supervisord_conf_path"] %>"
+  cfg_v4_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_250814_cfg["image_path"] %>"
+  cfg_v4_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_250814_cfg["init_tarball_path"] %>"
+  cfg_v4_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_250814_cfg["supervisord_conf_path"] %>"
+  cfg_v4_251124_image_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["image_path"] %>"
+  cfg_v4_251124_init_tarball_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["init_tarball_path"] %>"
+  cfg_v4_251124_supervisord_conf_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= v4_251124_cfg["supervisord_conf_path"] %>"
+  cfg_site_config_path:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_config_path %>"
+  cfg_test_hostname:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_hostname"] %>"
+  cfg_test_pwd:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_pwd"] %>"
+  cfg_test_user:
+    widget: hidden_field
+    cacheable: false
+    value: "<%= site_cfg["test_user"] %>"
+  version:
+    widget: select
+    label: "Cryosparc version"
+    help: "This defines the version of Crypsparc you want to load."
+    options:
+      - [ "v4.7.1-cuda12+251124", "v4.7.1-cuda12+251124"]
+      - [ "v5.0.4-beta", "v5.0.4-beta"]
+  cryosparc_license_id:
+    widget: 'password_field'
+    label:  "CryoSPARC License ID"
+    required: true
+    pattern: "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}"
+    value:  ""
+    help: |
+      - You must get an individual academic license id from <a href='https://cryosparc.com/download' target='_blank'>cryosparc.com/download</a>
+      - After you click the blue Launch button below, it may take up to 10 minutes before CryoSPARC is available
+      - You can only launch one CryoSPARC portal app job but you can run multiple computational jobs within CryoSPARC
+
+  use_custom_admin_password:
+    widget: "check_box"
+    label: "Set a custom Admin password"
+    help: |
+      - Your CryoSPARC Admin Email will be: `<%= ENV["USER"] %>@cryo.edu` (unchangable)
+      - Leave unchecked to use the `first 4 characters of the license ID` as the admin password.
+      - Check this box to provide a custom password for the admin account.
+    value: "0"
+  cryosparc_admin_password:
+    widget: 'password_field'
+    label: "Custom password for Admin user `<%= ENV["USER"] %>@cryo.edu` "
+    value: ""
+    help: "Used only when the custom admin password checkbox is checked."
+  cryosparc_database_root:
+    widget: path_selector
+    label: "Cryosparc Database Root (permanent storage with enough free space)"
+    directory: "<%= ENV["HOME"] %>"
+    value: "<%= ENV["HOME"] %>"
+    show_files: false
+    help: "CryoSPARC data for the selected version will be stored under folder `.cryosparc-${SELECTED_CRYO_VERSION}` within this root path."
+  
+  cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>    
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+
+form:
+  - cfg_frp_token_file_path
+  - cfg_frps_addr
+  - cfg_frps_port
+  - cfg_base_domain
+  - cfg_user_access_port
+  - cfg_module_apptainer
+  - cfg_module_frp
+  - cfg_v5_image_path
+  - cfg_v5_init_tarball_path
+  - cfg_v5_supervisord_conf_path
+  - cfg_v4_image_path
+  - cfg_v4_init_tarball_path
+  - cfg_v4_supervisord_conf_path
+  - cfg_v4_251124_image_path
+  - cfg_v4_251124_init_tarball_path
+  - cfg_v4_251124_supervisord_conf_path
+  - cfg_site_config_path
+  - cfg_test_hostname
+  - cfg_test_pwd
+  - cfg_test_user
+  - version
+  - cryosparc_database_root
+  - cryosparc_license_id
+  - use_custom_admin_password
+  - cryosparc_admin_password
+
+  
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %>

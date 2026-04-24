@@ -1,0 +1,21 @@
+# Must build on a GPU node. 
+# ml apptainer
+# unset APPTAINER_BINDPATH
+# export LICENSE_ID=xxxxxx
+# VERSION=v5
+# cd $VERSION
+# APPTAINERENV_LICENSE_ID=$LICENSE_ID \
+# APPTAINERE_CACHEDIR=$TMPDIR \
+# apptainer build --fakeroot --nv -B $PWD:/mnt ./$VERSION.sif ./$VERSION.def 2>&1 | tee build.log
+
+Bootstrap: localimage
+From: ../cuda128_runtime_base.sif
+
+%environment
+  export no_proxy=localhost,127.0.0.0/8
+  export PATH=/cryosparc_master/bin:$PATH
+  export PATH=/cryosparc_worker/bin:$PATH
+
+%post
+
+  bash /mnt/install_cryosparc_v5.sh
