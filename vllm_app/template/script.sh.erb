@@ -11,9 +11,7 @@
 <%- end -%>
 
 # debugging info
-module load apptainer/1.4.1
-apptainer --version
-module list
+module load vllm
 echo $PATH
 pwd
 export MODEL=/scratch/general/vast/app-repo/huggingface/<%= context.llmmodel %>
@@ -21,15 +19,31 @@ export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
+# Adding quantization support
 if [[ <%= context.quantization %> != "None" ]]; then
   QUANT_STRING=" --quantization <%= context.quantization %>"
 else
   QUANT_STRING=""
 fi
+#Adding multiple GPU support
+if (( <%= context.gpu_count %> > 1 )); then
+  MULTIPLE_GPUS="--tensor-parallel-size <%= context.gpu_count %>"
+else
+  MULTIPLE_GPUS=""
+fi
+echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING, MULTIPLE_GPUS is $MULTIPLE_GPUS
+# 1-12-26 - VLLM now requires a chat template file for models that do chat. This is a separate file so we want
+# to use it if we have one.
+if [ -e $MODEL/chat_template.jinja ]; then
+  TEMPLATE_STR="--chat-template ${MODEL}/chat_template.jinja"
+else
+  TEMPLATE_STR=""
+fi
 
-echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING
-./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN $QUANT_STRING >& llm.log &
+#DIAGNOSTIC
+export OMP_NUM_THREADS=4
 
+vllm serve $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 >& llm.log &
 #source_helpers
 #set -x
 # Wait for the RFDiffusion NIM server to start

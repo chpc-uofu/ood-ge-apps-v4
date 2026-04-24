@@ -14,7 +14,6 @@ attributes:
     cacheable: false
     value: |
       "<%= gpu_data.to_json %>"
-  
   llmmodel:
     widget: select
     label: Specific LLM to run from our local repository
@@ -39,6 +38,7 @@ attributes:
       - ["Qwen/Qwen2.5-VL-7B-Instruct"]
       - ["Qwen/Qwen2.5-VL-32B-Instruct"]
       - ["Qwen/Qwen2.5-VL-72B-Instruct"]
+      - ["Qwen/Qwen3-Coder-Next"]
       - ["allenai/OLMo-2-0425-1B-Instruct"]
       - ["allenai/OLMo-2-1124-7B-Instruct"]
       - ["allenai/OLMo-2-1124-13B-Instruct"]
@@ -75,8 +75,11 @@ attributes:
       - ["None","None"]
       - ["awq","awq"]            
       - ["fp8","fp8"]
-      - ["int4", "int4"]
-    
+      - ["fp_quant", "fp_quant"]
+      - ["modelopt_fp4","modelopt_fp4"]
+      - ["bitsandbytes", "bitsandbytes"]
+      - ["experts_int8", "experts_int8"]
+
   interface:
     widget: select
     label: <%= app_name %> interface
