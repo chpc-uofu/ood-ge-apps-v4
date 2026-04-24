@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+# This script sets up configs in the user's home so that symlinks
+# to the CHPC system prompt and skills are in place. Ensures that 
+# users of VS Code extensions have the same CHPC background for 
+# their agents as with the TUI modules. The logic is the same in both cases.
+# Currently, this supports Codex and Claude. Logic for Gemeni needs to be added.
+
+export CODEX_HOME="${HOME}/.codex"
+export CODEX_SQLITE_HOME="${HOME}/.codex"
+mkdir -p "${CODEX_HOME}/skills"
+
+SYSTEM_AGENTS_ROOT="/uufs/chpc.utah.edu/sys/etc/agents"
+CODEX_AGENTS_FILE="${SYSTEM_AGENTS_ROOT}/AGENTS.md"
+CODEX_SKILLS_DIR="${SYSTEM_AGENTS_ROOT}/skills"
+USER_AGENTS_FILE="${CODEX_HOME}/AGENTS.md"
+USER_SKILLS_DIR="${CODEX_HOME}/skills"
+
+CLAUDE_HOME="${HOME}/.claude"
+CLAUDE_AGENTS_ROOT="${SYSTEM_AGENTS_ROOT}/claude/etc"
+CLAUDE_PROMPT_FILE="${CLAUDE_AGENTS_ROOT}/CLAUDE.md"
+CLAUDE_SKILLS_DIR="${CLAUDE_AGENTS_ROOT}/skills"
+USER_CLAUDE_PROMPT_FILE="${CLAUDE_HOME}/CLAUDE.md"
+USER_CLAUDE_SKILLS_DIR="${CLAUDE_HOME}/skills"
+mkdir -p "${CLAUDE_HOME}"
+
+same_link_target() {
+  local src="$1"
+  local dst="$2"
+  [[ -L "${dst}" ]] && [[ "$(readlink -f "${dst}")" == "$(readlink -f "${src}")" ]]
+}
+
+link_if_missing() {
+  local src="$1"
+  local dst="$2"
+
+  if same_link_target "${src}" "${dst}"; then
+    return 0
+  fi
+
+  if [[ -e "${dst}" ]]; then
+    return 0
+  fi
+
+  ln -s "${src}" "${dst}"
+}
+
+upgrade_legacy_skill_link() {
+  local src="$1"
+  local dst="$2"
+  local name="$3"
+  local legacy_dst="${dst}/${name}"
+  local entry_count
+
+  if [[ ! -d "${dst}" ]]; then
+    return 1
+  fi
+
+  if ! same_link_target "${src}" "${legacy_dst}"; then
+    return 1
+  fi
+
+  entry_count="$(find "${dst}" -mindepth 1 -maxdepth 1 | wc -l)"
+  if [[ "${entry_count}" != "1" ]]; then
+    return 1
+  fi
+
+  rm -f "${legacy_dst}"
+  rmdir "${dst}"
+  ln -s "${src}" "${dst}"
+}
+
+link_shared_skill_to_dir() {
+  local src="$1"
+  local dst_dir="$2"
+  local name
+  local dst
+
+  name="$(basename "${src}")"
+  dst="${dst_dir}/${name}"
+
+  if upgrade_legacy_skill_link "${src}" "${dst}" "${name}"; then
+    return 0
+  fi
+
+  link_if_missing "${src}" "${dst}"
+}
+
+link_shared_skills_dir() {
+  local src_dir="$1"
+  local dst_dir="$2"
+
+  if [[ -e "${dst_dir}" && ! -d "${dst_dir}" ]]; then
+    return 0
+  fi
+
+  mkdir -p "${dst_dir}"
+
+  for skill_dir in "${src_dir}"/*; do
+    if [[ -d "${skill_dir}" ]]; then
+      link_shared_skill_to_dir "${skill_dir}" "${dst_dir}"
+    fi
+  done
+}
+
+if [[ -f "${CODEX_AGENTS_FILE}" ]]; then
+  link_if_missing "${CODEX_AGENTS_FILE}" "${USER_AGENTS_FILE}"
+fi
+
+if [[ -d "${CODEX_SKILLS_DIR}" ]]; then
+  link_shared_skills_dir "${CODEX_SKILLS_DIR}" "${USER_SKILLS_DIR}"
+fi
+
+if [[ -f "${CLAUDE_PROMPT_FILE}" ]]; then
+  link_if_missing "${CLAUDE_PROMPT_FILE}" "${USER_CLAUDE_PROMPT_FILE}"
+fi
+
+if [[ -d "${CLAUDE_SKILLS_DIR}" ]]; then
+  link_shared_skills_dir "${CLAUDE_SKILLS_DIR}" "${USER_CLAUDE_SKILLS_DIR}"
+fi
