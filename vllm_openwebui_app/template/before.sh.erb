@@ -1,0 +1,33 @@
+echo "=== before.sh: Setting up Open WebUI + Ollama ==="
+# Export the module function if it exists
+[[ $(type -t module) == "function" ]] && export -f module
+
+# Find available port to run server on
+export WEBUI_PORT=$(find_port ${host})
+export OLLAMA_PORT=$(find_port ${host})
+
+# Load required modules - seems weird they do it here when they don't use them here.
+# echo "Loading modules..."
+# module purge
+# module load ollama/0.13.5
+# module load openwebui/0.7.2
+
+# Resolve the short hostname
+# host_short="$(hostname -s 2>/dev/null || hostname)"
+
+# Generate random ports
+# export WEBUI_PORT=$(python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsockname()[1]); s.close()")
+# export OLLAMA_PORT=$(python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()")
+
+echo "WebUI Port: ${WEBUI_PORT}"
+echo "Ollama Port: ${OLLAMA_PORT}"
+echo "Host: ${host}"
+
+# Persist for script.sh - don't know why they write it, they could export it
+# echo "${host}.cm.cluster" > "${PWD}/.host"
+# Don';t know about the below
+# echo "${host}.int.chpc.utah.edu" > "${PWD}/.host"
+# echo "${WEBUI_PORT}" > "${PWD}/.port_webui"
+# echo "${OLLAMA_PORT}" > "${PWD}/.port_ollama"
+
+echo "before.sh complete"

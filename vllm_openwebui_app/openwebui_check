@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PORT="${OPENWEBUI_PORT:-8080}"
+
+# Persistent data directory
+if [[ -n "${OPENWEBUI_DATA_DIR:-}" ]]; then
+  DATA_DIR="${OPENWEBUI_DATA_DIR}"
+elif [[ -d "/scratch/general/vast/${USER}" ]]; then
+  DATA_DIR="/scratch/general/vast/${USER}/openwebui/data"
+else
+  DATA_DIR="${HOME}/.openwebui/data"
+fi
+mkdir -p "${DATA_DIR}"
+
+# Writable overlay dirs
+STATIC_DIR="${DATA_DIR}/static"
+mkdir -p "${STATIC_DIR}"
+
+SIF="${OPENWEBUI_SIF:?OPENWEBUI_SIF not set. Did you load the module?}"
+
+# Optional backend endpoints
+OPENAI_API_BASE_URL="${OPENAI_API_BASE_URL:-}"
+OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-}"
+
+# Persistent secret key
+SECRET_FILE="${DATA_DIR}/.webui_secret_key"
+if [[ -n "${WEBUI_SECRET_KEY:-}" ]]; then
+  SECRET="${WEBUI_SECRET_KEY}"
+elif [[ -f "${SECRET_FILE}" ]]; then
+  SECRET="$(cat "${SECRET_FILE}")"
+else
+  SECRET="$(python3 - <<'PY'
+import secrets
+print(secrets.token_hex(32))
+PY
+)"
+  printf '%s' "${SECRET}" > "${SECRET_FILE}"
+  chmod 600 "${SECRET_FILE}"
+fi
+
+# exec singularity exec --cleanenv \
+exec apptainer exec -e \
+  --bind "${DATA_DIR}:/app/backend/data" \
+  --bind "${STATIC_DIR}:/app/backend/open_webui/static" \
+  --env "WEBUI_SECRET_KEY=${SECRET}" \
+  --env "PORT=${PORT}" \
+  --env "OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL}" \
+  --env "OLLAMA_BASE_URL=${OLLAMA_BASE_URL}" \
+  "${SIF}" \
+  bash -c "cd /app/backend && ./start.sh --host 0.0.0.0 --port ${PORT}"

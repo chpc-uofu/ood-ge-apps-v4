@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# set -e
+
+echo "=== Open WebUI + VLLM Starting ==="
+
+# Load modules
+module purge
+module load vllm
+module load openwebui/0.7.2
+# module load cuda/12.9.0
+port_webui=${WEBUI_PORT}
+port_ollama=${OLLAMA_PORT}
+host_fqdn=${host}
+host_short=$(hostname -s)
+# Read connection info from before.sh
+echo "Host FQDN: ${host_fqdn}"
+echo "Host SHORT: ${host_short}"
+echo "WebUI Port: ${port_webui}"
+echo "Ollama Port: ${port_ollama}"
+
+# User configuration from form
+USER_OPENWEBUI_DATA_DIR="<%= context.openwebui_data_dir.to_s.strip %>"
+
+# System-wide Ollama models directory
+# SYSTEM_MODEL_DIR="/scratch/general/vast/app-repo/huggingface"
+export MODEL=/scratch/general/vast/app-repo/huggingface/<%= context.llmmodel %>
+export EXTRA="<%= context.extra_params %>"
+
+# Create user directories
+mkdir -p "${USER_OPENWEBUI_DATA_DIR}"
+# mkdir -p <%= context.scratch_dir %>
+printenv
+export TMPDIR=<%= context.scratch_dir %>
+export XDG_RUNTIME_DIR=<%= context.scratch_dir %>
+export VLLM_CACHE_ROOT=<%= context.scratch_dir %>
+export HF_HOME=<%= context.scratch_dir %>
+echo "TMPDIR AND XDG_RUNTIME_DIR should be different now"
+printenv
+# not allowing this yet
+# ============ MODEL SELECTION LOGIC ============
+# if [ "${USE_SYSTEM_MODEL}" = "yes" ]; then
+#   export OLLAMA_MODELS="${SYSTEM_MODEL_DIR}"
+#   echo "Using system-wide models from: ${OLLAMA_MODELS}"
+# else
+#   mkdir -p "${USER_MODEL_DIR}"
+#   export OLLAMA_MODELS="${USER_MODEL_DIR}"
+#   echo "Using user's models from: ${OLLAMA_MODELS}"
+# fi
+
+echo ""
+echo "=========================================="
+echo "Configuration:"
+echo "  Selected Model: ${MODEL}"
+echo "  WebUI Data: ${USER_OPENWEBUI_DATA_DIR}"
+echo "=========================================="
+echo ""
+# Check CUDA/GPU of where running
+nvidia-smi
+
+# Set Ollama to listen on localhost only
+export OLLAMA_HOST="127.0.0.1:${port_ollama}"
+
+# Start Ollama server
+echo "Starting VLLM on ${OLLAMA_HOST}..."
+# Unlike ollama, we actually need to have a model name here, not just a dir.
+# Wouldn't hurt to have an extra textbox or something for Lora too.
+CHAT_TEMPLATE_STRING=""
+if [[ $EXTRA == *"lora-modules"* ]]; then
+readarray -d "=" -t arr <<< $t
+CHAT_TEMPLATE_STRING=" --chat-template ${arr[1]}"
+fi
+# TMPDIR=<%= context.scratch_dir %> HF_HOME=<%= context.scratch_dir %> vllm serve $MODEL $EXTRA --host 127.0.0.1 --port ${port_ollama}  > "${PWD}/vllm.log" 2>&1 &
+vllm serve $MODEL $EXTRA --port ${port_ollama} $CHAT_TEMPLATE_STRING > "${PWD}/vllm.log" 2>&1 &
+#ollama serve > "${PWD}/ollama.log" 2>&1 &
+OLLAMA_PID=$!
+
+# Cleanup function
+cleanup() {
+  echo "Cleaning up..."
+  kill "${OLLAMA_PID}" 2>/dev/null || true
+  kill "${WEBUI_PID}" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Wait for Ollama to be ready
+TIMEOUT=600
+echo "Waiting for VLLM to start..."
+for i in $(seq 1 ${TIMEOUT}); do
+  if curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+    echo "VLLM is ready!"
+    break
+  fi
+  if ! kill -0 "${OLLAMA_PID}" 2>/dev/null; then
+    echo "ERROR: VLLM process died. Check ollama.log for details."
+    cat "${PWD}/vllm.log"
+    exit 1
+  fi
+  [ $((i % 10)) -eq 0 ] && echo "Still waiting... (${i}/${TIMEOUT} seconds)"
+  sleep 1
+done
+
+if ! curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+	echo "ERROR: VLLM failed to start within ${TIMEOUT} seconds."
+  cat "${PWD}/ollama.log"
+  exit 1
+fi
+
+# Pull model if requested
+#if [ -n "${PULL_NEW_MODEL}" ]; then
+#  echo "Pulling model: ${PULL_NEW_MODEL}..."
+#  ollama pull "${PULL_NEW_MODEL}" || {
+#    echo "WARNING: Failed to pull model ${PULL_NEW_MODEL}"
+#  }
+#fi
+
+# List available models - not applicable with VLLM
+
+# Configure Open WebUI environment
+export OLLAMA_BASE_URL="http://127.0.0.1:${port_ollama}"
+export OPENWEBUI_DATA_DIR="${USER_OPENWEBUI_DATA_DIR}"
+export OPENWEBUI_PORT="${port_webui}"
+export WEBUI_AUTH=true
+export ENABLE_SIGNUP=true
+export WEBUI_SECRET_KEY=$(openssl rand -hex 32 2>/dev/null || echo "fallback-secret-key-$(date +%s)")
+export ENABLE_PERSISTENT_CONFIG=false
+
+# Banner/name change only
+export WEBUI_NAME="🦙 𝗢VLLM 𝗕𝗔𝗖𝗞𝗘𝗡𝗗"
+export APPTAINERENV_WEBUI_NAME="$WEBUI_NAME"
+export SINGULARITYENV_WEBUI_NAME="$WEBUI_NAME"
+export WEBUI_BANNERS='[
+  {
+    "id": "vllm",
+    "type": "info",
+    "title": "",
+    "content": "🦙 𝗢VLLM 𝗕𝗔𝗖𝗞𝗘𝗡𝗗",
+    "dismissible": false,
+    "timestamp": 1
+  }
+]'
+export APPTAINERENV_WEBUI_BANNERS="$WEBUI_BANNERS"
+export SINGULARITYENV_WEBUI_BANNERS="$WEBUI_BANNERS"
+
+# Write connection info for the view page
+cat > "${PWD}/connection.yml" << EOF
+---
+cluster: "<%= context.cluster %>"
+host: "${host_fqdn}"
+port: "${port_webui}"
+ollama_port: "${port_ollama}"
+backend: "ollama"
+EOF
+
+echo ""
+echo "=============================================="
+echo "  Open WebUI + VLLM is starting!"
+echo "  "
+echo "  Use SSH tunnel to connect:"
+echo "  ssh -N -L ${port_webui}:127.0.0.1:${port_webui} $(whoami)@${host_short}"
+echo "  "
+echo "  Then open: http://127.0.0.1:${port_webui}/"
+echo "  "
+echo "  Models directory: ${OLLAMA_MODELS}"
+echo "=============================================="
+echo ""
+
+# Start Open WebUI
+cd "${USER_OPENWEBUI_DATA_DIR}"
+exec openwebui_vllm
+

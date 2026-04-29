@@ -45,6 +45,7 @@ entries:
   protein_binder_nim_app: []
   nim_app: []
   vllm_app: []
+  vllm_openwebui_app: []
   metashape_app: []
   windows_vm_app: []
   multitenant-dashboard: []

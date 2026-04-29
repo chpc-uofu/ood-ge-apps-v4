@@ -1,0 +1,6 @@
+---
+name: "VLLM (Open WebUI)"
+category: "Interactive Apps"
+subcategory: "AI"
+role: "batch_connect"
+description: "Launch Open WebUI connected to a VLLM server for local LLM inference. We recommend requesting 8-16 cores along with the following Advanced options: memory=64G, and at least a A100 GPU and higher depending on your model memory size. Also please note that larger models and certain graphics cards may take up to 15 minutes to start, although that time should be much quicker every time after the first that you start the model."
