@@ -27,9 +27,9 @@ module purge
 
 <%- end -%>
 
-if [ ! -d "/scratch/local/${USER}" ]; then
-    mkdir /scratch/local/${USER}
-fi
+#if [ ! -d "/scratch/local/${USER}" ]; then
+#    mkdir /scratch/local/${USER}
+#fi
 
 WORKDIR=/scratch/local/${USER}/${SLURM_JOB_ID}
 
