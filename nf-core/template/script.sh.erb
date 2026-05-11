@@ -75,17 +75,17 @@ num_core="<%= context.num_cores %>"
 # Build Nextflow command
 nextflow_command=("nextflow run $pipeline_nf -params-file $nfparams -profile apptainer,slurm")
 
-gpu_type="<%= context.gpu_type %>"
+gpu_type=
 gpustr=""
 
-if [[ "$gpu_type" != "none"]]; then
+if [[ "<%= context.gpu_type %>" != "none"]]; then
     echo "Using a GPU, modifying process block to include gres flag"
-    if [["$gpu_type" == "any"]]; then 
-        gpustr="--gres=gpu:"+gpu_count
+    if [["<%= context.gpu_type %>" == "any"]]; then 
+        gpustr="--gres=gpu:"+"<%= context.gpu_count %>"
     else
-        gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
+        gpustr="--gres=gpu:"+"<%= context.gpu_type %>"+":"+"<%= context.gpu_count %>"
     fi
-    if [[gpu_profile == "1" ]]; then
+    if [["<%= context.gpu_profile %>" == "1" ]]; then
         gpustr << ",nsight:1"
     fi
 else
