@@ -75,7 +75,6 @@ num_core="<%= context.num_cores %>"
 # Build Nextflow command
 nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer,slurm")
 
-gpu_type=
 gpustr=""
 
 if [[ "<%= context.gpu_type %>" != "none" ]]; then
@@ -98,10 +97,8 @@ process {
     executor = 'slurm'
     queue = '$queue'
     clusterOptions = '--account=$account --qos=$qos $gpustr'
-    resourceLimits = [
-        cpus: $num_core
-        memory: "$num_memory".GB
-    ]
+    cpus = $num_core
+    memory = $num_memory.GB
 }
 EOF
 
