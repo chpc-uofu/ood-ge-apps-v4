@@ -29,13 +29,11 @@ export EXTRA="<%= context.extra_params %>"
 # Create user directories
 mkdir -p "${USER_OPENWEBUI_DATA_DIR}"
 # mkdir -p <%= context.scratch_dir %>
-printenv
 export TMPDIR=<%= context.scratch_dir %>
 export XDG_RUNTIME_DIR=<%= context.scratch_dir %>
 export VLLM_CACHE_ROOT=<%= context.scratch_dir %>
 export HF_HOME=<%= context.scratch_dir %>
 echo "TMPDIR AND XDG_RUNTIME_DIR should be different now"
-printenv
 # not allowing this yet
 # ============ MODEL SELECTION LOGIC ============
 # if [ "${USE_SYSTEM_MODEL}" = "yes" ]; then
@@ -86,7 +84,7 @@ trap cleanup EXIT
 TIMEOUT=600
 echo "Waiting for VLLM to start..."
 for i in $(seq 1 ${TIMEOUT}); do
-  if curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+  if curl -s "http://127.0.0.1:${port_ollama}/version" > /dev/null 2>&1; then
     echo "VLLM is ready!"
     break
   fi
@@ -99,7 +97,7 @@ for i in $(seq 1 ${TIMEOUT}); do
   sleep 1
 done
 
-if ! curl -s "http://127.0.0.1:${port_ollama}/api/version" > /dev/null 2>&1; then
+if ! curl -s "http://127.0.0.1:${port_ollama}/version" > /dev/null 2>&1; then
 	echo "ERROR: VLLM failed to start within ${TIMEOUT} seconds."
   cat "${PWD}/ollama.log"
   exit 1
@@ -125,7 +123,7 @@ export WEBUI_SECRET_KEY=$(openssl rand -hex 32 2>/dev/null || echo "fallback-sec
 export ENABLE_PERSISTENT_CONFIG=false
 
 # Banner/name change only
-export WEBUI_NAME="🦙 𝗢VLLM 𝗕𝗔𝗖𝗞𝗘𝗡𝗗"
+export WEBUI_NAME="🦙  VLLM 𝗕𝗔𝗖𝗞𝗘𝗡𝗗"
 export APPTAINERENV_WEBUI_NAME="$WEBUI_NAME"
 export SINGULARITYENV_WEBUI_NAME="$WEBUI_NAME"
 export WEBUI_BANNERS='[
