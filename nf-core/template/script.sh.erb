@@ -98,11 +98,11 @@ cleanup = true
     
 process {
     executor = 'slurm'
-    queue = "$queue"
-    clusterOptions = '--account="$account" --qos="$qos" "$gpustr"'
+    queue = '$queue'
+    clusterOptions = '--account=$account --qos=$qos $gpustr'
     resourceLimits = [
-        cpus: "$num_core"
-        memory: "$num_memory"
+        cpus: $num_core
+        memory: "$num_memory".GB
     ]
 }
 EOF
