@@ -80,12 +80,12 @@ gpustr=""
 
 if [[ "<%= context.gpu_type %>" != "none" ]]; then
     echo "Using a GPU, modifying process block to include gres flag"
-    if [["<%= context.gpu_type %>" == "any" ]]; then 
+    if [[ "<%= context.gpu_type %>" == "any" ]]; then 
         gpustr="--gres=gpu:"+"<%= context.gpu_count %>"
     else
         gpustr="--gres=gpu:"+"<%= context.gpu_type %>"+":"+"<%= context.gpu_count %>"
     fi
-    if [["<%= context.gpu_profile %>" == "1" ]]; then
+    if [[ "<%= context.gpu_profile %>" == "1" ]]; then
         gpustr << ",nsight:1"
     fi
 else
