@@ -9,7 +9,7 @@ gpu_data = {
 site_config_path = File.expand_path("site_config.yml", __dir__)
 site_cfg = YAML.safe_load(File.read(site_config_path), aliases: false) || {}
 artifact_cfg = site_cfg["artifacts"] || {}
-v5_cfg = artifact_cfg["v5.0.4-beta"] || {}
+v5_cfg = artifact_cfg["v5.0.6"] || {}
 v4_250814_cfg = artifact_cfg["v4.7.1-cuda12+250814"] || {}
 v4_251124_cfg = artifact_cfg["v4.7.1-cuda12+251124"] || {}
 %>
@@ -107,7 +107,7 @@ attributes:
     help: "This defines the version of Crypsparc you want to load."
     options:
       - [ "v4.7.1-cuda12+251124", "v4.7.1-cuda12+251124"]
-      - [ "v5.0.4-beta", "v5.0.4-beta"]
+      - [ "v5.0.6", "v5.0.6"]
   cryosparc_license_id:
     widget: 'password_field'
     label:  "CryoSPARC License ID"
