@@ -53,7 +53,7 @@ export APPTAINERENV_CRYOSPARC_ADMIN_PASSWORD=<%= Shellwords.escape(context.cryos
 supervisord_conf_path=""
 
 case "$SELECTED_CRYO_VERSION" in
-  "v5.0.4-beta")
+  "v5.0.6")
     simage_path=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_IMAGE_PATH", context.cfg_v5_image_path.to_s)) %>
     tar_file=<%= Shellwords.escape(ENV.fetch("CRYOSPARC_V5_INIT_TARBALL_PATH", context.cfg_v5_init_tarball_path.to_s)) %>
     supervisord_conf_path=<%= Shellwords.escape(context.cfg_v5_supervisord_conf_path.to_s) %>

@@ -1,7 +1,7 @@
-# v5.0.4
+# v5.0.6
 set -x 
 
-VERSION="v5.0.4"
+echo "VERSION=$VERSION"
 echo "LICENSE_ID=$LICENSE_ID"
 #curl -L https://get.cryosparc.com/download/master-latest/$LICENSE_ID -o /mnt/cryosparc_master.tar.gz
 #curl -L https://get.cryosparc.com/download/worker-latest/$LICENSE_ID -o /mnt/cryosparc_worker.tar.gz
