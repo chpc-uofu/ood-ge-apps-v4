@@ -18,7 +18,7 @@ def find_staged_root(app_dirname)
   candidates.empty? ? "" : candidates.max_by { |d| File.mtime(d) }.to_s
 end
 
-app_name = "vllm_openwebui-OOD"
+app_name = "vllm_openwebui_app"
 sroot = find_staged_root(app_name)
 
 host = ""
