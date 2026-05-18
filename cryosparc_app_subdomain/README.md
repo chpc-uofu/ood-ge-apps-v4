@@ -9,7 +9,7 @@ Backed by a [custom Reverse Proxy service](https://github.com/chpc-uofu/ood_cryo
 ### Currently Supported CryoSPARC Versions
 
 - v4.7.1-cuda12+251124
-- v5.0.4-beta
+- v5.0.6
 
 ### Requirements
 
@@ -63,8 +63,8 @@ Top-level keys:
 
 Artifact keys:
 
-- `artifacts.v5.0.4-beta.image_path`: CryoSPARC v5 image path.
-- `artifacts.v5.0.4-beta.init_tarball_path`: CryoSPARC v5 first-run init tarball path.
+- `artifacts.v5.0.6.image_path`: CryoSPARC v5 image path.
+- `artifacts.v5.0.6.init_tarball_path`: CryoSPARC v5 first-run init tarball path.
 - `artifacts.v4.7.1-cuda12+251124.image_path`: CryoSPARC v4 image path.
 - `artifacts.v4.7.1-cuda12+251124.init_tarball_path`: CryoSPARC v4 first-run init tarball path.
 
@@ -77,8 +77,8 @@ Artifact keys:
 - `CRYOSPARC_USER_ACCESS_PORT` --> `user_access_port`
 - `CRYOSPARC_MODULE_APPTAINER` --> `module_apptainer`
 - `CRYOSPARC_MODULE_FRP` --> `module_frp`
-- `CRYOSPARC_V5_IMAGE_PATH` --> `artifacts.v5.0.4-beta.image_path`
-- `CRYOSPARC_V5_INIT_TARBALL_PATH` --> `artifacts.v5.0.4-beta.init_tarball_path`
+- `CRYOSPARC_V5_IMAGE_PATH` --> `artifacts.v5.0.6.image_path`
+- `CRYOSPARC_V5_INIT_TARBALL_PATH` --> `artifacts.v5.0.6.init_tarball_path`
 - `CRYOSPARC_V4_IMAGE_PATH` --> legacy `artifacts.v4.7.1-cuda12+250814.image_path`
 - `CRYOSPARC_V4_INIT_TARBALL_PATH` --> legacy `artifacts.v4.7.1-cuda12+250814.init_tarball_path`
 - `CRYOSPARC_V4_251124_IMAGE_PATH` --> `artifacts.v4.7.1-cuda12+251124.image_path`
