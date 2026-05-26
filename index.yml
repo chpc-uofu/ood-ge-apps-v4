@@ -30,6 +30,7 @@ entries:
   matlab_app: []
   matlab_html_app: []
   meshroom_app: []
+  nf-core: []
   paraview_app: []
   qgis_app: []
   relion_app: []
@@ -47,6 +48,7 @@ entries:
   vllm_app: []
   vllm_openwebui_app: []
   metashape_app: []
+<<<<<<< HEAD
   windows_vm_app: []
   multitenant-dashboard: []
   multitenant-delivery_debug: []
@@ -57,6 +59,16 @@ entries:
   multitenant-llm: []
   ollama_openwebui-OOD: []
   cryosparc_app_subdomain: []
+=======
+#  windows_vm_app: []
+#  multitenant-dashboard: []
+#  multitenant-delivery_debug: []
+#  multitenant-delivery_default: []
+#  multitenant-delivery_readfile: []
+#  multitenant-instruction: []
+#  multitenant-jupyter: []
+#  multitenant-llm: []
+>>>>>>> main
 #  rfdiffusion_nim_app: []
 #  proteinmpnn_nim_app: []
 #  alphafold_nim_app: []
