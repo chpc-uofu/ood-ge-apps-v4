@@ -1,0 +1,13 @@
+---
+name: NF-CORE
+category: nf-core pipelines
+subcategory: biology
+role: batch_connect
+description: |
+  This app will launch a nf-core pipeline of your choosing. 
+
+  Each pipeline can require several different parameters as input, each parameter unique to each pipeline.
+
+  Please research the required inputs to your nf-core pipeline here: https://nf-co.re/pipelines/. If you have any questions or need assistance, please email the CHPC helpdesk at helpdesk@chpc.utah.edu
+
+  To keep this form simple, a JSON file is required for all pipeline parameters. This is described here: **MODIFY TO UPLOAD EXAMPLE JSON FILE TO GITHUB AND POINT THERE**
