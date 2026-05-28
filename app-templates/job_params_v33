@@ -148,6 +148,12 @@
       - [
            'Nvidia RTX 6000 PRO B, SP, 96GB, owner','rtxpr6000bl',
         ]
+      - [
+           'Nvidia A100 1g MIG, DP, 10GB, owner','a100_80gb_pcie_1g.10gb',
+        ]
+      - [
+           'Nvidia A100  DP, 80GB, owner','a100_80gb_pcie',
+        ]
     help: |
       - Default **none** if no GPU.
       - **any** available GPU for the given cluster and partition.
