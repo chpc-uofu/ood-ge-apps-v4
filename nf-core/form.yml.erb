@@ -1,0 +1,238 @@
+<%
+template_root = "/var/www/ood/apps/templates/"
+gpu_data = {
+  gpu_partitions: CustomGPUPartitions.gpu_partitions,
+  gpu_name_mappings: CustomGPUMappings.gpu_name_mappings
+}
+%>
+---
+attributes:
+  pipeline:
+    widget: "select"
+    label: "Choose the nf-core pipeline you wish to run:"
+    help: "Select the nf-core pipeline to use"
+    options:
+      - [ "abotyper" , "abotyper" ]
+      - [ "airrflow" , "airrflow" ]
+      - [ "alleleexpression" , "alleleexpression" ]
+      - [ "ampliseq" , "ampliseq" ]
+      - [ "atacseq" , "atacseq" ]
+      - [ "bacass" , "bacass" ]
+      - [ "bactmap" , "bactmap" ]
+      - [ "bamtofastq" , "bamtofastq" ]
+      - [ "cageseq" , "cageseq" ]
+      - [ "callingcards" , "callingcards" ]
+      - [ "cellpainting" , "cellpainting" ]
+      - [ "chipseq" , "chiqseq" ]
+      - [ "circdna" , "circdna" ]
+      - [ "circrna" , "circrna" ]
+      - [ "clipseq" , "clipseq" ]
+      - [ "coproid" , "coproid" ]
+      - [ "createpanelrefs" , "createpanelrefs" ]
+      - [ "createtaxdb" , "createtaxdb" ]
+      - [ "crisprseq" , "crisprseq" ]
+      - [ "crisprvar" , "crisprvar" ]
+      - [ "cutandrun" , "cutandrun" ]
+      - [ "dartseq" , "dartseq" ]
+      - [ "datasync" , "datasync" ]
+      - [ "ddamsproteomics" , "ddamsproteomics" ]
+      - [ "deepmodeloptim" , "deepmodeloptim" ]
+      - [ "deepmutscan" , "deepmutscan" ]
+      - [ "deepvariant" , "deepvariant" ]
+      - [ "demo" , "demo" ]
+      - [ "demultiplex" , "demultiplex" ]
+      - [ "denovohybrid" , "denovohybrid" ]
+      - [ "denovotranscript" , "denovotranscript" ]
+      - [ "detaxizer" , "detaxizer" ]
+      - [ "diaproteomics" , "diaproteomics" ]
+      - [ "differentialabundance" , "differentialabundance" ]
+      - [ "diseasemodulediscovery" , "diseasemodulediscover" ]
+      - [ "drop" , "drop" ]
+      - [ "drugresponseeval" , "drugresponseeval" ]
+      - [ "dualrnaseq" , "dualrnaseq" ]
+      - [ "eager" , "eager" ]
+      - [ "epigenomesegmentation" , "epigenomesegmentation" ]
+      - [ "epitopeprediction" , "epitopeprediction" ]
+      - [ "evexplorer" , "evexplorer" ]
+      - [ "exoseq" , "exoseq" ]
+      - [ "fastqrepair" , "fastqrepair" ]
+      - [ "fastquorum" , "fastquorum" ]
+      - [ "fetchngs" , "fetchngs" ]
+      - [ "funcprofiler" , "funcprofiler" ]
+      - [ "funcscan" , "funcscan" ]
+      - [ "genephylomodeler" , "genephylomodeler" ]
+      - [ "genomeannotator" , "genomeannotator" ]
+      - [ "genomeassembler" , "genomeassembler" ]
+      - [ "genomeqc" , "genomeqc" ]
+      - [ "genomeskim" , "genomeskim" ]
+      - [ "genomicrelatedness" , "genomicrelatedness" ]
+      - [ "gwas" , "gwas" ]
+      - [ "hadge" , "hadge" ]
+      - [ "hgtseq" , "hgtseq" ]
+      - [ "hic" , "hic" ]
+      - [ "hicar" , "hicar" ]
+      - [ "hlatyping" , "hlatyping" ]
+      - [ "imcyto" , "imcyto" ]
+      - [ "isoseq" , "isoseq" ]
+      - [ "kmermaid" , "kmermaid" ]
+      - [ "liverctanalysis" , "liverctanalysis" ]
+      - [ "lncpipe" , "lncpipe" ]
+      - [ "longraredisease", "longraredisease" ]
+      - [ "lsmquant" , "lsmquant" ]
+      - [ "mag" , "mag" ]
+      - [ "magmap" , "magmap" ]
+      - [ "marsseq" , "marsseq" ]
+      - [ "mcmicro" , "mcmicro" ]
+      - [ "meerpipe" , "meerpipe" ]
+      - [ "metaboigniter" , "metaboigniter" ]
+      - [ "metapep" , "metapep" ]
+      - [ "metatdenovo" , "metatdenovo" ]
+      - [ "methylarray" , "methylarray" ]
+      - [ "methylong" , "methylong" ]
+      - [ "methylseq" , "methylseq" ]
+      - [ "mhcquant" , "mhcquant" ]
+      - [ "mitodetect" , "mitodetect" ]
+      - [ "mnaseseq" , "mnaseseq" ]
+      - [ "molkart" , "molkart" ]
+      - [ "mspepid" , "mspepid" ]
+      - [ "multiplesequencealign" , "multiplesequencealign" ]
+      - [ "nanoseq" , "nanoseq" ]
+      - [ "nanostring" , "nanostring" ]
+      - [ "nascent" , "nascent" ]
+      - [ "ncrnannotator" , "ncrnannotator" ]
+      - [ "neutronstar" , "neutronstar" ]
+      - [ "omicsgenetraitassociation" , "omicsgenetraitassociation" ]
+      - [ "oncoanalyser" , "oncoanalyser" ]
+      - [ "pacsomatic" , "pacsomatic" ]
+      - [ "pacvar" , "pacvar" ]
+      - [ "pairgenomealign" , "pairgenomealign" ]
+      - [ "pangenome" , "pangenome" ]
+      - [ "panoramaseq" , "panoramaseq" ]
+      - [ "pathogensurveillance" , "pathogensurveillance" ]
+      - [ "phageannotator" , "phageannotator" ]
+      - [ "phaseimpute" , "phaseimpute" ]
+      - [ "phyloplace" , "phyloplace" ]
+      - [ "pixelator" , "pixelator" ]
+      - [ "proteinannotator" , "proteinannotator" ]
+      - [ "proteinfamilies" , "proteinfamilies" ]
+      - [ "proteinfold" , "proteinfold" ]
+      - [ "proteogenomicsdb" , "proteogenomicsdb" ]
+      - [ "proteomicslfq" , "proteomicslfq" ]
+      - [ "quantms" , "quantms" ]
+      - [ "radseq" , "radseq" ]
+      - [ "rangeland" , "rangeland" ]
+      - [ "raredisease" , "raredisease" ]
+      - [ "rarevariantburden" , "rarevariantburden" ]
+      - [ "readsimulator" , "readsimulator" ]
+      - [ "references" , "references" ]
+      - [ "reportho" , "reportho" ]
+      - [ "ribomsqc", "ribomsqc" ]
+      - [ "riboseq" , "riboseq" ]
+      - [ "rnadnavar" , "rnadnavar" ]
+      - [ "rnafusion" , "rnafusion" ]
+      - [ "rnaseq" , "rnaseq" ]
+      - [ "rnasplice" , "rnasplice" ]
+      - [ "rnavar" , "rnavar" ]
+      - [ "sammyseq" , "sammyseq" ]
+      - [ "sarek" , "sarek" ]
+      - [ "scdownstream" , "scdownstream" ]
+      - [ "scflow" , "scflow" ]
+      - [ "scnanoseq", "scnanoseq" ]
+      - [ "scrnaseq" , "scrnaseq" ]
+      - [ "seqinspector" , "seqinspector" ]
+      - [ "seqsubmit" , "seqsubmit" ]
+      - [ "slamseq" , "slamseq" ]
+      - [ "smartseq2" , "smartseq2" ]
+      - [ "smrnaseq" , "smrnaseq" ]
+      - [ "sopa" , "sopa" ]
+      - [ "spatialvi" , "spatialvi" ]
+      - [ "spatialxe" , "spatialxe" ]
+      - [ "spinningjenny" , "spinningjenny" ]
+      - [ "ssds" , "ssds" ]
+      - [ "stableexpression" , "stableexpression" ]
+      - [ "taxprofiler" , "taxprofiler" ]
+      - [ "tbanalyzer" , "tbanalyzer" ]
+      - [ "tfactivity" , "tfactivity" ]
+      - [ "troughgraph" , "troughgraph" ]
+      - [ "tumourevo" , "tumourevo" ]
+      - [ "variantbenchmarking" , "variantbenchmarking" ]
+      - [ "variantcatalogue" , "variantcatalogue" ]
+      - [ "variantprioritization" , "variantprioritization" ]
+      - [ "vipr" , "vipr" ]
+      - [ "viralintegration" , "viralintegration" ]
+      - [ "viralmetagenome" , "viralmetagenome" ]
+      - [ "viralrecon" , "viralrecon" ]
+
+  nf_params:
+    widget: "path_selector"
+    label: "Parameter YAML File"
+    show_files: true
+    help: "Parameters are unique to each pipeline, detailed at https://nf-co.re/pipelines. Upload a YAML file with your necessary parameters."
+
+  cluster:
+    widget: select
+    options:
+      <%- CustomQueues.clusters.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"friscos_v2") do |line| %>
+<%= line %>
+<% end %>    
+<% IO.foreach(template_root+"cluster-help") do |line| %>
+<%= line %>
+<% end %>    
+  custom_accpart:
+    widget: select
+    options:
+      <%- CustomAccPart.accpart.each do |g| %>
+      - "<%= g %>"
+      <%- end %>
+<% IO.foreach(template_root+"accpart-help") do |line| %>
+<%= line %>
+<% end %>    
+
+<% IO.foreach(template_root+"job_params_v33") do |line| %>
+<%= line %>
+<% end %>   
+
+  gpudata:
+    widget: "hidden_field"
+    cacheable: false
+    value: |
+      "<%= gpu_data.to_json %>"
+   
+  bc_num_hours:
+    value: 1
+    min: 1
+    max: 72
+    step: 1
+  bc_email_on_started:
+    help: "If you do not receive the email, check your [Profile](https://www.chpc.utah.edu/role/user/edit_profile.php) for correct address."
+  workdir:
+    label: "Working Directory"
+    widget: "path_selector"
+    directory: "/scratch/general/vast"
+    required: false
+    help: "Please select a directory under your uNID. If no directory under your uNID exists, please create one."
+  resume:
+    label: "Resume"
+    widget: "check_box"
+    checked_value: 1
+    unchecked_value: 0
+    help: "Resume previous run if found."
+
+  tower_access_token:
+    widget: "text_field"
+    required: false
+    label: "TOWER_ACCESS_TOKEN (Optional)"
+    help: "Your Seqera TOWER_ACCESS_TOKEN used to monitor runs on [Nextflow Tower](https://seqera.io)."
+
+form:
+  - pipeline
+  - nf_params
+<% IO.foreach(template_root+"form_params_gpu") do |line| %>
+<%= line %>
+<% end %>
+  - resume
+  - workdir
+  - tower_access_token
