@@ -48,25 +48,15 @@ vllm serve $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS
 
 # Unfortunately VLLM responds as port ready long before it is really ready.
 # So wait_until_port_used is modified to check log for actual readiness
-unset -f wait_until_port_used
 
-wait_until_port_used () {
-    local port="${1}"
+wait_until_vllm_ready () {
     local time="${2:-30}"
     for ((i=1; i<=time*2; i++)); do
-      port_used "${port}"
-      port_status=$?
-      # echo $port $port_status
       if [ -f llm.log ]; then
          if grep "Application startup complete" llm.log; then
 		 return 0
          else echo "Log exists, Waiting on server start"
 	 fi
-      fi
-      if [ "$port_status" == "127" ]; then
-         echo "commands to find port were either not found or inaccessible."
-         echo "command options are lsof, nc, bash's /dev/tcp, or python (or python3) with socket lib."
-         return 127
       fi
       sleep 1
     done
@@ -76,7 +66,7 @@ wait_until_port_used () {
 # Wait for the NIM server to start
 echo VLLM port is $nimport
 echo "Waiting for VLLM server to open port $nimport..."
-if wait_until_port_used "${host}:${nimport}" 600; then
+if wait_until_vllm_ready "${host}:${nimport}" 600; then
   echo "Discovered VLLM server listening on port $nimport!"
 else
   echo "Timed out waiting for VLLM  server to open port $nimport!"
