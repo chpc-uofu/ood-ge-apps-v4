@@ -42,6 +42,7 @@ fi
 
 #DIAGNOSTIC
 export OMP_NUM_THREADS=4
+export NVIDIA_DISABLE_REQUIRE=1
 
 vllm serve $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 >& llm.log &
 #source_helpers
