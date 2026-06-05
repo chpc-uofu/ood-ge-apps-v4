@@ -108,6 +108,7 @@ process {
     cpus = $num_core
     memory = $num_memory.GB
 }
+trace.overwrite = true
 EOF
 
 echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
