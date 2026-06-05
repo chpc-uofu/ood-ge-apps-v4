@@ -13,6 +13,7 @@ module list
 # Set the working directory
 workdir="<%= context.workdir %>"
 nfparams="<%= context.nf_params %>"
+time="<%= context.bc_num_hours %>"
 account="<%= context.custom_accpart.split(":")[0]%>"
 queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
@@ -96,7 +97,7 @@ cat <<EOF > custom.config
 process {
     executor = 'slurm'
     queue = '$queue'
-    clusterOptions = '--account=$account --qos=$qos $gpustr'
+    clusterOptions = '--time=$time --account=$account --qos=$qos $gpustr'
     cpus = $num_core
     memory = $num_memory.GB
 }
