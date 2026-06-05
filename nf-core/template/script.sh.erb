@@ -104,7 +104,7 @@ cat <<EOF > custom.config
 process {
     executor = 'slurm'
     queue = '$queue'
-    clusterOptions = '--time=$time --account=$account --qos=$qos $gpustr'
+    clusterOptions = '--account=$account --qos=$qos $gpustr'
     cpus = $num_core
     memory = $num_memory.GB
 }
