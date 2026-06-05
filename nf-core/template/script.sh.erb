@@ -73,6 +73,13 @@ export pipeline_nf="<%= context.pipeline %>"
 num_memory="<%= context.memtask %>"
 num_core="<%= context.num_cores %>"
 
+if [[ $num_memory -eq 0 ]]; then
+    echo "Adding 5Gb of memory for each job as memory was left unspecified."
+    $num_memory="5"
+else
+    echo "Memory required for each job is $num_memory."
+fi
+
 # Build Nextflow command
 nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer")
 
