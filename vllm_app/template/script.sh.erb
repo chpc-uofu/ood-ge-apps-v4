@@ -17,6 +17,8 @@ pwd
 export MODEL=/scratch/general/vast/app-repo/huggingface/<%= context.llmmodel %>
 export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
+export EXTRA="<%= context.extra_params %>"
+
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
 # Adding quantization support
@@ -40,42 +42,8 @@ else
   TEMPLATE_STR=""
 fi
 
-#DIAGNOSTIC
-export OMP_NUM_THREADS=4
-export NVIDIA_DISABLE_REQUIRE=1
-
-vllm serve $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 >& llm.log &
-
-# Unfortunately VLLM responds as port ready long before it is really ready.
-# So wait_until_port_used is modified to check log for actual readiness
-
-wait_until_vllm_ready () {
-    local time="${2:-30}"
-    for ((i=1; i<=time*2; i++)); do
-      if [ -f llm.log ]; then
-         if grep "Application startup complete" llm.log; then
-		 return 0
-         else echo "Log exists, Waiting on server start"
-	 fi
-      fi
-      sleep 1
-    done
-    return 1
-  }
-
-# Wait for the NIM server to start
-echo VLLM port is $nimport
-echo "Waiting for VLLM server to open port $nimport..."
-if wait_until_vllm_ready "${host}:${nimport}" 600; then
-  echo "Discovered VLLM server listening on port $nimport!"
-else
-  echo "Timed out waiting for VLLM  server to open port $nimport!"
-  clean_up 1
-fi
-
-sleep 2
-
-
+echo vllm_serve --model $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 
+vllm_serve --model $MODEL $EXTRA --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 >& llm.log &
 # Set working directory to home directory
 cd "${HOME}"
 
@@ -98,7 +66,7 @@ fi
 #Check again, if we don't find it after this we give up.
 if [[ $(type -p jupyter) ]];
 then echo "jupyter found at second time of asking"
-else exit 1
+else echo "Jupyter not found after checking twice. Exiting."; exit 1
 fi
 
 jupyter kernelspec list

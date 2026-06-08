@@ -68,7 +68,7 @@ readarray -d "=" -t arr <<< $t
 CHAT_TEMPLATE_STRING=" --chat-template ${arr[1]}"
 fi
 # TMPDIR=<%= context.scratch_dir %> HF_HOME=<%= context.scratch_dir %> vllm serve $MODEL $EXTRA --host 127.0.0.1 --port ${port_ollama}  > "${PWD}/vllm.log" 2>&1 &
-vllm serve $MODEL $EXTRA --port ${port_ollama} $CHAT_TEMPLATE_STRING > "${PWD}/vllm.log" 2>&1 &
+vllm_serve $MODEL $EXTRA --port ${port_ollama} $CHAT_TEMPLATE_STRING > "${PWD}/vllm.log" 2>&1 &
 #ollama serve > "${PWD}/ollama.log" 2>&1 &
 OLLAMA_PID=$!
 
