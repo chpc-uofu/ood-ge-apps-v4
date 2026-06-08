@@ -1,42 +1,49 @@
 #!/usr/bin/env bash
 
+<%- if context.python == "custom" -%>
+  <%= context.custom_environment.gsub /\r\n?/, "\n" %>
+<%- else -%>
   module load <%= context.python %>
+<%- end -%>
 # additional environment
 <%- if context.additional_environment != "" -%>
   <%= context.additional_environment.gsub /\r\n?/, "\n" %>
 <%- end -%>
 
 # debugging info
-module load genai
-module load apptainer/1.4.1
-apptainer --version
-module list
+module load vllm
 echo $PATH
 pwd
 export MODEL=/scratch/general/vast/app-repo/huggingface/<%= context.llmmodel %>
 export SCRATCH_DIR=<%= context.scratch_dir %>
 export HUGGINGFACE_TOKEN=<%= context.huggingfacetoken %>
+export EXTRA="<%= context.extra_params %>"
+
 echo model= $MODEL
 echo scratch_dir= $SCRATCH_DIR
+# Adding quantization support
+if [[ <%= context.quantization %> != "None" ]]; then
+  QUANT_STRING=" --quantization <%= context.quantization %>"
+else
+  QUANT_STRING=""
+fi
+#Adding multiple GPU support
+if (( <%= context.gpu_count %> > 1 )); then
+  MULTIPLE_GPUS="--tensor-parallel-size <%= context.gpu_count %>"
+else
+  MULTIPLE_GPUS=""
+fi
+echo LLM port is $nimport, jupyter port is $port, QUANT_STRING is $QUANT_STRING, MULTIPLE_GPUS is $MULTIPLE_GPUS
+# 1-12-26 - VLLM now requires a chat template file for models that do chat. This is a separate file so we want
+# to use it if we have one.
+if [ -e $MODEL/chat_template.jinja ]; then
+  TEMPLATE_STR="--chat-template ${MODEL}/chat_template.jinja"
+else
+  TEMPLATE_STR=""
+fi
 
-echo LLM port is $nimport, jupyter port is $port
-<%- if context.llm == "ollama" -%>
-./start_ollama_server.sh $nimport $MODEL $SCRATCH_DIR  >& llm.log &
-<%- elsif context.llm == "vLLM" -%>
-./start_vllm_server.sh $nimport $MODEL $SCRATCH_DIR $HUGGINGFACE_TOKEN >& llm.log &
-<%- end -%>
-
-#source_helpers
-#set -x
-# Wait for the RFDiffusion NIM server to start
-#echo "Waiting for RFDiffusion NIM server to open port 8082..."
-#if wait_until_port_used "localhost:8082" 600; then
-#  echo "Discovered RFDiffusion NIM server listening on port 8082!"
-#else
-#  echo "Timed out waiting for RFDiffusion NIM  server to open port 8082!"
-#  clean_up 1
-#fi
-
+echo vllm_serve --model $MODEL  --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 
+vllm_serve --model $MODEL $EXTRA --host=localhost --port=$nimport $QUANT_STRING $MULTIPLE_GPUS $TEMPLATE_STR --gpu_memory_utilization 0.8 >& llm.log &
 # Set working directory to home directory
 cd "${HOME}"
 
@@ -50,6 +57,18 @@ cd "${HOME}"
 
 # List available kernels for debugging purposes
 #set -x
+
+#check if jupyter exists in user env
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found in user env"
+else export PATH=$HOME/.local/bin:$PATH
+fi
+#Check again, if we don't find it after this we give up.
+if [[ $(type -p jupyter) ]];
+then echo "jupyter found at second time of asking"
+else echo "Jupyter not found after checking twice. Exiting."; exit 1
+fi
+
 jupyter kernelspec list
 { set +x; } 2>/dev/null
 echo "TTT - $(date)"

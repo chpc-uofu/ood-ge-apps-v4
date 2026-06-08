@@ -5,7 +5,7 @@
      if gpu_type == "any" 
       gpustr="--gres=gpu:"+gpu_count
      else
-      gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
+             gpustr="--gres=gpu:"+gpu_type+":"+gpu_count
      end
      if gpu_profile == "1" 
        gpustr << ",nsight:1"

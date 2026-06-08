@@ -1,0 +1,27 @@
+# Unfortunately VLLM responds as port ready long before it is really ready.
+# So wait_until_port_used is modified to check log for actual readiness
+
+wait_until_vllm_ready () {
+    local time="${2:-30}"
+    for ((i=1; i<=time*2; i++)); do
+      if [ -f llm.log ]; then
+         if grep "Application startup complete" llm.log; then
+                 return 0
+         else echo "Log exists, Waiting on server start"
+         fi
+      fi
+      sleep 1
+    done
+    return 1
+  }
+
+# Wait for the NIM server to start
+echo VLLM port is $nimport, starting checking loop
+echo "Waiting for VLLM server to open port $nimport..."
+if wait_until_vllm_ready "${host}:${nimport}" 600; then
+  echo "Discovered VLLM server listening on port $nimport!"
+else
+  echo "Timed out waiting for VLLM  server to open port $nimport!"
+  clean_up 1
+fi
+
