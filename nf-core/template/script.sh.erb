@@ -13,6 +13,7 @@ module list
 # Set the working directory
 workdir="<%= context.workdir %>"
 nfparams="<%= context.nf_params %>"
+time="<%= context.bc_num_hours %>"
 account="<%= context.custom_accpart.split(":")[0]%>"
 queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
@@ -72,6 +73,13 @@ export pipeline_nf="<%= context.pipeline %>"
 num_memory="<%= context.memtask %>"
 num_core="<%= context.num_cores %>"
 
+if [[ $num_memory -eq 0 ]]; then
+    echo "Adding 5Gb of memory for each job as memory was left unspecified."
+    num_memory="5"
+else
+    echo "Memory required for each job is $num_memory."
+fi
+
 # Build Nextflow command
 nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer")
 
@@ -91,18 +99,35 @@ else
     echo "No GPU selected"
 fi
 
-    
-cat <<EOF > custom.config  
-process {
-    executor = 'slurm'
-    queue = '$queue'
-    clusterOptions = '--account=$account --qos=$qos $gpustr'
-    cpus = $num_core
-    memory = $num_memory.GB
-}
-EOF
+if [[ $queue == "notchpeak-shared-short" ]]; then
+    echo "notchpeak-shared-short has an 8 hour max walltime. Making each spawned job have a maximum of 8 hours."
+    cat <<EOF > custom.config  
+    process {
+        executor = 'slurm'
+        queue = '$queue'
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+        cpus = $num_core
+        memory = $num_memory.GB
+        time = '8h'
+    }
+    trace.overwrite = true
+    EOF
 
-echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
+    echo "custom.config file created with cpus=$num_core, memory=$num_memory, time=$time, and gpu=$gpustr."
+else
+    cat <<EOF > custom.config  
+    process {
+        executor = 'slurm'
+        queue = '$queue'
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+        cpus = $num_core
+        memory = $num_memory.GB
+    }
+    trace.overwrite = true
+    EOF
+
+    echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
+fi
 
 
 nextflow_command+=( "-c custom.config")
