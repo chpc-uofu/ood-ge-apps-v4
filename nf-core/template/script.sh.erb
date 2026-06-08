@@ -99,19 +99,35 @@ else
     echo "No GPU selected"
 fi
 
-    
-cat <<EOF > custom.config  
-process {
-    executor = 'slurm'
-    queue = '$queue'
-    clusterOptions = '--account=$account --qos=$qos $gpustr'
-    cpus = $num_core
-    memory = $num_memory.GB
-}
-trace.overwrite = true
-EOF
+if [[ $queue == "notchpeak-shared-short" ]]; then
+    echo "notchpeak-shared-short has an 8 hour max walltime. Making each spawned job have a maximum of 8 hours."
+    cat <<EOF > custom.config  
+    process {
+        executor = 'slurm'
+        queue = '$queue'
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+        cpus = $num_core
+        memory = $num_memory.GB
+        time = '8h'
+    }
+    trace.overwrite = true
+    EOF
 
-echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
+    echo "custom.config file created with cpus=$num_core, memory=$num_memory, time=$time, and gpu=$gpustr."
+else
+    cat <<EOF > custom.config  
+    process {
+        executor = 'slurm'
+        queue = '$queue'
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+        cpus = $num_core
+        memory = $num_memory.GB
+    }
+    trace.overwrite = true
+    EOF
+
+    echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
+fi
 
 
 nextflow_command+=( "-c custom.config")
