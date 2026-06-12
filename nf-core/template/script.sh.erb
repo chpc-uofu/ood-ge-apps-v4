@@ -126,4 +126,6 @@ nextflow_command+=( "-c custom.config")
 
 # Output and execute the command
 echo "Executing command: ${nextflow_command[*]}"
+eval "nextflow config main.nf"
+eval "nextflow config nf-core/$pipeline_nf"
 eval "${nextflow_command[*]}"
