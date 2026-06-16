@@ -103,12 +103,13 @@ fi
 cat <<EOF > custom.config  
 process {
     withName: '.*' {
-        executor {
-            name = 'slurm'
-        }
+        executor = 'slurm'
         queue = '$queue'
         clusterOptions = '--account=$account --qos=$qos $gpustr'
     }
+}
+executor {
+    name = 'slurm'
 }
 trace.overwrite = true
 EOF
@@ -117,10 +118,10 @@ echo "custom.config file created with cpus=$num_core, memory=$num_memory, where 
 
 if [[ $queue == "notchpeak-shared-short" ]]; then
     echo "notchpeak-shared-short has an 8 hour max walltime, as well as limits on CPU and memory usage. We recommend using a partition other than notchpeak-shared-short for nf-core pipelines. Updating each spawned job to be limited to walltime, CPU, and memory limits."
-    sed -i "4a\\            queueSize = 5" custom.config
-    sed -i "7a\\        time = '8h'" custom.config
-    sed -i "8a\\        cpus = $num_core" custom.config
-    sed -i "9a\\        memory = $num_memory.GB" custom.config
+    sed -i "5a\\        time = '8h'" custom.config
+    sed -i "6a\\        cpus = $num_core" custom.config
+    sed -i "7a\\        memory = $num_memory.GB" custom.config
+    sed -i "9i\\    queueSize = 5" custom.config
 fi
 
 nextflow_command+=( "-c custom.config")
