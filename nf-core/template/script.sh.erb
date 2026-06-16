@@ -115,9 +115,11 @@ EOF
 echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
 
 if [[ $queue == "notchpeak-shared-short" ]]; then
-    echo "notchpeak-shared-short has an 8 hour max walltime. We recommend using a partition other than notchpeak-shared-short for nf-core pipelines. Making each spawned job have a maximum of 8 hours."
-    echo "process.time = '8h'" >> custom.config
-    echo "executor.queueSize = 5" >> custom.config
+    echo "notchpeak-shared-short has an 8 hour max walltime, as well as limits on CPU and memory usage. We recommend using a partition other than notchpeak-shared-short for nf-core pipelines. Updating each spawned job to be limited to walltime, CPU, and memory limits."
+    sed -i "5a\\        time = '8h'" custom.config
+    sed -i "6a\\        cpus = $num_core" custom.config
+    sed -i "7a\\        memory = $num_memory.GB" custom.config
+    sed -i "3a\\        executor.queueSize = 5" custom.config
 fi
 
 nextflow_command+=( "-c custom.config")
