@@ -23,6 +23,7 @@ if [[ ! -d "$workdir" ]]; then
     echo "Creating working directory: $workdir"
     mkdir -p "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
 else
+    echo "Creating work directory: $workdir"
     mkdir -p "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
 fi
 
