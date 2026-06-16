@@ -105,8 +105,6 @@ process {
         executor = 'slurm'
         queue = '$queue'
         clusterOptions = '--account=$account --qos=$qos $gpustr'
-        cpus = $num_core
-        memory = $num_memory.GB
     }
 }
 trace.overwrite = true
