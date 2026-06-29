@@ -122,7 +122,7 @@ if [[ $queue == "notchpeak-shared-short" ]]; then
     sed -i "6a\\        cpus = $num_core" custom.config
     sed -i "7a\\        memory = $num_memory.GB" custom.config
     sed -i "12a\\    queueSize = 5" custom.config
-    nextflow_command+=( "-qs 5" )
+    nextflow_command+=( "-qs 2" )
 fi
 
 nextflow_command+=( "-c custom.config")
