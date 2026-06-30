@@ -15,6 +15,8 @@
 
 batch_connect:
   template: "basic"
+  conn_params:
+    - custom_service_port
 script:
   accounting_id: "<%= custom_accpart.split(":")[0]%>"
   queue_name: "<%= custom_accpart.split(":")[1] %>"
