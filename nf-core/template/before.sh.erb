@@ -11,4 +11,4 @@ WORKING_DIR="<%= context.workdir %>"
 export working_path="$WORKING_DIR"
 
 export workdir="<%= context.workdir %>"
-export slurmjob="$SLURM_JOB_ID"
+export slurmjob="$(SLURM_JOB_ID)"
