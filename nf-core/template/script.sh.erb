@@ -19,23 +19,29 @@ queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
 pipeline_nf="<%= context.pipeline %>"
 
+#Defining the two scratch locations
+scratch1="vast"
+scratch2="nfs1"
 
-# Ensure the working directory exists
-if [[ ! -d "$workdir" ]]; then
-    echo "Creating working directory: $workdir"
-    mkdir -p "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
-else
-    echo "Creating work directory: $workdir"
-    mkdir -p "/scratch/general/vast/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
-fi
-
+# Checking if the user used a scratch directory for the workdir or not and creating subdir with uNID if so
 # Copy necessary files and change to the working directory
-if [[ ! -d "$workdir" ]]; then
-    cp "$nfparams" "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+if [[ "$workdir" == *"$scratch1"* || "$workdir" == *"$scratch2"* ]]; then
+    if [[ "$workdir" == *"$USER"* ]]; then
+        echo "Creating working directory"
+        mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    else
+        echo "Creating uNID subdir in scratch space"
+        mkdir -p "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    fi
 else
-    cp "$nfparams" "/scratch/general/vast/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "/scratch/general/vast/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory workdir"; exit 1; }
+    echo "Creating work directory"
+    mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+    cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
 fi
 
 # Determine if the job should resume
