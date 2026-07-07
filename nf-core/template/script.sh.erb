@@ -17,14 +17,16 @@ time="<%= context.bc_num_hours %>"
 account="<%= context.custom_accpart.split(":")[0]%>"
 queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
+pipeline_nf="<%= context.pipeline %>"
+
 
 # Ensure the working directory exists
 if [[ ! -d "$workdir" ]]; then
     echo "Creating working directory: $workdir"
-    mkdir -p "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+    mkdir -p "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
 else
     echo "Creating work directory: $workdir"
-    mkdir -p "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+    mkdir -p "/scratch/general/vast/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
 fi
 
 # Copy necessary files and change to the working directory
@@ -60,15 +62,6 @@ export NXF_APPTAINER_CACHEDIR="/scratch/general/nfs1/app-repo/singularity-cache-
 
 # Clean up nf-params.json by removing empty values and replacing placeholders
 sed -i -E '/:[[:space:]]*,/d; /"[[:space:]]*"/d' "$nfparams"
-
-export pipeline_nf="<%= context.pipeline %>"
-#comment out or replace the 3 export commands below
-#export pipeline_version=/cluster/tufts/biocontainers/nf-core/pipelines/nf-core-ampliseq/2.13.0/2_13_0
-#export projectDir=$pipeline_version
-#export baseDir=$pipeline_version
-
-#I commented out the above export lines and the below sed line because I am not targetting a specific version of a pre-downloaded pipeline and I do not know what that sed command is exactly doing.
-#sed -i -E "s@\$(projectDir)@$projectDir@g; s@\$(baseDir)@$baseDir@g; s/\"None\"/null/g" "$nfparams"
 
 # Define resources based on execution environment
 num_memory="<%= context.memtask %>"
