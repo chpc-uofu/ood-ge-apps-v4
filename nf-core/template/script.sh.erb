@@ -18,6 +18,7 @@ account="<%= context.custom_accpart.split(":")[0]%>"
 queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
 pipeline_nf="<%= context.pipeline %>"
+outdir="<%= context.outdir %>"
 
 #Defining the two scratch locations
 scratch1="vast"
@@ -81,7 +82,7 @@ else
 fi
 
 # Build Nextflow command
-nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer")
+nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer --outdir=$outdir")
 
 gpustr=""
 
