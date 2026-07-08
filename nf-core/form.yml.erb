@@ -213,7 +213,12 @@ attributes:
     widget: "path_selector"
     directory: "/scratch/general/vast"
     required: false
-    help: "Please select a directory under your uNID. If no directory under your uNID exists, please create one."
+    help: "This is the location where your job will run. Using the scratch space is highly recommended."
+  outdir:
+    label: "Output Directory"
+    widget: "path_selector"
+    required: false
+    help: "This is where output files will be stored."
   resume:
     label: "Resume"
     widget: "check_box"
@@ -230,9 +235,10 @@ attributes:
 form:
   - pipeline
   - nf_params
+  - workdir
+  - outdir
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
 <% end %>
-  - resume
-  - workdir
   - tower_access_token
+  - resume
