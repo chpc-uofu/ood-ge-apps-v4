@@ -1,7 +1,7 @@
 ---
-name: Nextflow NF-CORE
-category: Workflow Manager
-subcategory: biology
+name: Nextflow NF-Core
+category: Interactive Apps
+subcategory: Workflow Managers
 role: batch_connect
 description: |
   This app will launch a nf-core pipeline of your choosing. 
