@@ -74,11 +74,19 @@ sed -i -E '/:[[:space:]]*,/d; /"[[:space:]]*"/d' "$nfparams"
 num_memory="<%= context.memtask %>"
 num_core="<%= context.num_cores %>"
 
+#adding base amount of memory for parent job if no memory selected
 if [[ $num_memory -eq 0 ]]; then
     echo "Adding 5Gb of memory to the parent job, as memory was left unspecified."
     num_memory="5"
 else
     echo "Memory required for parent job is $num_memory."
+fi
+
+#seeing if outdir is specified, if not, make it the scratch dir
+if [[ -z "$outdir" ]]; then
+    outdir="<%= context.workdir %>"
+else
+    echo "Output files being stored in $outdir"
 fi
 
 # Build Nextflow command
