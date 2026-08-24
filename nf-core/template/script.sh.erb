@@ -13,25 +13,36 @@ module list
 # Set the working directory
 workdir="<%= context.workdir %>"
 nfparams="<%= context.nf_params %>"
+time="<%= context.bc_num_hours %>"
 account="<%= context.custom_accpart.split(":")[0]%>"
 queue="<%= context.custom_accpart.split(":")[1] %>"
 qos="<%= context.custom_accpart.split(":")[2] %>"
+pipeline_nf="<%= context.pipeline %>"
+outdir="<%= context.outdir %>"
 
-# Ensure the working directory exists
-if [[ ! -d "$workdir" ]]; then
-    echo "Creating working directory: $workdir"
-    mkdir -p "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
-else
-    mkdir -p "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
-fi
+#Defining the two scratch locations
+scratch1="vast"
+scratch2="nfs1"
 
+# Checking if the user used a scratch directory for the workdir or not and creating subdir with uNID if so
 # Copy necessary files and change to the working directory
-if [[ ! -d "$workdir" ]]; then
-    cp "$nfparams" "$workdir/$USER/SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "$workdir/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+if [[ "$workdir" == *"$scratch1"* || "$workdir" == *"$scratch2"* ]]; then
+    if [[ "$workdir" == *"$USER"* ]]; then
+        echo "Creating working directory"
+        mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    else
+        echo "Creating uNID subdir in scratch space"
+        mkdir -p "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    fi
 else
-    cp "$nfparams" "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "/scratch/general/vast/$USER/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory workdir"; exit 1; }
+    echo "Creating work directory"
+    mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+    cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
 fi
 
 # Determine if the job should resume
@@ -59,21 +70,19 @@ export NXF_APPTAINER_CACHEDIR="/scratch/general/nfs1/app-repo/singularity-cache-
 # Clean up nf-params.json by removing empty values and replacing placeholders
 sed -i -E '/:[[:space:]]*,/d; /"[[:space:]]*"/d' "$nfparams"
 
-export pipeline_nf="<%= context.pipeline %>"
-#comment out or replace the 3 export commands below
-#export pipeline_version=/cluster/tufts/biocontainers/nf-core/pipelines/nf-core-ampliseq/2.13.0/2_13_0
-#export projectDir=$pipeline_version
-#export baseDir=$pipeline_version
-
-#I commented out the above export lines and the below sed line because I am not targetting a specific version of a pre-downloaded pipeline and I do not know what that sed command is exactly doing.
-#sed -i -E "s@\$(projectDir)@$projectDir@g; s@\$(baseDir)@$baseDir@g; s/\"None\"/null/g" "$nfparams"
-
 # Define resources based on execution environment
 num_memory="<%= context.memtask %>"
 num_core="<%= context.num_cores %>"
 
+if [[ $num_memory -eq 0 ]]; then
+    echo "Adding 5Gb of memory to the parent job, as memory was left unspecified."
+    num_memory="5"
+else
+    echo "Memory required for parent job is $num_memory."
+fi
+
 # Build Nextflow command
-nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer")
+nextflow_command=("nextflow run nf-core/$pipeline_nf -params-file $nfparams -profile apptainer --outdir=$outdir")
 
 gpustr=""
 
@@ -91,19 +100,30 @@ else
     echo "No GPU selected"
 fi
 
-    
 cat <<EOF > custom.config  
 process {
-    executor = 'slurm'
-    queue = '$queue'
-    clusterOptions = '--account=$account --qos=$qos $gpustr'
-    cpus = $num_core
-    memory = $num_memory.GB
+    withName: '.*' {
+        executor = 'slurm'
+        queue = '$queue'
+        clusterOptions = '--account=$account --qos=$qos $gpustr'
+    }
 }
+executor {
+    name = 'slurm'
+}
+trace.overwrite = true
 EOF
 
 echo "custom.config file created with cpus=$num_core, memory=$num_memory, where gpu=$gpustr."
 
+if [[ $queue == "notchpeak-shared-short" ]]; then
+    echo "notchpeak-shared-short has an 8 hour max walltime, as well as limits on CPU and memory usage. We recommend using a partition other than notchpeak-shared-short for nf-core pipelines. Updating each spawned job to be limited to walltime, CPU, and memory limits."
+    sed -i "5a\\        time = '8h'" custom.config
+    sed -i "6a\\        cpus = $num_core" custom.config
+    sed -i "7a\\        memory = $num_memory.GB" custom.config
+    sed -i "12a\\    queueSize = 5" custom.config
+    nextflow_command+=( "-qs 2" )
+fi
 
 nextflow_command+=( "-c custom.config")
 
