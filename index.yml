@@ -30,7 +30,7 @@ entries:
   matlab_app: []
   matlab_html_app: []
   meshroom_app: []
-  #nf-core: []
+  nf-core: []
   paraview_app: []
   qgis_app: []
   relion_app: []
