@@ -1,5 +1,5 @@
 ---
-name: NF-CORE
+name: Nextflow NF-Core
 category: Interactive Apps
 subcategory: Workflow Manager
 role: batch_connect
@@ -11,3 +11,4 @@ description: |
   Please research the required inputs to your nf-core pipeline here: https://nf-co.re/pipelines/. If you have any questions or need assistance, please email the CHPC helpdesk at helpdesk@chpc.utah.edu
 
   To keep this form simple, a YAML file is required for all pipeline parameters. This is described on each pipeline's documentation. Please reach out to the CHPC if you need assistance putting the yaml file together.
+  
