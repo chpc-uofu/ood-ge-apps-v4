@@ -1,6 +1,6 @@
 ---
 name: NF-CORE
-category: nf-core pipelines
+category: Workflow Manager
 subcategory: biology
 role: batch_connect
 description: |
