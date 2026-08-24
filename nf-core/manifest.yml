@@ -1,5 +1,5 @@
 ---
-name: NF-CORE
+name: Nextflow NF-CORE
 category: Workflow Manager
 subcategory: biology
 role: batch_connect
