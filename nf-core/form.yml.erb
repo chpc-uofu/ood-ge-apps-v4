@@ -217,6 +217,7 @@ attributes:
   outdir:
     label: "Output Directory"
     widget: "path_selector"
+    hide_by_default: true    
     required: false
     help: "This is where output files will be stored. If unsure, either leave blank or make it the same as your working directory."
   resume:
@@ -224,21 +225,22 @@ attributes:
     widget: "check_box"
     checked_value: 1
     unchecked_value: 0
-    help: "Resume previous run if found."
+    help: "Resume previous nf-core run if found."
 
   tower_access_token:
     widget: "text_field"
     required: false
+    hide_by_default: true    
     label: "TOWER_ACCESS_TOKEN (Optional)"
     help: "Your Seqera TOWER_ACCESS_TOKEN used to monitor runs on [Nextflow Tower](https://seqera.io)."
 
 form:
   - pipeline
   - nf_params
-  - workdir
-  - outdir
 <% IO.foreach(template_root+"form_params_gpu") do |line| %>
 <%= line %>
 <% end %>
+  - workdir
+  - outdir
   - tower_access_token
   - resume
