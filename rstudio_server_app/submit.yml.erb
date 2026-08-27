@@ -43,9 +43,9 @@ script:
     <%- if constraint != "" -%>
     - "-C"
     - "<%= constraint %>"
+    <%- end -%>
     <%- if reservation != "" -%>
     - "--reservation"
     - "<%= reservation %>"
-    <%- end -%>
     <%- end -%>
   <%- end -%>
