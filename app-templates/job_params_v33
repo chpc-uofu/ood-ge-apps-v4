@@ -191,3 +191,11 @@
     skip_label: true
     help: "Node owner is useful for targeting owner-guest nodes to [lower preemption chances](https://www.chpc.utah.edu/usage/constraints). CPU architecture targets [specific CPUs](https://www.chpc.utah.edu/usage/constraints/#cpu). Default empty."
 
+  reservation_checkbox:
+    widget: "check_box"
+    label: "Reservation"
+    value: "0"
+  reservation:
+    widget: text_area
+    skip_label: true
+    help: "Enter the reservation name you got from CHPC consultant. It can also be obtained by running 'scontrol show res' on the cluster terminal."
