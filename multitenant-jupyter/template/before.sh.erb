@@ -35,6 +35,7 @@ EOL
 )
 
 <%- unless MultiTenant.specs.nil? || MultiTenant.specs.empty? -%>
-  export VLLM_HOST=<%= context.ollama_interface %>
+export VLLM_HOST=<%= context.ollama_interface %>
+export VLLM_API_KEY=<%= context.api_key %>
 <%- end -%>
 

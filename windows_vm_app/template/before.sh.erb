@@ -15,7 +15,7 @@ echo "SMBCONF: ${SMBCONF}"
 # Export the module function if it exists
 [[ $(type -t module) == "function" ]] && export -f module
 
-export ONDEMAND_SERVER="ondemand.chpc.utah.edu"
+export ONDEMAND_SERVER="ondemand-staging.chpc.utah.edu"
 echo "BEFORE.SH Before script running..."
 
 # set hostnames. Samba server requires host_fqdn.
