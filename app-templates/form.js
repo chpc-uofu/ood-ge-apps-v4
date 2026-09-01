@@ -125,10 +125,23 @@ function filterAccountPartitionOptions() {
 
     for (let i = 0; i < options.length; i++) {
         const option = options[i];
-        const isOptionVisible = option.value.indexOf(selectedCluster) >= 0 ||
-            (clusterAcronyms[selectedCluster] && option.value.indexOf(clusterAcronyms[selectedCluster]) >= 0);
-        option.style.display = isOptionVisible ? 'block' : 'none';
+        const [, partition] = option.value.split(':');
+
+        const matchesCluster =
+            option.value.includes(selectedCluster) ||
+            (
+                clusterAcronyms[selectedCluster] &&
+                option.value.includes(clusterAcronyms[selectedCluster])
+            );
+
+        const isGraniteReserved =
+            selectedCluster === 'granite' &&
+            partition === 'reserved';
+
+        option.style.display =
+            matchesCluster || isGraniteReserved ? 'block' : 'none';
     }
+
     toggleAdvancedOptions();
 }
 
