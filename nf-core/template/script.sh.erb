@@ -70,7 +70,7 @@ fi
 echo "Working directory is $workdir_full."
 
 # Set the Singularity cache directory
-export NXF_APPTAINER_CACHEDIR="../singularity-cache-nf"
+export NXF_APPTAINER_CACHEDIR="$workdir_full../singularity-cache-nf"
 echo "Containers are being cached at $NXF_APPTAINER_CACHEDIR"
 
 # Clean up nf-params.json by removing empty values and replacing placeholders
