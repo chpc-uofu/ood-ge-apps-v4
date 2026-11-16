@@ -29,23 +29,23 @@ scratch2="nfs1"
 if [[ "$workdir" == *"$scratch1"* || "$workdir" == *"$scratch2"* ]]; then
     if [[ "$workdir" == *"$USER"* ]]; then
         echo "Creating working directory"
-        workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
-        mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-        cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-        cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+        workdir_full="$workdir/$pipeline_nf/$SLURM_JOB_ID"
+        mkdir -p "$workdir_full" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir_full" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir_full" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     else
         echo "Creating uNID subdir in scratch space"
-        workdir="$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID"
-        mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-        cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-        cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+        workdir_full="$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID"
+        mkdir -p "$workdir_full" || { echo "Error: Failed to create $workdir"; exit 1; }
+        cp "$nfparams" "$workdir_full" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir_full" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     fi
 else
     echo "Creating work directory"
-    workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
-    mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-    cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    workdir_full="$workdir/$pipeline_nf/$SLURM_JOB_ID"
+    mkdir -p "$workdir_full" || { echo "Error: Failed to create $workdir"; exit 1; }
+    cp "$nfparams" "$workdir_full" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "$workdir_full" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
 fi
 
 # Determine if the job should resume
@@ -67,10 +67,11 @@ else
     echo "Not using Nextflow Tower."
 fi
 
-echo "$workdir"
+echo "Working directory is $workdir_full."
 
 # Set the Singularity cache directory
-export NXF_APPTAINER_CACHEDIR="/scratch/general/nfs1/app-repo/singularity-cache-nf"
+export NXF_APPTAINER_CACHEDIR="../singularity-cache-nf"
+echo "Containers are being cached at $NXF_APPTAINER_CACHEDIR"
 
 # Clean up nf-params.json by removing empty values and replacing placeholders
 sed -i -E '/:[[:space:]]*,/d; /"[[:space:]]*"/d' "$nfparams"
