@@ -31,21 +31,21 @@ if [[ "$workdir" == *"$scratch1"* || "$workdir" == *"$scratch2"* ]]; then
         echo "Creating working directory"
         workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
         mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-        cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-        cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+        cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     else
         echo "Creating uNID subdir in scratch space"
         workdir="$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID"
         mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-        cp "$nfparams" "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-        cd "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+        cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+        cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     fi
 else
     echo "Creating work directory"
     workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
     mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
-    cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
-    cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
+    cp "$nfparams" "$workdir" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
+    cd "$workdir" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
 fi
 
 # Determine if the job should resume
