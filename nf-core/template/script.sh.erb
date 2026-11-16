@@ -29,18 +29,21 @@ scratch2="nfs1"
 if [[ "$workdir" == *"$scratch1"* || "$workdir" == *"$scratch2"* ]]; then
     if [[ "$workdir" == *"$USER"* ]]; then
         echo "Creating working directory"
-        mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
+        mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
         cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
         cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     else
         echo "Creating uNID subdir in scratch space"
-        mkdir -p "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+        workdir="$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID"
+        mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
         cp "$nfparams" "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
         cd "$workdir/$USER/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
     fi
 else
     echo "Creating work directory"
-    mkdir -p "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to create $workdir"; exit 1; }
+    workdir="$workdir/$pipeline_nf/$SLURM_JOB_ID"
+    mkdir -p "$workdir" || { echo "Error: Failed to create $workdir"; exit 1; }
     cp "$nfparams" "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to copy JSON nf-params"; exit 1; }
     cd "$workdir/$pipeline_nf/$SLURM_JOB_ID" || { echo "Error: Failed to change to directory $workdir"; exit 1; }
 fi
@@ -63,6 +66,8 @@ if [[ -n "${TOWER_ACCESS_TOKEN:="<%= context.tower_access_token %>"}" && -n "${T
 else
     echo "Not using Nextflow Tower."
 fi
+
+echo "$workdir"
 
 # Set the Singularity cache directory
 export NXF_APPTAINER_CACHEDIR="/scratch/general/nfs1/app-repo/singularity-cache-nf"
