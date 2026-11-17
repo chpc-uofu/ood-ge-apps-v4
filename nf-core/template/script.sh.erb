@@ -113,12 +113,13 @@ process {
         queue = '$queue'
         clusterOptions = '--account=$account --qos=$qos $gpustr'
     }
+    withName: '.*MULTIQC.*' {
+        beforeScript = 'export TMPDIR="$workdir_full"'
+    }
+}
 }
 executor {
     name = 'slurm'
-}
-apptainer {
-    runOptions = '-B "$TMPDIR":/tmp'
 }
 trace.overwrite = true
 EOF
