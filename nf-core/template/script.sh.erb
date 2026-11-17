@@ -118,7 +118,7 @@ executor {
     name = 'slurm'
 }
 apptainer {
-    runOptions = '-B "$TMPDIR"'
+    runOptions = '-B "$TMPDIR":/tmp'
 }
 trace.overwrite = true
 EOF
